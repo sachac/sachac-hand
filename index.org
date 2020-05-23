@@ -1,4 +1,8 @@
 #+PROPERTY: header-args python  :noweb yes
+
+I want to be able to generate fonts quickly from the handwriting
+samples I can draw on my tablet PC or my phone. After some fiddling
+around, I figured out how to get reasonable SVG outlines into 
  
 * Parameters
 
@@ -13,6 +17,8 @@ params = {'template': 'files/template-256.png',
   'new_full_name': 'SachaHand',
   'glyph_dir': 'files/glyphs/',
   'font_name': '/home/sacha/.fonts/Romochka.otf',
+  'output_text': 'Hello world',
+  'output_file': 'files/output.pdf',
   'letters': 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789?:;-=!\'@/\\"~_',
   'rows': 10, 
   'columns': 10, 
@@ -100,7 +106,7 @@ for i, ch in enumerate(params['letters']):
 * Import SVG outlines into font
 sudo apt-get install python3-fontforge
 
-#+BEGIN_SRC python :results output
+#+BEGIN_SRC python :results file
 import fontforge
 import os
 <<params>>
@@ -117,17 +123,23 @@ for i, ch in enumerate(params['letters']):
   png_filename = os.path.join(params['glyph_dir'], 'uni%s.png' % hex(ord(ch)).replace('0x', '').zfill(4))
   glyph.importOutlines(png_filename)
   glyph.importOutlines(svg_filename)
-#font.em = params['em']
-#font.descent = params['descent']
-#font.ascent = params['ascent']
+font.em = params['em']
+font.descent = params['descent']
+font.ascent = params['ascent']
+for ch in params['letters']:
+  glyph = font.createMappedChar(ch)
+  glyph.left_side_bearing = glyph.right_side_bearing = int(params['em'] / 80)
+space = font.createMappedChar(' ')
+space.width = int(params['em'] / 5)
 font.save(params['new_font_file'])
-open(params['new_font_file'])
+fontforge.printSetup('pdf-file', params['output_file'], 300, 200)
+font.selection.all()
+font.printSample('fontsample', 24, params['output_text'], params['output_file'])
+return params['output_file']
 #+END_SRC
 
 #+RESULTS:
+[[file:files/output.pdf]]
 
-for FILE in *.pbm; do autotrace --output-file $FILE:s/pbm/svg $FILE; done
+* Progress is being made!
 
-#+RESULTS:
-
-It looks like there's an extra rectangle imported in the SVG. Maybe I can pull that out.
