@@ -1,0 +1,133 @@
+#+PROPERTY: header-args python  :noweb yes
+ 
+* Parameters
+
+#+NAME: params
+#+begin_src python
+params = {'template': 'files/template-256.png',
+  'sample_file': 'files/sample.png',
+  'name_list': 'files/aglfn.txt',
+  'new_font_file': 'files/SachaHand.sfd',
+  'new_font_name': 'SachaHand',
+  'new_family_name': 'SachaFonts',
+  'new_full_name': 'SachaHand',
+  'glyph_dir': 'files/glyphs/',
+  'font_name': '/home/sacha/.fonts/Romochka.otf',
+  'letters': 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789?:;-=!\'@/\\"~_',
+  'rows': 10, 
+  'columns': 10, 
+  'em': 1024, 
+  'em_width': 1024, 
+  'ascent': 800, 
+  'descent': 224, 
+  'height': 256, 
+  'width': 256, 
+  'caps': 650,
+  'line_width': 10
+  }
+params['font_size'] = int(params['em'] * 0.87)
+params['baseline'] = params['em'] - params['descent']
+#+end_src
+
+* DONE Generate guidelines
+
+#+begin_src python :results file
+from PIL import Image, ImageFont, ImageDraw
+<<params>>
+#LETTERS = 'abcd'
+def draw_letter(origin, letter, params):
+  draw = params['draw']
+  draw.line((origin[0], origin[1], origin[0], origin[1] + params['em']), fill='lightgray', width=params['line_width'])
+  draw.line((origin[0], origin[1] + params['baseline'] - params['ascent'] / 2, origin[0] + params['em_width'], origin[1] + params['baseline'] - params['ascent'] / 2), fill='lightgray', width=params['line_width'])
+  draw.line((origin[0], origin[1] + params['baseline'], origin[0] + params['em_width'], origin[1] + params['baseline']), fill='red', width=params['line_width'])
+  draw.line((origin[0], origin[1] + params['baseline'] - params['ascent'], origin[0] + params['em_width'], origin[1] + params['baseline'] - params['ascent']), fill='lightblue', width=params['line_width'])
+  draw.line((origin[0], origin[1] + params['baseline'] - params['caps'], origin[0] + params['em_width'], origin[1] + params['baseline'] - params['caps']), fill='lightgreen', width=params['line_width'])
+  width, height = draw.textsize(letter, font=params['font'])
+  draw.text((origin[0] + (params['em_width'] - width) / 2, origin[1]), letter, font=params['font'], fill='lightgray')
+
+def make_template(params):
+  img = Image.new('RGB', (params['columns'] * params['em'], params['rows'] * params['em_width']), 'white')
+  params['draw'] = ImageDraw.Draw(img)
+  params['font'] = ImageFont.truetype(params['font_name'], params['font_size'])
+  params['letters'] = params['letters'].ljust(params['rows'] * params['columns'] + 1)
+  for r in range(params['rows']):
+    for c in range(params['columns']):
+      draw_letter((c * params['em_width'], r * params['em']), params['letters'][r * params['rows'] + c], params)
+  img.thumbnail((params['columns'] * params['height'], params['columns'] * params['width']))
+  img.save(params['template'])
+  return params['template']
+
+return make_template(params)
+#+end_src
+
+#+ATTR_HTML: :width 400
+#+RESULTS:
+[[file:files/template-256.png]]
+* TODO Cut into glyphs
+
+(setenv "LD_LIBRARY_PATH" "/usr/local/lib")
+
+#+begin_src python :results output
+import os
+import libxml2
+from PIL import Image, ImageOps
+import subprocess
+<<params>>
+im = Image.open(params['sample_file']).convert('1')
+for i, ch in enumerate(params['letters']):
+  top = int(i / params['rows']) * params['height']
+  bottom = top + params['height']
+  left = int(i % params['columns']) * params['width']
+  right = left + params['width']
+  small = im.crop((left, top, right, bottom))
+  #small = ImageOps.invert(small)
+  #small = im.resize((params['em_width'], params['em']))
+  filename = os.path.join(params['glyph_dir'], 'uni%s.pbm' % hex(ord(ch)).replace('0x', '').zfill(4))
+  small.save(filename)
+  svg = filename.replace('.pbm', '.svg')
+  png = filename.replace('.pbm', '.png')
+  small.save(png)
+  subprocess.call(['autotrace', '-output-file', svg, filename])
+  doc = libxml2.parseFile(svg)
+  root = doc.children
+  child = root.children
+  child.next.unlinkNode()
+  doc.saveFile(svg)
+#+end_src
+
+#+RESULTS:
+
+* Import SVG outlines into font
+sudo apt-get install python3-fontforge
+
+#+BEGIN_SRC python :results output
+import fontforge
+import os
+<<params>>
+fontforge.loadNamelist(params['name_list'])
+font = fontforge.font()
+font.em = params['height']
+font.encoding = 'UnicodeFull'
+font.fontname = params['new_font_name']
+font.familyname = params['new_family_name']
+font.fullname = params['new_family_name']
+for i, ch in enumerate(params['letters']):
+  glyph = font.createMappedChar(ch)
+  svg_filename = os.path.join(params['glyph_dir'], 'uni%s.svg' % hex(ord(ch)).replace('0x', '').zfill(4))
+  png_filename = os.path.join(params['glyph_dir'], 'uni%s.png' % hex(ord(ch)).replace('0x', '').zfill(4))
+  glyph.importOutlines(png_filename)
+  glyph.importOutlines(svg_filename)
+#font.em = params['em']
+#font.descent = params['descent']
+#font.ascent = params['ascent']
+font.save(params['new_font_file'])
+open(params['new_font_file'])
+#+END_SRC
+
+#+RESULTS:
+
+for FILE in *.pbm; do autotrace --output-file $FILE:s/pbm/svg $FILE; done
+
+#+RESULTS:
+
+It looks like there's an extra rectangle imported in the SVG. Maybe I can pull that out.
