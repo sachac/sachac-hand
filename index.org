@@ -26,7 +26,7 @@ params = {'template': 'files/template-256.png',
   'font_name': '/home/sacha/.fonts/Breip.ttf', #'/home/sacha/.fonts/Romochka.otf',
   'output_text': 'ooooooooonnnnnnnnn hhhhhhhooooohhhhhoooohohohoho',
   'output_file': 'files/output.pdf',
-  'letters': 'HOnodpagscebhklftijmnruwvxyzCGABRDLEFIJKMNPQSTUVWXYZ0123456789?:;-–—=!\'’"“”@/\\~_#$%&()*+,.<>[]^`{|}',
+  'letters': 'HOnodpagscebhklftijmnruwvxyzCGABRDLEFIJKMNPQSTUVWXYZ0123456789?:;-–—=!\'’"“”@/\\~_#$%&()*+,.<>[]^`{|}q',
   'direction': 'vertical',
   'rows': 10, 
   'columns': 10, 
@@ -189,18 +189,18 @@ def make_template(params):
 
 ** Actually make the templates
 #+begin_src python :results file
-<<template>>
-#make_template({**params, 'font_name': '/home/sacha/.fonts/Romochka.otf', 'template': 'files/template-romochka.png'}) 
-#make_template({**params, 'font_name': '/home/sacha/.fonts/Breip.ttf', 'template': 'files/template-breip.png'}) 
-return make_template({**params, 'font_name': '/home/sacha/.fonts/KGPrimaryDots.ttf', 
-'letters': 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890?:;-–—=!\'’"“”@/\\~_#$%&()*+,.<>[]^`{|}', 'direction': 'horizontal', 'text_color': 'black',
-'template': 'files/template-kg.png', 'ascent': 675, 'descent': 375, 'caps': 525, 'x_height': 300}) 
-#return make_template({**params, 'font_name': '/home/sacha/.fonts/Romochka.otf', 
-#'template': 'files/template-sample.png', 'direction': 'horizontal', 'rows': 4, 'columns': 4, #'height': 100, 'width': 100 }) 
+  <<template>>
+  make_template({**params, 'font_name': '/home/sacha/.fonts/Romochka.otf', 'template': 'files/template-romochka.png'}) 
+  make_template({**params, 'font_name': '/home/sacha/.fonts/Breip.ttf', 'template': 'files/template-breip.png'}) 
+  # return make_template({**params, 'font_name': '/home/sacha/.fonts/KGPrimaryDots.ttf', 
+  # 'letters': 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890?:;-–—=!\'’"“”@/\\~_#$%&()*+,.<>[]^`{|}', 'direction': 'horizontal', 'text_color': 'black',
+  # 'template': 'files/template-kg.png', 'ascent': 675, 'descent': 375, 'caps': 525, 'x_height': 300}) 
+  return make_template({**params, 'font_name': '/home/sacha/.fonts/Romochka.otf', 
+  'template': 'files/template-sample.png', 'direction': 'horizontal', 'rows': 4, 'columns': 4, 'height': 100, 'width': 100 }) 
 #+end_src
 
 #+RESULTS:
-[[file:files/template-kg.png]]
+[[file:files/template-sample.png]]
 
 * TODO Cut into glyphs
 
@@ -293,6 +293,40 @@ font.generate(params['new_otf'])
 
 #+RESULTS:
 
+* Adjust bearings
+
+#+NAME: load_font
+#+begin_src python
+  import fontforge
+  <<params>>
+  font = fontforge.open(params['new_font_file'])
+#+end_src
+
+#+NAME: save_font
+#+begin_src python
+  font.save(params['new_font_file'])
+  font.generate(params['new_otf'])
+#+end_src
+
+#+NAME: bearings
+|   | Left | Right |
+|---+------+-------|
+| k |    4 |       |
+| r |   22 |       |
+
+#+begin_src python :results output :var bearings=bearings
+<<load_font>>
+for row in bearings:
+  g = font.createMappedChar(row[0])
+  if row[1]:
+    g.left_side_bearing = row[1]
+  if row[2]:
+    g.right_side_bearing = row[2]
+<<save_font>>
+#+end_src
+
+#+RESULTS:
+
 * Display sample text
 
 #+CALL: sample(size=70,text="hhhhoooooohhhhhoooohohohoho",filename="files/check")
@@ -326,6 +360,115 @@ return filename
 #+RESULTS:
 [[file:files/check/df63774e9861483fab011918259a0101.png]]
 
+* Okay, start kerning my own font
+
+#+CALL: sample(text="My name is Sacha Chua.")
+
+#+RESULTS:
+[[file:files/check/7eac967c93c59501f821419b53e135a7.png]]
+
+
+#+CALL: sample(text="innge g s  treeron aanesy entit orndthn ee")
+
+#+RESULTS:
+[[file:files/check/fce1e9a703787c1830f14b6740a19ffa.png]]
+
+#+CALL: sample(text=": ted atarr hetont, acstou o fekne rieWe s")
+
+#+RESULTS:
+[[file:files/check/d7eb25371ee2531c1cd7f7b35f463e7f.png]]
+
+#+CALL: sample(text="maalewo 20roea mle w 2itvi e pk rimedietio")
+
+#+RESULTS:
+[[file:files/check/8035be0030522279a7f07dad4459f391.png]]
+
+#+CALL: sample(text="omchev cly01edlil ve i braisseha Wotdece d")
+
+#+RESULTS:
+[[file:files/check/1a90072c289fbe032810aefc219f8c00.png]]
+
+#+CALL: sample(text="cotahih looouticurel laseccssila")
+
+#+RESULTS:
+[[file:files/check/62010679546ef54d7cb54d1a2c20a1b3.png]]
+
+#+CALL: sample(text="oooonnnnooooreteferotofoks")
+
+#+RESULTS:
+[[file:files/check/b0a309d52c6f4893f47488901587e7ff.png]]
+
+* Kerning
+
+#+NAME: kerning_matrix
+|       | o,a,c,e | f,t,x,v | h,b,l |
+| f     |    -102 |     -61 |   -30 |
+| t     |     -70 |     -41 |   -25 |
+| r     |     -82 |     -41 |   -25 |
+| k     |     -50 |     -81 |       |
+| l     |     -41 |     -50 |       |
+| v     |     -40 |     -35 |       |
+| b,o,p |     -20 |     -80 |       |
+| a     |     -40 |     -60 |       |
+| W     |     -40 |         |   -20 |
+| T     |         |         |   -60 |
+#+NAME: kern
+#+begin_src python :results output :var kerning=kerning_matrix
+  <<load_font>>
+  try:
+    font.addLookup("kern","gpos_pair",0,[["kern",[["latn",["dflt"]]]]])
+    font.addLookupSubtable("kern", "kern-1")
+  except:
+    print("Kerning tables already exist")
+  # Maybe I should just manually do it
+  headers = [x.split(',') for x in kerning[0][1:]]
+  for row in kerning[1:]:
+    for first_letter in row[0].split(','):
+      g = font.createMappedChar(first_letter)
+      for i, value in enumerate(row[1:]):
+        if not value: continue
+        glyph_set = headers[i]
+        for second_letter in glyph_set:
+          g.addPosSub("kern-1", second_letter, 0, 0, value, 0, 0, 0, 0, 0)
+  <<save_font>>
+#+end_src
+
+#+RESULTS: kern
+: Kerning tables already exist
+
+#+RESULTS:
+: Try to add
+
+#+CALL: sample(text="thanks for everything")
+
+#+RESULTS:
+[[file:files/check/9f79d7f1c98fdf55cc10200ce55baf13.png]]
+
+ #+RESULTS: show_kerning
+ :results:
+ |          | Other | acdeoquwy |   ft |    s | bhkl |    j |   i |  mnr | ACGOQU |   x | Other |
+ |----------+-------+-----------+------+------+------+------+-----+------+--------+-----+-------|
+ | Other    |     0 |         0 |    0 |    0 |    0 |    0 |   0 |    0 |      0 |   0 |     0 |
+ | fkrt     |     0 |      -143 |  -92 |  -68 |  -17 | -146 | -43 |  -39 |      0 | -75 |     0 |
+ | c        |     0 |       -33 |  -70 |  -29 |  -26 |    0 |   0 |    0 |      0 |   0 |     0 |
+ | T        |     0 |      -186 | -146 | -208 |  -39 | -139 |   0 |    0 |      0 |   0 |     0 |
+ | l        |     0 |         0 |    0 |    0 |    0 |   24 |   0 |    0 |      0 |   0 |     0 |
+ | abemnopu |   -25 |       -38 |  -89 |  -31 |  -18 |   45 |   0 |  -30 |      0 | -23 |     0 |
+ | gj       |     0 |         0 |    0 |    0 |    0 |    0 |   0 |    0 |      0 |   0 |     0 |
+ | dh       |     0 |       -21 |  -31 |    0 |    0 |  -98 |   0 |    0 |      0 |   0 |     0 |
+ | s        |     0 |         0 |  -45 |  -29 |    0 |    0 |   0 |    0 |      0 |   0 |     0 |
+ | x        |     0 |       -24 |  -41 |    0 |    0 |    0 |   0 |    0 |      0 |   0 |     0 |
+ | space    |     0 |       -21 |    0 |    0 |    0 |    0 |   0 |    0 |    -68 |   0 |     0 |
+ | P        |     0 |      -138 |  -80 | -151 |    0 | -184 | -26 | -103 |      0 |   0 |     0 |
+
+* Mwahahaha! Making my handwriting font, literate programming style
+
+
+
+
+* Along the way
+** python aglfn
+FileNotFoundError: [Errno 2] No such file or directory: '/home/sacha/.local/lib/python3.8/site-packages/aglfn/agl-aglfn/aglfn.txt'
 * Copy metrics from my edited font
 
 ** Get the glyph bearings
@@ -494,103 +637,3 @@ return filename
 
  :end:
 
-* Okay, start kerning my own font
-
-#+CALL: sample(text="My name is Sacha Chua.")
-
-#+RESULTS:
-[[file:files/check/7eac967c93c59501f821419b53e135a7.png]]
-
-
-#+CALL: sample(text="innge g s  treeron aanesy entit orndthn ee")
-
-#+RESULTS:
-[[file:files/check/fce1e9a703787c1830f14b6740a19ffa.png]]
-
-#+CALL: sample(text=": ted atarr hetont, acstou o fekne rieWe s")
-
-#+RESULTS:
-[[file:files/check/d7eb25371ee2531c1cd7f7b35f463e7f.png]]
-
-#+CALL: sample(text="maalewo 20roea mle w 2itvi e pk rimedietio")
-
-#+RESULTS:
-[[file:files/check/8035be0030522279a7f07dad4459f391.png]]
-
-#+CALL: sample(text="omchev cly01edlil ve i braisseha Wotdece d")
-
-#+RESULTS:
-[[file:files/check/1a90072c289fbe032810aefc219f8c00.png]]
-
-#+CALL: sample(text="cotahih looouticurel laseccssila")
-
-#+RESULTS:
-[[file:files/check/62010679546ef54d7cb54d1a2c20a1b3.png]]
-
-#+CALL: sample(text="oooonnnnooooreteferotofoks")
-
-#+RESULTS:
-[[file:files/check/b0a309d52c6f4893f47488901587e7ff.png]]
-
-* Class-based kerning
-
-Right-side classes are the rows, left-side classes are the columns
-
-** Add them to the font
-
-#+begin_src python :results file
-  import fontforge
-  import os
-  import aglfn
-  <<params>>
-  fontforge.loadNamelist(params['name_list'])
-  font = fontforge.open(params['new_font_file'])
-  # Create class-based kerning table if it doesn't already exist
-  print("Try to add")
-  #(('DFLT', ('dflt',)), ('latn', ('dflt',)))
-  font.addLookup("kern","gpos_pair",0,[["kern",[["latn",["dflt"]]]]])
-  # font.addKerningClass("kern", "kern-1", 18, 10, (("f", "t", "r")), (("o", "c", "e", "a")), True, True)
-  font.addKerningClass("kern", "kern-1", ((("f", "t"))), (("Other", "a")), (0, -150, -150, -150))
-  print(font.gpos_lookups)
-  font.save('/home/sacha/code/font/files/kerned.sfd')
-  font.generate("/home/sacha/code/font/files/kerned.otf")
-  return "<<sample(text="fafafafay",font_file="/home/sacha/code/font/files/kerned.otf")>>"
-#+end_src
-
-#+RESULTS:
-[[file:files/check/daf54c82ba14261cc9f870f3ce7887cd.png]]
-
-
-#+RESULTS:
-[[file:files/check/daf54c82ba14261cc9f870f3ce7887cd.png]]
-
-#+CALL: sample(text="oooonnnnooooreteferotofoksofof")
-
-#+RESULTS:
-[[file:files/check/4922837dee1fd0fdca929f27e365c19d.png]]
-
- #+RESULTS: show_kerning
- :results:
- |          | Other | acdeoquwy |   ft |    s | bhkl |    j |   i |  mnr | ACGOQU |   x | Other |
- |----------+-------+-----------+------+------+------+------+-----+------+--------+-----+-------|
- | Other    |     0 |         0 |    0 |    0 |    0 |    0 |   0 |    0 |      0 |   0 |     0 |
- | fkrt     |     0 |      -143 |  -92 |  -68 |  -17 | -146 | -43 |  -39 |      0 | -75 |     0 |
- | c        |     0 |       -33 |  -70 |  -29 |  -26 |    0 |   0 |    0 |      0 |   0 |     0 |
- | T        |     0 |      -186 | -146 | -208 |  -39 | -139 |   0 |    0 |      0 |   0 |     0 |
- | l        |     0 |         0 |    0 |    0 |    0 |   24 |   0 |    0 |      0 |   0 |     0 |
- | abemnopu |   -25 |       -38 |  -89 |  -31 |  -18 |   45 |   0 |  -30 |      0 | -23 |     0 |
- | gj       |     0 |         0 |    0 |    0 |    0 |    0 |   0 |    0 |      0 |   0 |     0 |
- | dh       |     0 |       -21 |  -31 |    0 |    0 |  -98 |   0 |    0 |      0 |   0 |     0 |
- | s        |     0 |         0 |  -45 |  -29 |    0 |    0 |   0 |    0 |      0 |   0 |     0 |
- | x        |     0 |       -24 |  -41 |    0 |    0 |    0 |   0 |    0 |      0 |   0 |     0 |
- | space    |     0 |       -21 |    0 |    0 |    0 |    0 |   0 |    0 |    -68 |   0 |     0 |
- | P        |     0 |      -138 |  -80 | -151 |    0 | -184 | -26 | -103 |      0 |   0 |     0 |
-
-* Mwahahaha! Making my handwriting font, literate programming style
-
-
-
-
-* Along the way
-** python aglfn
-FileNotFoundError: [Errno 2] No such file or directory: '/home/sacha/.local/lib/python3.8/site-packages/aglfn/agl-aglfn/aglfn.txt'
