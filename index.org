@@ -1,31 +1,36 @@
-#+PROPERTY: header-args python  :noweb yes 
+#+PROPERTY: header-args python  :noweb yes :dir "files" :exports both
 I want to be able to generate fonts quickly from the handwriting
 samples I can draw on my tablet PC or my phone. 
 
 * Things I needed to install 
 
-sudo apt-get install python3-fontforge python3-numpy python3-sqlalchemy python3-pandas python3-pymysql python3-nltk
+sudo apt-get install fontforge python3-fontforge python3-numpy python3-sqlalchemy python3-pandas python3-pymysql python3-nltk woff-tools
 
-* Parameters
+Compile autotrace based on my fork at https://github.com/sachac/autotrace so that it uses Graphicsmagick instead of Imagemagick.
+
+I also needed =(setenv "LD_LIBRARY_PATH" "/usr/local/lib")=. There are probably a bunch of other prerequisites I've forgotten to write down.
+
+* Parameters and common functions
 
 #+NAME: params
-#+begin_src python :results output
+#+begin_src python :results none :eval no
 import numpy as np
-# Reshape this
-params = {'template': 'files/template-256.png',
-  'sample_file': '/home/sacha/code/font/files/sample.png',
-  'name_list': 'files/aglfn.txt',
-  'new_font_file': 'files/SachaHand.sfd',
-  'new_otf': '/home/sacha/.fonts/SachaHand.otf',
+import aglfn
+import fontforge
+
+params = {'template': 'template-256.png',
+  'sample_file': 'sample.png',
+  'name_list': 'aglfn.txt',
+  'new_font_file': 'SachaHand.sfd',
+  'new_otf': 'SachaHand.otf',
   'new_font_name': 'sachacHand',
   'default_bearing': 40,
   'new_family_name': 'sachacFonts',
   'text_color': 'lightgray',
   'new_full_name': 'sachacHand',
-  'glyph_dir': 'files/glyphs/',
-  'font_name': '/home/sacha/.fonts/Breip.ttf', #'/home/sacha/.fonts/Romochka.otf',
+  'glyph_dir': 'glyphs/',
   'output_text': 'ooooooooonnnnnnnnn hhhhhhhooooohhhhhoooohohohoho',
-  'output_file': 'files/output.pdf',
+  'output_file': 'output.pdf',
   'letters': 'HOnodpagscebhklftijmnruwvxyzCGABRDLEFIJKMNPQSTUVWXYZ0123456789?:;-–—=!\'’"“”@/\\~_#$%&()*+,.<>[]^`{|}q',
   'direction': 'vertical',
   'rows': 10, 
@@ -42,121 +47,33 @@ params = {'template': 'files/template-256.png',
   }
 params['font_size'] = int(params['em'] * 0.88)
 params['baseline'] = params['em'] - params['descent']
+
 def transpose_letters(letters, width, height):
-  return ''.join(np.reshape(list(letters.ljust(100)), (10, 10)).transpose().reshape(-1))
+  return ''.join(np.reshape(list(letters.ljust(width * height)), (height, width)).transpose().reshape(-1))
+
+def get_letter_matrix(params):
+  matrix = np.reshape(list(params['letters'].ljust(params['rows'] * params['columns']))[0:params['rows'] * params['columns']], (params['rows'], params['columns']))
+  if params['direction'] == 'vertical':
+    matrix = matrix.transpose()
+  return matrix
+
+def glyph_filename_base(ch):
+  return 'uni%s-%s' % (hex(ord(ch)).replace('0x', '').zfill(4), aglfn.name(ch))
+
+def load_font(params):
+  return fontforge.open(params['new_font_file'])
+
+def save_font(font, params):
+  font.save(params['new_font_file'])
+  font.generate(params['new_otf'])
 #+end_src
 
-#+RESULTS: params
 
-* Figure out what glyphs I need
-
-#+NAME: connect-to-db
-#+begin_src python :eval no
-from dotenv import load_dotenv
-from sqlalchemy import create_engine
-import os
-import pandas as pd
-import pymysql
-load_dotenv(dotenv_path="/home/sacha/code/docker/blog/.env", verbose=True)
-
-sqlEngine       = create_engine('mysql+pymysql://' + os.getenv('PYTHON_DB'), pool_recycle=3600)
-dbConnection    = sqlEngine.connect()
-#+end_src
-
-** Check glyphs
-
-#+begin_src python :results table
-<<connect-to-db>>
-df           = pd.read_sql("select post_title from wp_posts WHERE post_type='post' AND post_status='publish'", dbConnection);
-# Debugging
-#q = df[~df['post_title'].str.match('^[A-Za-z0-9\? "\'(),\-:\.\*;/@\!\[\]=_&\?\$\+#^{}\~]+$')]
-#print(q)
-from collections import Counter
-df['filtered'] = df.post_title.str.replace('[A-Za-z0-9\? "\'(),\-:\.\*;/@\!\[\]=_&\?\$\+#^{}\~]+', '')
-#print(df['filtered'].apply(list).sum())
-res = Counter(df.filtered.apply(list).sum())
-return res.most_common()
-#+end_src
-
-#+RESULTS:
-| Â    | 65 |
-| Ã    | 57 |
-| ‚    | 39 |
-| ƒ    | 33 |
-| ’    | 13 |
-| £    |  8 |
-| \x81 |  4 |
-| ¤    |  4 |
-| »    |  4 |
-| ¦    |  3 |
-| ¿    |  3 |
-| –    |  3 |
-| —    |  2 |
-| ¥    |  2 |
-| ¨    |  2 |
-| €    |  2 |
-| ō    |  2 |
-| %    |  2 |
-| \t   |  1 |
-| „    |  1 |
-| Ÿ    |  1 |
-| Š    |  1 |
-| œ    |  1 |
-| ¬    |  1 |
-| ª    |  1 |
-| ž    |  1 |
-| <    |  1 |
-| >    |  1 |
-| ¹    |  1 |
-| …    |  1 |
-| §    |  1 |
-| ¸    |  1 |
-| Ž    |  1 |
-| ¼    |  1 |
-| Œ    |  1 |
-| \xa0 |  1 |
-| \x8d |  1 |
-| †    |  1 |
-| «    |  1 |
-| ā    |  1 |
-| ē    |  1 |
-| č    |  1 |
-
-** Look up posts with weird glyphs
-
-#+NAME: check-posts
-#+begin_src python :results output :var char="–"
-<<connect-to-db>>
-df           = pd.read_sql("select id, post_title from wp_posts WHERE post_type='post' AND post_status='publish' AND post_title LIKE %(char)s limit 10;", dbConnection, params={"char": '%' + char + '%'});
-print(df)
-#+end_src
-
-#+RESULTS: check-posts
-:       id                                         post_title
-: 0   7059    Wiki organization challenge – thinking out loud
-: 1   7330   Setting up my new tablet PC – apps, config, etc.
-: 2  22038  Work on the business from the outside, not in ...
-
-** Get frequency of pairs of characters
-
-#+NAME: digrams
-#+begin_src python :results value scalar :cache yes
-<<connect-to-db>>
-df = pd.read_sql("select post_title from wp_posts WHERE post_type='post' AND post_status='publish'", dbConnection);
-from collections import Counter
-s = df.post_title.apply(list).sum()
-res = Counter('{}{}'.format(a, b) for a, b in zip(s, s[1:]))
-common = res.most_common(100)
-return ''.join([x[0] for x in common])
-#+end_src
-
-#+RESULTS[5a3f821b4bbfcb462cebc176c66bcb697c6bf4f2]: digrams
-: innge g s  treeron aanesy entit orndthn ee: ted atarr hetont, acstou o fekne rieWe smaalewo 20roea mle w 2itvi e pk rimedietioomchev cly01edlil ve i braisseha Wotdece dcotahih looouticurel laseccssila
-
-* DONE Generate guidelines
+* Generate guidelines
 ** Code to make the template
+
 #+NAME: template
-#+begin_src python 
+#+begin_src python :results none :eval no
 from PIL import Image, ImageFont, ImageDraw
 <<params>>
 #LETTERS = 'abcd'
@@ -176,41 +93,35 @@ def make_template(params):
   img = Image.new('RGB', (params['columns'] * params['em'], params['rows'] * params['em_width']), 'white')
   params['draw'] = ImageDraw.Draw(img)
   params['font'] = ImageFont.truetype(params['font_name'], params['font_size'])
-  draw_letters = params['letters'].ljust(params['rows'] * params['columns'])
-  if params['direction'] == 'vertical':
-    draw_letters = transpose_letters(draw_letters, params['columns'], params['rows'])
-  for r in range(params['rows']):
-    for c in range(params['columns']):
-      draw_letter((c * params['em_width'], r * params['em']), draw_letters[r * params['rows'] + c], params)
+  matrix = get_letter_matrix(params)
+  for r, row in enumerate(matrix):
+    for c, ch in enumerate(row):
+      draw_letter((c * params['em_width'], r * params['em']), ch, params)
   img.thumbnail((params['columns'] * params['height'], params['columns'] * params['width']))
   img.save(params['template'])
   return params['template']
 #+end_src
 
 ** Actually make the templates
+
 #+begin_src python :results file
   <<template>>
-  make_template({**params, 'font_name': '/home/sacha/.fonts/Romochka.otf', 'template': 'files/template-romochka.png'}) 
-  make_template({**params, 'font_name': '/home/sacha/.fonts/Breip.ttf', 'template': 'files/template-breip.png'}) 
+  make_template({**params, 'font_name': '/home/sacha/.fonts/Romochka.otf', 'template': 'template-romochka.png'}) 
+  make_template({**params, 'font_name': '/home/sacha/.fonts/Breip.ttf', 'template': 'template-breip.png'}) 
   # return make_template({**params, 'font_name': '/home/sacha/.fonts/KGPrimaryDots.ttf', 
   # 'letters': 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890?:;-–—=!\'’"“”@/\\~_#$%&()*+,.<>[]^`{|}', 'direction': 'horizontal', 'text_color': 'black',
-  # 'template': 'files/template-kg.png', 'ascent': 675, 'descent': 375, 'caps': 525, 'x_height': 300}) 
+  # 'template': 'template-kg.png', 'ascent': 675, 'descent': 375, 'caps': 525, 'x_height': 300}) 
   return make_template({**params, 'font_name': '/home/sacha/.fonts/Romochka.otf', 
-  'template': 'files/template-sample.png', 'direction': 'horizontal', 'rows': 4, 'columns': 4, 'height': 100, 'width': 100 }) 
+  'template': 'template-sample.png', 'direction': 'horizontal', 'rows': 4, 'columns': 4, 'height': 100, 'width': 100 }) 
 #+end_src
 
 #+RESULTS:
 [[file:files/template-sample.png]]
 
-* TODO Cut into glyphs
-
-(setenv "LD_LIBRARY_PATH" "/usr/local/lib")
+* Cut into glyphs
 
 #+NAME: glyph_filename
 #+begin_src python 
-import aglfn
-def glyph_filename_base(ch):
-  return 'uni%s-%s' % (hex(ord(ch)).replace('0x', '').zfill(4), aglfn.name(ch))
 #+end_src
 
 #+begin_src python :results output
@@ -224,23 +135,25 @@ im = Image.open(params['sample_file']).convert('1')
 letters = params['letters']
 if params['direction'] == 'vertical':
   letters = transpose_letters(letters, params['columns'], params['rows'])
-for i, ch in enumerate(letters):  
-  top = int(i / params['rows']) * params['height']
+matrix = np.reshape(list(letters), (params['rows'], params['columns']))
+for r, row in enumerate(matrix):
+  top = r * params['height']
   bottom = top + params['height']
-  left = int(i % params['columns']) * params['width']
-  right = left + params['width']
-  small = im.crop((left, top, right, bottom))
-  filename = os.path.join(params['glyph_dir'], glyph_filename_base(ch) + '.pbm')
-  small.save(filename)
-  svg = filename.replace('.pbm', '.svg')
-  png = filename.replace('.pbm', '.png')
-  small.save(png)
-  subprocess.call(['autotrace', '-output-file', svg, filename])
-  doc = libxml2.parseFile(svg)
-  root = doc.children
-  child = root.children
-  child.next.unlinkNode()
-  doc.saveFile(svg)
+  for c, ch in enumerate(row):
+    left = c * params['width']
+    right = left + params['width']
+    small = im.crop((left, top, right, bottom))
+    filename = os.path.join(params['glyph_dir'], glyph_filename_base(ch) + '.pbm')
+    small.save(filename)
+    svg = filename.replace('.pbm', '.svg')
+    png = filename.replace('.pbm', '.png')
+    small.save(png)
+    subprocess.call(['autotrace', '-output-file', svg, filename])
+    doc = libxml2.parseFile(svg)
+    root = doc.children
+    child = root.children
+    child.next.unlinkNode()
+    doc.saveFile(svg)
 #+end_src
 
 #+RESULTS:
@@ -287,26 +200,12 @@ for ch in params['letters']:
     glyph.left_side_bearing = glyph.right_side_bearing = params['default_bearing'] 
   except:
     print("Error with ", ch)
-font.save(params['new_font_file'])
-font.generate(params['new_otf'])
+save_font(font, params)
 #+END_SRC
 
 #+RESULTS:
 
 * Adjust bearings
-
-#+NAME: load_font
-#+begin_src python
-  import fontforge
-  <<params>>
-  font = fontforge.open(params['new_font_file'])
-#+end_src
-
-#+NAME: save_font
-#+begin_src python
-  font.save(params['new_font_file'])
-  font.generate(params['new_otf'])
-#+end_src
 
 #+NAME: bearings
 |   | Left | Right |
@@ -315,26 +214,166 @@ font.generate(params['new_otf'])
 | r |   22 |       |
 
 #+begin_src python :results output :var bearings=bearings
-<<load_font>>
+<<params>>
+font = load_font(params)
 for row in bearings:
   g = font.createMappedChar(row[0])
   if row[1]:
     g.left_side_bearing = row[1]
   if row[2]:
     g.right_side_bearing = row[2]
-<<save_font>>
+save_font(font, params)
 #+end_src
 
 #+RESULTS:
 
+* Kerning
+
+Rows are first characters, columns are second characters.
+
+#+NAME: kerning_matrix
+|       | None | o,a,c,e | f,t,x,v | h,b,l |
+| None  |      |         |         |       |
+| f     |      |    -102 |     -61 |   -30 |
+| t     |      |     -70 |     -41 |   -25 |
+| r     |      |     -82 |     -41 |   -25 |
+| k     |      |     -50 |     -81 |   -20 |
+| l     |      |     -41 |     -50 |       |
+| v     |      |     -40 |     -35 |   -30 |
+| b,o,p |      |     -20 |     -80 |       |
+| a     |      |     -40 |     -60 |       |
+| W     |      |     -40 |     -30 |   -20 |
+| T     |      |    -190 |    -120 |   -60 |
+
+** Kern as character pairs
+#+NAME: kern
+#+begin_src python :results output :var kerning=kerning_matrix
+  <<params>>
+  font = load_font(params)
+  try:
+    font.addLookup("kern","gpos_pair",0,[["kern",[["latn",["dflt"]]]]])
+    font.addLookupSubtable("kern", "kern-1")
+  except:
+    print("Kerning tables already exist")
+  # Someday I'll figure out how to add these as classes
+  headers = [x.split(',') for x in kerning[0][1:]]
+  for row in kerning[1:]:
+    for first_letter in row[0].split(','):
+      g = font.createMappedChar(first_letter)
+      for i, value in enumerate(row[1:]):
+        if not value: continue
+        glyph_set = headers[i]
+        for second_letter in glyph_set:
+          g.addPosSub("kern-1", second_letter, 0, 0, value, 0, 0, 0, 0, 0)
+  save_font(font, params)
+#+end_src
+
+#+RESULTS: kern
+: Kerning tables already exist
+
+#+CALL: sample(text="thanks for everything")
+
+#+RESULTS:
+[[file:files/check/9f79d7f1c98fdf55cc10200ce55baf13.png]]
+
+ #+RESULTS: show_kerning
+ :results:
+ hello
+ 'kern' Horizontal Kerning in Latin lookup 0
+ ('gpos_pair', (), (('kern', (('DFLT', ('dflt',)), ('latn', ('dflt',)))),))
+ ("'kern' Horizontal Kerning in Latin lookup 0-1",)
+ (None, ('f', 'k', 'r', 't'), ('c',), ('T',), ('l',), ('a', 'b', 'e', 'm', 'n', 'o', 'p', 'u'), ('g', 'j'), ('d', 'h'), ('s',), ('x',), ('space',), ('P',)) (None, ('a', 'c', 'd', 'e', 'o', 'q', 'u', 'w', 'y'), ('f', 't'), ('s',), ('b', 'h', 'k', 'l'), ('j',), ('i',), ('m', 'n', 'r'), ('A', 'C', 'G', 'O', 'Q', 'U'), ('x',), ()) (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -143, -92, -68, -17, -146, -43, -39, 0, -75, 0, 0, -33, -70, -29, -26, 0, 0, 0, 0, 0, 0, 0, -186, -146, -208, -39, -139, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 24, 0, 0, 0, 0, 0, -25, -38, -89, -31, -18, 45, 0, -30, 0, -23, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -21, -31, 0, 0, -98, 0, 0, 0, 0, 0, 0, 0, -45, -29, 0, 0, 0, 0, 0, 0, 0, 0, -24, -41, 0, 0, 0, 0, 0, 0, 0, 0, 0, -21, 0, 0, 0, 0, 0, 0, -68, 0, 0, 0, -138, -80, -151, 0, -184, -26, -103, 0, 0, 0)
+ ||Other|acdeoquwy|ft|s|bhkl|j|i|mnr|ACGOQU|x|Other|
+ |-----
+ |Other|0|0|0|0|0|0|0|0|0|0|0|
+ |fkrt|0|-143|-92|-68|-17|-146|-43|-39|0|-75|0|
+ |c|0|-33|-70|-29|-26|0|0|0|0|0|0|
+ |T|0|-186|-146|-208|-39|-139|0|0|0|0|0|
+ |l|0|0|0|0|0|24|0|0|0|0|0|
+ |abemnopu|-25|-38|-89|-31|-18|45|0|-30|0|-23|0|
+ |gj|0|0|0|0|0|0|0|0|0|0|0|
+ |dh|0|-21|-31|0|0|-98|0|0|0|0|0|
+ |s|0|0|-45|-29|0|0|0|0|0|0|0|
+ |x|0|-24|-41|0|0|0|0|0|0|0|0|
+ |space|0|-21|0|0|0|0|0|0|-68|0|0|
+ |P|0|-138|-80|-151|0|-184|-26|-103|0|0|0|
+
+ :end:
+ :results:
+ |          | Other | acdeoquwy |   ft |    s | bhkl |    j |   i |  mnr | ACGOQU |   x | Other |
+ |----------+-------+-----------+------+------+------+------+-----+------+--------+-----+-------|
+ | Other    |     0 |         0 |    0 |    0 |    0 |    0 |   0 |    0 |      0 |   0 |     0 |
+ | fkrt     |     0 |      -143 |  -92 |  -68 |  -17 | -146 | -43 |  -39 |      0 | -75 |     0 |
+ | c        |     0 |       -33 |  -70 |  -29 |  -26 |    0 |   0 |    0 |      0 |   0 |     0 |
+ | T        |     0 |      -186 | -146 | -208 |  -39 | -139 |   0 |    0 |      0 |   0 |     0 |
+ | l        |     0 |         0 |    0 |    0 |    0 |   24 |   0 |    0 |      0 |   0 |     0 |
+ | abemnopu |   -25 |       -38 |  -89 |  -31 |  -18 |   45 |   0 |  -30 |      0 | -23 |     0 |
+ | gj       |     0 |         0 |    0 |    0 |    0 |    0 |   0 |    0 |      0 |   0 |     0 |
+ | dh       |     0 |       -21 |  -31 |    0 |    0 |  -98 |   0 |    0 |      0 |   0 |     0 |
+ | s        |     0 |         0 |  -45 |  -29 |    0 |    0 |   0 |    0 |      0 |   0 |     0 |
+ | x        |     0 |       -24 |  -41 |    0 |    0 |    0 |   0 |    0 |      0 |   0 |     0 |
+ | space    |     0 |       -21 |    0 |    0 |    0 |    0 |   0 |    0 |    -68 |   0 |     0 |
+ | P        |     0 |      -138 |  -80 | -151 |    0 | -184 | -26 | -103 |      0 |   0 |     0 |
+
+
+
+
+** Kern as classes
+
+#+NAME: kern_classes
+#+begin_src python :results output :var kerning=kerning_matrix :session "kern"
+  <<params>>
+  font = load_font(params)
+  try:
+    font.removeLookup('kern')
+  except:
+    print("Starting from scratch")    
+  font.addLookup("kern", "gpos_pair", 0, [["kern",[["latn",["dflt"]]]]])
+  offsets = np.asarray(kerning)
+  classes_right = [None if (x == "" or x == "None") else x.split(",") for x in offsets[0,1:]]
+  classes_left = [None if (x == "" or x == "None") else x.split(',') for x in offsets[1:,0]]
+  print(kerning)
+  print(classes_left)
+  print(classes_right)
+  offset_list = [0 if x == "" else int(x) for x in offsets[1:,1:].reshape(-1)]
+  print(offset_list)
+  font.addKerningClass("kern", "kern-1", classes_left, classes_right, offset_list)
+  save_font(font, params)
+#+end_src
+
+#+RESULTS: kern_classes
+: [['', 'None', 'o,a,c,e', 'f,t,x,v', 'h,b,l'], ['None', '', '', '', ''], ['f', '', -102, -61, -30], ['t', '', -70, -41, -25], ['r', '', -82, -41, -25], ['k', '', -50, -81, ''], ['l', '', -41, -50, ''], ['v', '', -40, -35, ''], ['b,o,p', '', -20, -80, ''], ['a', '', -40, -60, ''], ['W', '', -40, '', -20], ['T', '', '', '', -60]]
+: [None, ['f'], ['t'], ['r'], ['k'], ['l'], ['v'], ['b', 'o', 'p'], ['a'], ['W'], ['T']]
+: [None, ['o', 'a', 'c', 'e'], ['f', 't', 'x', 'v'], ['h', 'b', 'l']]
+: [0, 0, 0, 0, 0, -102, -61, -30, 0, -70, -41, -25, 0, -82, -41, -25, 0, -50, -81, 0, 0, -41, -50, 0, 0, -40, -35, 0, 0, -20, -80, 0, 0, -40, -60, 0, 0, -40, 0, -20, 0, 0, 0, -60]
+
+#+CALL: sample(text="thanks for everything")
+
+#+RESULTS:
+[[file:files/check/9f79d7f1c98fdf55cc10200ce55baf13.png]]
+
+ #+RESULTS: show_kerning
+ :results:
+ |          | Other | acdeoquwy |   ft |    s | bhkl |    j |   i |  mnr | ACGOQU |   x | Other |
+ |----------+-------+-----------+------+------+------+------+-----+------+--------+-----+-------|
+ | Other    |     0 |         0 |    0 |    0 |    0 |    0 |   0 |    0 |      0 |   0 |     0 |
+ | fkrt     |     0 |      -143 |  -92 |  -68 |  -17 | -146 | -43 |  -39 |      0 | -75 |     0 |
+ | c        |     0 |       -33 |  -70 |  -29 |  -26 |    0 |   0 |    0 |      0 |   0 |     0 |
+ | T        |     0 |      -186 | -146 | -208 |  -39 | -139 |   0 |    0 |      0 |   0 |     0 |
+ | l        |     0 |         0 |    0 |    0 |    0 |   24 |   0 |    0 |      0 |   0 |     0 |
+ | abemnopu |   -25 |       -38 |  -89 |  -31 |  -18 |   45 |   0 |  -30 |      0 | -23 |     0 |
+ | gj       |     0 |         0 |    0 |    0 |    0 |    0 |   0 |    0 |      0 |   0 |     0 |
+ | dh       |     0 |       -21 |  -31 |    0 |    0 |  -98 |   0 |    0 |      0 |   0 |     0 |
+ | s        |     0 |         0 |  -45 |  -29 |    0 |    0 |   0 |    0 |      0 |   0 |     0 |
+ | x        |     0 |       -24 |  -41 |    0 |    0 |    0 |   0 |    0 |      0 |   0 |     0 |
+ | space    |     0 |       -21 |    0 |    0 |    0 |    0 |   0 |    0 |    -68 |   0 |     0 |
+ | P        |     0 |      -138 |  -80 | -151 |    0 | -184 | -26 | -103 |      0 |   0 |     0 |
+
+
 * Display sample text
 
-#+CALL: sample(size=70,text="hhhhoooooohhhhhoooohohohoho",filename="files/check")
-#+RESULTS:
-[[file:files/check/b07b8b758c96f1518d7788229ce6297d.png]]
-
 #+NAME: sample
-#+begin_src python :results file :var filename="files/check" :var text="Hello world" :var size=70 :var font_file=""
+#+begin_src python :results file :var filename="check" :var text="Hello world" :var size=70 :var font_file=""
 from PIL import Image, ImageFont, ImageDraw
 import os
 import hashlib
@@ -359,107 +398,6 @@ return filename
 #+CALL: sample(text="hhhhhoooohhhhhoooohooo")
 #+RESULTS:
 [[file:files/check/df63774e9861483fab011918259a0101.png]]
-
-* Okay, start kerning my own font
-
-#+CALL: sample(text="My name is Sacha Chua.")
-
-#+RESULTS:
-[[file:files/check/7eac967c93c59501f821419b53e135a7.png]]
-
-
-#+CALL: sample(text="innge g s  treeron aanesy entit orndthn ee")
-
-#+RESULTS:
-[[file:files/check/fce1e9a703787c1830f14b6740a19ffa.png]]
-
-#+CALL: sample(text=": ted atarr hetont, acstou o fekne rieWe s")
-
-#+RESULTS:
-[[file:files/check/d7eb25371ee2531c1cd7f7b35f463e7f.png]]
-
-#+CALL: sample(text="maalewo 20roea mle w 2itvi e pk rimedietio")
-
-#+RESULTS:
-[[file:files/check/8035be0030522279a7f07dad4459f391.png]]
-
-#+CALL: sample(text="omchev cly01edlil ve i braisseha Wotdece d")
-
-#+RESULTS:
-[[file:files/check/1a90072c289fbe032810aefc219f8c00.png]]
-
-#+CALL: sample(text="cotahih looouticurel laseccssila")
-
-#+RESULTS:
-[[file:files/check/62010679546ef54d7cb54d1a2c20a1b3.png]]
-
-#+CALL: sample(text="oooonnnnooooreteferotofoks")
-
-#+RESULTS:
-[[file:files/check/b0a309d52c6f4893f47488901587e7ff.png]]
-
-* Kerning
-
-#+NAME: kerning_matrix
-|       | o,a,c,e | f,t,x,v | h,b,l |
-| f     |    -102 |     -61 |   -30 |
-| t     |     -70 |     -41 |   -25 |
-| r     |     -82 |     -41 |   -25 |
-| k     |     -50 |     -81 |       |
-| l     |     -41 |     -50 |       |
-| v     |     -40 |     -35 |       |
-| b,o,p |     -20 |     -80 |       |
-| a     |     -40 |     -60 |       |
-| W     |     -40 |         |   -20 |
-| T     |         |         |   -60 |
-#+NAME: kern
-#+begin_src python :results output :var kerning=kerning_matrix
-  <<load_font>>
-  try:
-    font.addLookup("kern","gpos_pair",0,[["kern",[["latn",["dflt"]]]]])
-    font.addLookupSubtable("kern", "kern-1")
-  except:
-    print("Kerning tables already exist")
-  # Maybe I should just manually do it
-  headers = [x.split(',') for x in kerning[0][1:]]
-  for row in kerning[1:]:
-    for first_letter in row[0].split(','):
-      g = font.createMappedChar(first_letter)
-      for i, value in enumerate(row[1:]):
-        if not value: continue
-        glyph_set = headers[i]
-        for second_letter in glyph_set:
-          g.addPosSub("kern-1", second_letter, 0, 0, value, 0, 0, 0, 0, 0)
-  <<save_font>>
-#+end_src
-
-#+RESULTS: kern
-: Kerning tables already exist
-
-#+RESULTS:
-: Try to add
-
-#+CALL: sample(text="thanks for everything")
-
-#+RESULTS:
-[[file:files/check/9f79d7f1c98fdf55cc10200ce55baf13.png]]
-
- #+RESULTS: show_kerning
- :results:
- |          | Other | acdeoquwy |   ft |    s | bhkl |    j |   i |  mnr | ACGOQU |   x | Other |
- |----------+-------+-----------+------+------+------+------+-----+------+--------+-----+-------|
- | Other    |     0 |         0 |    0 |    0 |    0 |    0 |   0 |    0 |      0 |   0 |     0 |
- | fkrt     |     0 |      -143 |  -92 |  -68 |  -17 | -146 | -43 |  -39 |      0 | -75 |     0 |
- | c        |     0 |       -33 |  -70 |  -29 |  -26 |    0 |   0 |    0 |      0 |   0 |     0 |
- | T        |     0 |      -186 | -146 | -208 |  -39 | -139 |   0 |    0 |      0 |   0 |     0 |
- | l        |     0 |         0 |    0 |    0 |    0 |   24 |   0 |    0 |      0 |   0 |     0 |
- | abemnopu |   -25 |       -38 |  -89 |  -31 |  -18 |   45 |   0 |  -30 |      0 | -23 |     0 |
- | gj       |     0 |         0 |    0 |    0 |    0 |    0 |   0 |    0 |      0 |   0 |     0 |
- | dh       |     0 |       -21 |  -31 |    0 |    0 |  -98 |   0 |    0 |      0 |   0 |     0 |
- | s        |     0 |         0 |  -45 |  -29 |    0 |    0 |   0 |    0 |      0 |   0 |     0 |
- | x        |     0 |       -24 |  -41 |    0 |    0 |    0 |   0 |    0 |      0 |   0 |     0 |
- | space    |     0 |       -21 |    0 |    0 |    0 |    0 |   0 |    0 |    -68 |   0 |     0 |
- | P        |     0 |      -138 |  -80 | -151 |    0 | -184 | -26 | -103 |      0 |   0 |     0 |
 
 * Mwahahaha! Making my handwriting font, literate programming style
 
@@ -591,7 +529,6 @@ FileNotFoundError: [Errno 2] No such file or directory: '/home/sacha/.local/lib/
 
 ** Get the kerning information
 
- #+NAME: show_kerning
  #+begin_src python :results output drawer :var font="/home/sacha/code/font/files/SachaHandEdited.sfd"
  import fontforge
  import numpy as np
@@ -608,6 +545,7 @@ FileNotFoundError: [Errno 2] No such file or directory: '/home/sacha/.local/lib/
  print(sub)
  for subtable in sub:
    (classes_left, classes_right, array) = f.getKerningClass(subtable)
+   print(classes_left, classes_right, array)
    classes_left = list(map(lambda x: ''.join(x or ('Other')), classes_left))
    classes_right = list(map(lambda x: ''.join(x or ('Other')), classes_right))
    kerning = np.array(array).reshape(len(classes_left), len(classes_right))
@@ -615,11 +553,13 @@ FileNotFoundError: [Errno 2] No such file or directory: '/home/sacha/.local/lib/
    out(df)
  #+end_src
 
- #+RESULTS: show_kerning
+ #+RESULTS:
  :results:
+ hello
  'kern' Horizontal Kerning in Latin lookup 0
  ('gpos_pair', (), (('kern', (('DFLT', ('dflt',)), ('latn', ('dflt',)))),))
  ("'kern' Horizontal Kerning in Latin lookup 0-1",)
+ (None, ('f', 'k', 'r', 't'), ('c',), ('T',), ('l',), ('a', 'b', 'e', 'm', 'n', 'o', 'p', 'u'), ('g', 'j'), ('d', 'h'), ('s',), ('x',), ('space',), ('P',)) (None, ('a', 'c', 'd', 'e', 'o', 'q', 'u', 'w', 'y'), ('f', 't'), ('s',), ('b', 'h', 'k', 'l'), ('j',), ('i',), ('m', 'n', 'r'), ('A', 'C', 'G', 'O', 'Q', 'U'), ('x',), ()) (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -143, -92, -68, -17, -146, -43, -39, 0, -75, 0, 0, -33, -70, -29, -26, 0, 0, 0, 0, 0, 0, 0, -186, -146, -208, -39, -139, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 24, 0, 0, 0, 0, 0, -25, -38, -89, -31, -18, 45, 0, -30, 0, -23, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -21, -31, 0, 0, -98, 0, 0, 0, 0, 0, 0, 0, -45, -29, 0, 0, 0, 0, 0, 0, 0, 0, -24, -41, 0, 0, 0, 0, 0, 0, 0, 0, 0, -21, 0, 0, 0, 0, 0, 0, -68, 0, 0, 0, -138, -80, -151, 0, -184, -26, -103, 0, 0, 0)
  ||Other|acdeoquwy|ft|s|bhkl|j|i|mnr|ACGOQU|x|Other|
  |-----
  |Other|0|0|0|0|0|0|0|0|0|0|0|
@@ -637,3 +577,113 @@ FileNotFoundError: [Errno 2] No such file or directory: '/home/sacha/.local/lib/
 
  :end:
 
+
+* Extra stuff
+** Figure out what glyphs I want based on my blog headings
+
+ #+NAME: connect-to-db
+ #+begin_src python :eval no
+ from dotenv import load_dotenv
+ from sqlalchemy import create_engine
+ import os
+ import pandas as pd
+ import pymysql
+ load_dotenv(dotenv_path="/home/sacha/code/docker/blog/.env", verbose=True)
+
+ sqlEngine       = create_engine('mysql+pymysql://' + os.getenv('PYTHON_DB'), pool_recycle=3600)
+ dbConnection    = sqlEngine.connect()
+ #+end_src
+
+** Check glyphs
+
+#+begin_src python :results table
+<<connect-to-db>>
+df           = pd.read_sql("select post_title from wp_posts WHERE post_type='post' AND post_status='publish'", dbConnection);
+# Debugging
+#q = df[~df['post_title'].str.match('^[A-Za-z0-9\? "\'(),\-:\.\*;/@\!\[\]=_&\?\$\+#^{}\~]+$')]
+#print(q)
+from collections import Counter
+df['filtered'] = df.post_title.str.replace('[A-Za-z0-9\? "\'(),\-:\.\*;/@\!\[\]=_&\?\$\+#^{}\~]+', '')
+#print(df['filtered'].apply(list).sum())
+res = Counter(df.filtered.apply(list).sum())
+return res.most_common()
+#+end_src
+
+#+RESULTS:
+| Â    | 65 |
+| Ã    | 57 |
+| ‚    | 39 |
+| ƒ    | 33 |
+| ’    | 13 |
+| £    |  8 |
+| \x81 |  4 |
+| ¤    |  4 |
+| »    |  4 |
+| ¦    |  3 |
+| ¿    |  3 |
+| –    |  3 |
+| —    |  2 |
+| ¥    |  2 |
+| ¨    |  2 |
+| €    |  2 |
+| ō    |  2 |
+| %    |  2 |
+| \t   |  1 |
+| „    |  1 |
+| Ÿ    |  1 |
+| Š    |  1 |
+| œ    |  1 |
+| ¬    |  1 |
+| ª    |  1 |
+| ž    |  1 |
+| <    |  1 |
+| >    |  1 |
+| ¹    |  1 |
+| …    |  1 |
+| §    |  1 |
+| ¸    |  1 |
+| Ž    |  1 |
+| ¼    |  1 |
+| Œ    |  1 |
+| \xa0 |  1 |
+| \x8d |  1 |
+| †    |  1 |
+| «    |  1 |
+| ā    |  1 |
+| ē    |  1 |
+| č    |  1 |
+
+** Look up posts with weird glyphs
+
+#+NAME: check-posts
+#+begin_src python :results output :var char="–"
+<<connect-to-db>>
+df           = pd.read_sql("select id, post_title from wp_posts WHERE post_type='post' AND post_status='publish' AND post_title LIKE %(char)s limit 10;", dbConnection, params={"char": '%' + char + '%'});
+print(df)
+#+end_src
+
+#+RESULTS: check-posts
+:       id                                         post_title
+: 0   7059    Wiki organization challenge – thinking out loud
+: 1   7330   Setting up my new tablet PC – apps, config, etc.
+: 2  22038  Work on the business from the outside, not in ...
+
+** Get frequency of pairs of characters
+
+#+NAME: digrams
+#+begin_src python :results value scalar :cache yes
+<<connect-to-db>>
+df = pd.read_sql("select post_title from wp_posts WHERE post_type='post' AND post_status='publish'", dbConnection);
+from collections import Counter
+s = df.post_title.apply(list).sum()
+res = Counter('{}{}'.format(a, b) for a, b in zip(s, s[1:]))
+common = res.most_common(100)
+return ''.join([x[0] for x in common])
+#+end_src
+
+#+RESULTS[5a3f821b4bbfcb462cebc176c66bcb697c6bf4f2]: digrams
+: innge g s  treeron aanesy entit orndthn ee: ted atarr hetont, acstou o fekne rieWe smaalewo 20roea mle w 2itvi e pk rimedietioomchev cly01edlil ve i braisseha Wotdece dcotahih looouticurel laseccssila
+
+* Other resources
+
+http://ctan.localhost.net.ar/fonts/amiri/tools/build.py
