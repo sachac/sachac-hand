@@ -1,14 +1,134 @@
-#+PROPERTY: header-args python  :noweb yes :dir "files" :exports both
-I want to be able to generate fonts quickly from the handwriting
-samples I can draw on my tablet PC or my phone. 
+#+PROPERTY: header-args python  :noweb yes :dir "/home/sacha/code/font/files" :exports both
+
+* Summary
+
+I wanted to make my own handwriting font. I also wanted to be able to
+generate fonts quickly from the handwriting samples I can draw on my
+tablet PC or my phone.
+
+Quick links:
+
+| [[file:files/SachaHandEdited.sfd]] | Edited FontForge file |
+| [[file:files/sachacHand.otf]]      | OpenType font         |
+| [[file:files/sachacHand.woff]]     | Web font              |
+
+* License
+
+Feel free to use the font under the SIL Open Font License. That means
+you can freely create and distribute things that use the font. See
+conditions below if you plan to bundle or modify the font.
+
+** sachacHand - SIL Open Font License
+
+This Font Software is licensed under the SIL Open Font License, Version 1.1.
+
+This license is copied below, and is also available with a FAQ at: http://scripts.sil.org/OFL
+
+
+SIL OPEN FONT LICENSE
+Version 1.1 - 26 February 2007
+
+
+PREAMBLE
+The goals of the Open Font License (OFL) are to stimulate worldwide
+development of collaborative font projects, to support the font creation
+efforts of academic and linguistic communities, and to provide a free and
+open framework in which fonts may be shared and improved in partnership
+with others.
+
+The OFL allows the licensed fonts to be used, studied, modified and
+redistributed freely as long as they are not sold by themselves. The
+fonts, including any derivative works, can be bundled, embedded,
+redistributed and/or sold with any software provided that any reserved
+names are not used by derivative works. The fonts and derivatives,
+however, cannot be released under any other type of license. The
+requirement for fonts to remain under this license does not apply
+to any document created using the fonts or their derivatives.
+
+
+DEFINITIONS
+"Font Software" refers to the set of files released by the Copyright
+Holder(s) under this license and clearly marked as such. This may
+include source files, build scripts and documentation.
+
+"Reserved Font Name" refers to any names specified as such after the
+copyright statement(s).
+
+"Original Version" refers to the collection of Font Software components as
+distributed by the Copyright Holder(s).
+
+"Modified Version" refers to any derivative made by adding to, deleting,
+or substituting - in part or in whole - any of the components of the
+Original Version, by changing formats or by porting the Font Software to a
+new environment.
+
+"Author" refers to any designer, engineer, programmer, technical
+writer or other person who contributed to the Font Software.
+
+
+PERMISSION & CONDITIONS
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of the Font Software, to use, study, copy, merge, embed, modify,
+redistribute, and sell modified and unmodified copies of the Font
+Software, subject to the following conditions:
+
+1) Neither the Font Software nor any of its individual components,
+in Original or Modified Versions, may be sold by itself.
+
+2) Original or Modified Versions of the Font Software may be bundled,
+redistributed and/or sold with any software, provided that each copy
+contains the above copyright notice and this license. These can be
+included either as stand-alone text files, human-readable headers or
+in the appropriate machine-readable metadata fields within text or
+binary files as long as those fields can be easily viewed by the user.
+
+3) No Modified Version of the Font Software may use the Reserved Font
+Name(s) unless explicit written permission is granted by the corresponding
+Copyright Holder. This restriction only applies to the primary font name as
+presented to the users.
+
+4) The name(s) of the Copyright Holder(s) or the Author(s) of the Font
+Software shall not be used to promote, endorse or advertise any
+Modified Version, except to acknowledge the contribution(s) of the
+Copyright Holder(s) and the Author(s) or with their explicit written
+permission.
+
+5) The Font Software, modified or unmodified, in part or in whole,
+must be distributed entirely under this license, and must not be
+distributed under any other license. The requirement for fonts to
+remain under this license does not apply to any document created
+using the Font Software.
+
+
+TERMINATION
+This license becomes null and void if any of the above conditions are
+not met.
+
+
+DISCLAIMER
+THE FONT SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO ANY WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT
+OF COPYRIGHT, PATENT, TRADEMARK, OR OTHER RIGHT. IN NO EVENT SHALL THE
+COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+INCLUDING ANY GENERAL, SPECIAL, INDIRECT, INCIDENTAL, OR CONSEQUENTIAL
+DAMAGES, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+FROM, OUT OF THE USE OR INABILITY TO USE THE FONT SOFTWARE OR FROM
+OTHER DEALINGS IN THE FONT SOFTWARE.
+
 
 * Things I needed to install 
 
-sudo apt-get install fontforge python3-fontforge python3-numpy python3-sqlalchemy python3-pandas python3-pymysql python3-nltk woff-tools
+=sudo apt-get install fontforge python3-fontforge python3-numpy python3-sqlalchemy python3-pandas python3-pymysql python3-nltk woff-tools=
 
-Compile autotrace based on my fork at https://github.com/sachac/autotrace so that it uses Graphicsmagick instead of Imagemagick.
+I compiled autotrace based on my fork at https://github.com/sachac/autotrace so that it uses Graphicsmagick instead of Imagemagick.
 
 I also needed =(setenv "LD_LIBRARY_PATH" "/usr/local/lib")=. There are probably a bunch of other prerequisites I've forgotten to write down.
+
+** Errors fixed along the way
+
+- =FileNotFoundError: [Errno 2] No such file or directory: '/home/sacha/.local/lib/python3.8/site-packages/aglfn/agl-aglfn/aglfn.txt'=
+  - symlink or copy the one from /usr/share/aglfn to the right place
 
 * Parameters and common functions
 
@@ -191,15 +311,6 @@ for i, ch in enumerate(cut_letters):
 font.em = params['em']
 font.descent = params['descent']
 font.ascent = params['ascent']
-space = font.createMappedChar(' ')
-space.width = int(params['em'] / 5)
-for ch in params['letters']:
-  if ch == ' ': continue
-  try:
-    glyph = font.createMappedChar(aglfn.name(ch))
-    glyph.left_side_bearing = glyph.right_side_bearing = params['default_bearing'] 
-  except:
-    print("Error with ", ch)
 save_font(font, params)
 #+END_SRC
 
@@ -212,10 +323,22 @@ save_font(font, params)
 |---+------+-------|
 | k |    4 |       |
 | r |   22 |       |
+| j |  -90 |       |
+| s |   24 |       |
 
+#+NAME: set_bearings
 #+begin_src python :results output :var bearings=bearings
 <<params>>
 font = load_font(params)
+space = font.createMappedChar(' ')
+space.width = int(params['em'] / 5)
+for ch in params['letters']:
+  if ch == ' ': continue
+  try:
+    glyph = font.createMappedChar(aglfn.name(ch))
+    glyph.left_side_bearing = glyph.right_side_bearing = params['default_bearing'] 
+  except:
+    print("Error with ", ch)
 for row in bearings:
   g = font.createMappedChar(row[0])
   if row[1]:
@@ -225,100 +348,26 @@ for row in bearings:
 save_font(font, params)
 #+end_src
 
-#+RESULTS:
+#+RESULTS: set_bearings
 
-* Kerning
+* Kern the font
 
 Rows are first characters, columns are second characters.
 
 #+NAME: kerning_matrix
-|       | None | o,a,c,e | f,t,x,v | h,b,l |
-| None  |      |         |         |       |
-| f     |      |    -102 |     -61 |   -30 |
-| t     |      |     -70 |     -41 |   -25 |
-| r     |      |     -82 |     -41 |   -25 |
-| k     |      |     -50 |     -81 |   -20 |
-| l     |      |     -41 |     -50 |       |
-| v     |      |     -40 |     -35 |   -30 |
-| b,o,p |      |     -20 |     -80 |       |
-| a     |      |     -40 |     -60 |       |
-| W     |      |     -40 |     -30 |   -20 |
-| T     |      |    -190 |    -120 |   -60 |
-
-** Kern as character pairs
-#+NAME: kern
-#+begin_src python :results output :var kerning=kerning_matrix
-  <<params>>
-  font = load_font(params)
-  try:
-    font.addLookup("kern","gpos_pair",0,[["kern",[["latn",["dflt"]]]]])
-    font.addLookupSubtable("kern", "kern-1")
-  except:
-    print("Kerning tables already exist")
-  # Someday I'll figure out how to add these as classes
-  headers = [x.split(',') for x in kerning[0][1:]]
-  for row in kerning[1:]:
-    for first_letter in row[0].split(','):
-      g = font.createMappedChar(first_letter)
-      for i, value in enumerate(row[1:]):
-        if not value: continue
-        glyph_set = headers[i]
-        for second_letter in glyph_set:
-          g.addPosSub("kern-1", second_letter, 0, 0, value, 0, 0, 0, 0, 0)
-  save_font(font, params)
-#+end_src
-
-#+RESULTS: kern
-: Kerning tables already exist
-
-#+CALL: sample(text="thanks for everything")
-
-#+RESULTS:
-[[file:files/check/9f79d7f1c98fdf55cc10200ce55baf13.png]]
-
- #+RESULTS: show_kerning
- :results:
- hello
- 'kern' Horizontal Kerning in Latin lookup 0
- ('gpos_pair', (), (('kern', (('DFLT', ('dflt',)), ('latn', ('dflt',)))),))
- ("'kern' Horizontal Kerning in Latin lookup 0-1",)
- (None, ('f', 'k', 'r', 't'), ('c',), ('T',), ('l',), ('a', 'b', 'e', 'm', 'n', 'o', 'p', 'u'), ('g', 'j'), ('d', 'h'), ('s',), ('x',), ('space',), ('P',)) (None, ('a', 'c', 'd', 'e', 'o', 'q', 'u', 'w', 'y'), ('f', 't'), ('s',), ('b', 'h', 'k', 'l'), ('j',), ('i',), ('m', 'n', 'r'), ('A', 'C', 'G', 'O', 'Q', 'U'), ('x',), ()) (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -143, -92, -68, -17, -146, -43, -39, 0, -75, 0, 0, -33, -70, -29, -26, 0, 0, 0, 0, 0, 0, 0, -186, -146, -208, -39, -139, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 24, 0, 0, 0, 0, 0, -25, -38, -89, -31, -18, 45, 0, -30, 0, -23, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -21, -31, 0, 0, -98, 0, 0, 0, 0, 0, 0, 0, -45, -29, 0, 0, 0, 0, 0, 0, 0, 0, -24, -41, 0, 0, 0, 0, 0, 0, 0, 0, 0, -21, 0, 0, 0, 0, 0, 0, -68, 0, 0, 0, -138, -80, -151, 0, -184, -26, -103, 0, 0, 0)
- ||Other|acdeoquwy|ft|s|bhkl|j|i|mnr|ACGOQU|x|Other|
- |-----
- |Other|0|0|0|0|0|0|0|0|0|0|0|
- |fkrt|0|-143|-92|-68|-17|-146|-43|-39|0|-75|0|
- |c|0|-33|-70|-29|-26|0|0|0|0|0|0|
- |T|0|-186|-146|-208|-39|-139|0|0|0|0|0|
- |l|0|0|0|0|0|24|0|0|0|0|0|
- |abemnopu|-25|-38|-89|-31|-18|45|0|-30|0|-23|0|
- |gj|0|0|0|0|0|0|0|0|0|0|0|
- |dh|0|-21|-31|0|0|-98|0|0|0|0|0|
- |s|0|0|-45|-29|0|0|0|0|0|0|0|
- |x|0|-24|-41|0|0|0|0|0|0|0|0|
- |space|0|-21|0|0|0|0|0|0|-68|0|0|
- |P|0|-138|-80|-151|0|-184|-26|-103|0|0|0|
-
- :end:
- :results:
- |          | Other | acdeoquwy |   ft |    s | bhkl |    j |   i |  mnr | ACGOQU |   x | Other |
- |----------+-------+-----------+------+------+------+------+-----+------+--------+-----+-------|
- | Other    |     0 |         0 |    0 |    0 |    0 |    0 |   0 |    0 |      0 |   0 |     0 |
- | fkrt     |     0 |      -143 |  -92 |  -68 |  -17 | -146 | -43 |  -39 |      0 | -75 |     0 |
- | c        |     0 |       -33 |  -70 |  -29 |  -26 |    0 |   0 |    0 |      0 |   0 |     0 |
- | T        |     0 |      -186 | -146 | -208 |  -39 | -139 |   0 |    0 |      0 |   0 |     0 |
- | l        |     0 |         0 |    0 |    0 |    0 |   24 |   0 |    0 |      0 |   0 |     0 |
- | abemnopu |   -25 |       -38 |  -89 |  -31 |  -18 |   45 |   0 |  -30 |      0 | -23 |     0 |
- | gj       |     0 |         0 |    0 |    0 |    0 |    0 |   0 |    0 |      0 |   0 |     0 |
- | dh       |     0 |       -21 |  -31 |    0 |    0 |  -98 |   0 |    0 |      0 |   0 |     0 |
- | s        |     0 |         0 |  -45 |  -29 |    0 |    0 |   0 |    0 |      0 |   0 |     0 |
- | x        |     0 |       -24 |  -41 |    0 |    0 |    0 |   0 |    0 |      0 |   0 |     0 |
- | space    |     0 |       -21 |    0 |    0 |    0 |    0 |   0 |    0 |    -68 |   0 |     0 |
- | P        |     0 |      -138 |  -80 | -151 |    0 | -184 | -26 | -103 |      0 |   0 |     0 |
-
-
-
-
-** Kern as classes
+|       | None | o,a,c,e,d,g,q,w | f,t,x,v,y,z | h,b,l,i,k | j | m,n,p,r,u |   s |    T |
+| None  |      |                 |             |           |   |           |     |      |
+| f     |      |            -102 |         -61 |       -30 |   |       -60 |     | -120 |
+| t     |      |             -70 |         -41 |       -25 |   |           |     | -120 |
+| r     |      |             -82 |         -41 |       -25 |   |       -20 |     | -120 |
+| k     |      |             -50 |         -81 |       -20 |   |       -20 | -48 | -120 |
+| l     |      |             -41 |         -50 |           |   |           |     | -120 |
+| v     |      |             -40 |         -35 |       -30 |   |           |     | -120 |
+| b,o,p |      |             -20 |         -80 |           |   |           |     | -120 |
+| a     |      |             -40 |         -60 |           |   |           |     | -120 |
+| W     |      |             -40 |         -30 |       -20 |   |           |     | -120 |
+| T     |      |            -190 |        -120 |       -60 |   |      -130 |     |      |
+| F     |      |            -190 |        -120 |       -60 |   |      -130 |     | -120 |
 
 #+NAME: kern_classes
 #+begin_src python :results output :var kerning=kerning_matrix :session "kern"
@@ -332,48 +381,17 @@ Rows are first characters, columns are second characters.
   offsets = np.asarray(kerning)
   classes_right = [None if (x == "" or x == "None") else x.split(",") for x in offsets[0,1:]]
   classes_left = [None if (x == "" or x == "None") else x.split(',') for x in offsets[1:,0]]
-  print(kerning)
-  print(classes_left)
-  print(classes_right)
   offset_list = [0 if x == "" else int(x) for x in offsets[1:,1:].reshape(-1)]
-  print(offset_list)
   font.addKerningClass("kern", "kern-1", classes_left, classes_right, offset_list)
   save_font(font, params)
 #+end_src
 
 #+RESULTS: kern_classes
-: [['', 'None', 'o,a,c,e', 'f,t,x,v', 'h,b,l'], ['None', '', '', '', ''], ['f', '', -102, -61, -30], ['t', '', -70, -41, -25], ['r', '', -82, -41, -25], ['k', '', -50, -81, ''], ['l', '', -41, -50, ''], ['v', '', -40, -35, ''], ['b,o,p', '', -20, -80, ''], ['a', '', -40, -60, ''], ['W', '', -40, '', -20], ['T', '', '', '', -60]]
-: [None, ['f'], ['t'], ['r'], ['k'], ['l'], ['v'], ['b', 'o', 'p'], ['a'], ['W'], ['T']]
-: [None, ['o', 'a', 'c', 'e'], ['f', 't', 'x', 'v'], ['h', 'b', 'l']]
-: [0, 0, 0, 0, 0, -102, -61, -30, 0, -70, -41, -25, 0, -82, -41, -25, 0, -50, -81, 0, 0, -41, -50, 0, 0, -40, -35, 0, 0, -20, -80, 0, 0, -40, -60, 0, 0, -40, 0, -20, 0, 0, 0, -60]
-
-#+CALL: sample(text="thanks for everything")
-
-#+RESULTS:
-[[file:files/check/9f79d7f1c98fdf55cc10200ce55baf13.png]]
-
- #+RESULTS: show_kerning
- :results:
- |          | Other | acdeoquwy |   ft |    s | bhkl |    j |   i |  mnr | ACGOQU |   x | Other |
- |----------+-------+-----------+------+------+------+------+-----+------+--------+-----+-------|
- | Other    |     0 |         0 |    0 |    0 |    0 |    0 |   0 |    0 |      0 |   0 |     0 |
- | fkrt     |     0 |      -143 |  -92 |  -68 |  -17 | -146 | -43 |  -39 |      0 | -75 |     0 |
- | c        |     0 |       -33 |  -70 |  -29 |  -26 |    0 |   0 |    0 |      0 |   0 |     0 |
- | T        |     0 |      -186 | -146 | -208 |  -39 | -139 |   0 |    0 |      0 |   0 |     0 |
- | l        |     0 |         0 |    0 |    0 |    0 |   24 |   0 |    0 |      0 |   0 |     0 |
- | abemnopu |   -25 |       -38 |  -89 |  -31 |  -18 |   45 |   0 |  -30 |      0 | -23 |     0 |
- | gj       |     0 |         0 |    0 |    0 |    0 |    0 |   0 |    0 |      0 |   0 |     0 |
- | dh       |     0 |       -21 |  -31 |    0 |    0 |  -98 |   0 |    0 |      0 |   0 |     0 |
- | s        |     0 |         0 |  -45 |  -29 |    0 |    0 |   0 |    0 |      0 |   0 |     0 |
- | x        |     0 |       -24 |  -41 |    0 |    0 |    0 |   0 |    0 |      0 |   0 |     0 |
- | space    |     0 |       -21 |    0 |    0 |    0 |    0 |   0 |    0 |    -68 |   0 |     0 |
- | P        |     0 |      -138 |  -80 | -151 |    0 | -184 | -26 | -103 |      0 |   0 |     0 |
-
 
 * Display sample text
 
 #+NAME: sample
-#+begin_src python :results file :var filename="check" :var text="Hello world" :var size=70 :var font_file=""
+#+begin_src python :results file :var filename="check" :var text="Hello world" :var size=70 :var font_file="" :var bg="white" :var fg="black"
 from PIL import Image, ImageFont, ImageDraw
 import os
 import hashlib
@@ -382,9 +400,9 @@ if font_file == "":
   font_file = params['new_otf']
 font = ImageFont.truetype(font_file, size)
 font_size = font.getsize(text)
-img = Image.new('LA', font_size, 'black')
+img = Image.new('LA', (font_size[0] + 20, font_size[1] + 20), bg)
 draw = ImageDraw.Draw(img)
-draw.text((0, 0), text, 'white', font)
+draw.text((10, 10), text, fg, font)
 if os.path.isdir(filename):
   filename = os.path.join(filename, hashlib.md5(text.encode()).hexdigest() + '.png')
 img.save(filename)
@@ -394,191 +412,129 @@ return filename
 #+RESULTS: sample
 [[file:files/check/3e25960a79dbc69b674cd4ec67a72c62.png]]
 
-
 #+CALL: sample(text="hhhhhoooohhhhhoooohooo")
 #+RESULTS:
 [[file:files/check/df63774e9861483fab011918259a0101.png]]
 
-* Mwahahaha! Making my handwriting font, literate programming style
+* Test the font
 
+[[file:files/test.html]]
 
+#+begin_src html :tangle "files/test.html"
+<html>
+  <head>
+    <style>
+     @font-face { font-family: 'SachaHand'; src: url('SachaHand.otf') format('opentype'); }
+     body { font-family: 'SachaHand', Alegreya; font-size: 30pt }
+    </style>
+  </head>
+  <body>
+    nnnnnaaannnnbbbbnn
+    This is a test
+    ohohohohohoho
+    Emacs News 2020-04-05
+    The quick brown fox jumps over the lazy dog.
 
+nnaannnnabnnnnacnnnnadnnnnaennnnafnnnnagnnnnahnnnn
+ainnnnajnnnnaknnnnalnnnnamnnnnannnnnaonnnnapnnnnaq
+nnnnarnnnnasnnnnatnnnnaunnnnavnnnnawnnnnaxnnnnaynn
+nnaznnnnbannnnbbnnnnbcnnnnbdnnnnbennnnbfnnnnbgnnnn
+bhnnnnbinnnnbjnnnnbknnnnblnnnnbmnnnnbnnnnnbonnnnbp
+nnnnbqnnnnbrnnnnbsnnnnbtnnnnbunnnnbvnnnnbwnnnnbxnn
+nnbynnnnbznnnncannnncbnnnnccnnnncdnnnncennnncfnnnn
+cgnnnnchnnnncinnnncjnnnncknnnnclnnnncmnnnncnnnnnco
+nnnncpnnnncqnnnncrnnnncsnnnnctnnnncunnnncvnnnncwnn
+nncxnnnncynnnncznnnndannnndbnnnndcnnnnddnnnndennnn
+dfnnnndgnnnndhnnnndinnnndjnnnndknnnndlnnnndmnnnndn
+nnnndonnnndpnnnndqnnnndrnnnndsnnnndtnnnndunnnndvnn
+nndwnnnndxnnnndynnnndznnnneannnnebnnnnecnnnnednnnn
+eennnnefnnnnegnnnnehnnnneinnnnejnnnneknnnnelnnnnem
+nnnnennnnneonnnnepnnnneqnnnnernnnnesnnnnetnnnneunn
+nnevnnnnewnnnnexnnnneynnnneznnnnfannnnfbnnnnfcnnnn
+fdnnnnfennnnffnnnnfgnnnnfhnnnnfinnnnfjnnnnfknnnnfl
+nnnnfmnnnnfnnnnnfonnnnfpnnnnfqnnnnfrnnnnfsnnnnftnn
+nnfunnnnfvnnnnfwnnnnfxnnnnfynnnnfznnnngannnngbnnnn
+gcnnnngdnnnngennnngfnnnnggnnnnghnnnnginnnngjnnnngk
+nnnnglnnnngmnnnngnnnnngonnnngpnnnngqnnnngrnnnngsnn
+nngtnnnngunnnngvnnnngwnnnngxnnnngynnnngznnnnhannnn
+hbnnnnhcnnnnhdnnnnhennnnhfnnnnhgnnnnhhnnnnhinnnnhj
+nnnnhknnnnhlnnnnhmnnnnhnnnnnhonnnnhpnnnnhqnnnnhrnn
+nnhsnnnnhtnnnnhunnnnhvnnnnhwnnnnhxnnnnhynnnnhznnnn
+iannnnibnnnnicnnnnidnnnniennnnifnnnnignnnnihnnnnii
+nnnnijnnnniknnnnilnnnnimnnnninnnnnionnnnipnnnniqnn
+nnirnnnnisnnnnitnnnniunnnnivnnnniwnnnnixnnnniynnnn
+iznnnnjannnnjbnnnnjcnnnnjdnnnnjennnnjfnnnnjgnnnnjh
+nnnnjinnnnjjnnnnjknnnnjlnnnnjmnnnnjnnnnnjonnnnjpnn
+nnjqnnnnjrnnnnjsnnnnjtnnnnjunnnnjvnnnnjwnnnnjxnnnn
+jynnnnjznnnnkannnnkbnnnnkcnnnnkdnnnnkennnnkfnnnnkg
+nnnnkhnnnnkinnnnkjnnnnkknnnnklnnnnkmnnnnknnnnnkonn
+nnkpnnnnkqnnnnkrnnnnksnnnnktnnnnkunnnnkvnnnnkwnnnn
+kxnnnnkynnnnkznnnnlannnnlbnnnnlcnnnnldnnnnlennnnlf
+nnnnlgnnnnlhnnnnlinnnnljnnnnlknnnnllnnnnlmnnnnlnnn
+nnlonnnnlpnnnnlqnnnnlrnnnnlsnnnnltnnnnlunnnnlvnnnn
+lwnnnnlxnnnnlynnnnlznnnnmannnnmbnnnnmcnnnnmdnnnnme
+nnnnmfnnnnmgnnnnmhnnnnminnnnmjnnnnmknnnnmlnnnnmmnn
+nnmnnnnnmonnnnmpnnnnmqnnnnmrnnnnmsnnnnmtnnnnmunnnn
+mvnnnnmwnnnnmxnnnnmynnnnmznnnnnannnnnbnnnnncnnnnnd
+nnnnnennnnnfnnnnngnnnnnhnnnnninnnnnjnnnnnknnnnnlnn
+nnnmnnnnnnnnnnnonnnnnpnnnnnqnnnnnrnnnnnsnnnnntnnnn
+nunnnnnvnnnnnwnnnnnxnnnnnynnnnnznnnnoannnnobnnnnoc
+nnnnodnnnnoennnnofnnnnognnnnohnnnnoinnnnojnnnnoknn
+nnolnnnnomnnnnonnnnnoonnnnopnnnnoqnnnnornnnnosnnnn
+otnnnnounnnnovnnnnownnnnoxnnnnoynnnnoznnnnpannnnpb
+nnnnpcnnnnpdnnnnpennnnpfnnnnpgnnnnphnnnnpinnnnpjnn
+nnpknnnnplnnnnpmnnnnpnnnnnponnnnppnnnnpqnnnnprnnnn
+psnnnnptnnnnpunnnnpvnnnnpwnnnnpxnnnnpynnnnpznnnnqa
+nnnnqbnnnnqcnnnnqdnnnnqennnnqfnnnnqgnnnnqhnnnnqinn
+nnqjnnnnqknnnnqlnnnnqmnnnnqnnnnnqonnnnqpnnnnqqnnnn
+qrnnnnqsnnnnqtnnnnqunnnnqvnnnnqwnnnnqxnnnnqynnnnqz
+nnnnrannnnrbnnnnrcnnnnrdnnnnrennnnrfnnnnrgnnnnrhnn
+nnrinnnnrjnnnnrknnnnrlnnnnrmnnnnrnnnnnronnnnrpnnnn
+rqnnnnrrnnnnrsnnnnrtnnnnrunnnnrvnnnnrwnnnnrxnnnnry
+nnnnrznnnnsannnnsbnnnnscnnnnsdnnnnsennnnsfnnnnsgnn
+nnshnnnnsinnnnsjnnnnsknnnnslnnnnsmnnnnsnnnnnsonnnn
+spnnnnsqnnnnsrnnnnssnnnnstnnnnsunnnnsvnnnnswnnnnsx
+nnnnsynnnnsznnnntannnntbnnnntcnnnntdnnnntennnntfnn
+nntgnnnnthnnnntinnnntjnnnntknnnntlnnnntmnnnntnnnnn
+tonnnntpnnnntqnnnntrnnnntsnnnnttnnnntunnnntvnnnntw
+nnnntxnnnntynnnntznnnnuannnnubnnnnucnnnnudnnnnuenn
+nnufnnnnugnnnnuhnnnnuinnnnujnnnnuknnnnulnnnnumnnnn
+unnnnnuonnnnupnnnnuqnnnnurnnnnusnnnnutnnnnuunnnnuv
+nnnnuwnnnnuxnnnnuynnnnuznnnnvannnnvbnnnnvcnnnnvdnn
+nnvennnnvfnnnnvgnnnnvhnnnnvinnnnvjnnnnvknnnnvlnnnn
+vmnnnnvnnnnnvonnnnvpnnnnvqnnnnvrnnnnvsnnnnvtnnnnvu
+nnnnvvnnnnvwnnnnvxnnnnvynnnnvznnnnwannnnwbnnnnwcnn
+nnwdnnnnwennnnwfnnnnwgnnnnwhnnnnwinnnnwjnnnnwknnnn
+wlnnnnwmnnnnwnnnnnwonnnnwpnnnnwqnnnnwrnnnnwsnnnnwt
+nnnnwunnnnwvnnnnwwnnnnwxnnnnwynnnnwznnnnxannnnxbnn
+nnxcnnnnxdnnnnxennnnxfnnnnxgnnnnxhnnnnxinnnnxjnnnn
+xknnnnxlnnnnxmnnnnxnnnnnxonnnnxpnnnnxqnnnnxrnnnnxs
+nnnnxtnnnnxunnnnxvnnnnxwnnnnxxnnnnxynnnnxznnnnyann
+nnybnnnnycnnnnydnnnnyennnnyfnnnnygnnnnyhnnnnyinnnn
+yjnnnnyknnnnylnnnnymnnnnynnnnnyonnnnypnnnnyqnnnnyr
+nnnnysnnnnytnnnnyunnnnyvnnnnywnnnnyxnnnnyynnnnyznn
+nnzannnnzbnnnnzcnnnnzdnnnnzennnnzfnnnnzgnnnnzhnnnn
+zinnnnzjnnnnzknnnnzlnnnnzmnnnnznnnnnzonnnnzpnnnnzq
+nnnnzrnnnnzsnnnnztnnnnzunnnnzvnnnnzwnnnnzxnnnnzynn
+nnzznn
+#+end_src
 
-* Along the way
-** python aglfn
-FileNotFoundError: [Errno 2] No such file or directory: '/home/sacha/.local/lib/python3.8/site-packages/aglfn/agl-aglfn/aglfn.txt'
-* Copy metrics from my edited font
+Test string from http://www.ninastoessinger.com/stringmaker/index.php
 
-** Get the glyph bearings
+* And then a lot of hand-hacking of the contours later, I have a font!
 
- #+begin_src python :results table
- import fontforge
- import numpy as np
- import pandas as pd
- f = fontforge.open("/home/sacha/code/font/files/SachaHandEdited.sfd")
- return list(map(lambda g: [g.glyphname, g.left_side_bearing, g.right_side_bearing], f.glyphs()))
- #+end_src
+[[file:files/sachacHand.otf]]
+[[file:files/sachacHand.woff]]
+[[file:files/SachaHandEdited.sfd]]
 
- #+RESULTS:
- | a            |               39.0 |                38.0 |
- | b            |               39.0 |   38.59677350874102 |
- | c            | 38.807172523099524 |                39.0 |
- | d            | 38.853036079593494 |   37.70218462414317 |
- | e            |               23.0 |                39.0 |
- | f            |               22.0 |                28.0 |
- | g            |               39.0 |  38.839263397187665 |
- | h            |  42.44897959183673 |  32.244897959183675 |
- | i            |               39.0 |                39.0 |
- | j            |               29.0 |   37.07269908475212 |
- | k            |            38.7232 |                38.0 |
- | l            | 38.849996883261696 |                24.0 |
- | m            |  38.88120540762966 |  61.872974804436524 |
- | n            |  38.41699749411689 |   50.09722712588024 |
- | o            | 38.861850745445174 |   38.36155030599474 |
- | p            |  38.72189349112426 |  38.806185204215126 |
- | q            | 38.635016803781454 |                38.0 |
- | r            | 39.183503419072274 |                39.0 |
- | s            |               39.0 |                38.0 |
- | t            |               39.0 |                39.0 |
- | u            |  38.68004732178092 |   38.39916483580083 |
- | v            |               39.0 |                39.0 |
- | w            |   38.5881853639986 |   38.21114561800016 |
- | x            |               39.0 |                39.0 |
- | y            |              -25.0 |   36.43496760281849 |
- | z            |               39.0 |                39.0 |
- | A            |  39.38789400666183 |                39.0 |
- | B            |               39.0 |   37.98737993209943 |
- | C            |  39.16280761404536 |                38.0 |
- | D            |               39.0 |   39.51459156482764 |
- | E            |               39.0 |                39.0 |
- | F            |               39.0 |                38.0 |
- | G            |               39.0 |  38.966489765633526 |
- | H            |               39.0 |                38.0 |
- | I            |  38.96694214876033 |               39.25 |
- | J            |               39.0 |  38.464468801750854 |
- | K            |  38.59617220614814 |                38.0 |
- | L            |               39.0 |                38.0 |
- | M            | 38.745166004060955 |                38.0 |
- | N            |  38.73987423309397 |  38.115654115187624 |
- | O            |  38.98891966759004 |   38.81665596263048 |
- | P            | 39.107438016528924 |   38.65155124501666 |
- | Q            |  39.08006855188009 |   38.01570072979803 |
- | R            |               39.0 |                38.0 |
- | S            |               39.0 |   37.81373873377618 |
- | T            |               39.0 |                38.0 |
- | U            |              38.75 |   37.93218925782895 |
- | V            |  38.64979175001243 |                38.0 |
- | W            |               39.0 |   38.97697312351511 |
- | X            |               39.0 |                39.0 |
- | Y            |   39.2011995420152 |  38.493344292403606 |
- | Z            | 38.920094771357476 |                39.0 |
- | zero         |  39.02557980683008 |     38.934353847767 |
- | one          |               39.0 |   37.86668813070091 |
- | two          |               39.0 |                38.0 |
- | three        |               39.0 |   38.30090715487154 |
- | four         |  38.61480785064145 |                38.0 |
- | five         |               39.0 |  38.759568693514495 |
- | six          |   39.2019689704218 |   38.50115350183796 |
- | seven        |               39.0 |   39.45880036173975 |
- | eight        |  39.30732386691426 |   38.81767097798502 |
- | nine         |  39.04800948718441 |  37.956930045381114 |
- | question     |  39.35264826217293 |   38.26531143335521 |
- | colon        |               38.5 |   38.70624687253556 |
- | semicolon    |               39.0 |   39.27324858612964 |
- | hyphen       |               39.0 |                38.0 |
- | equal        |               39.0 |                38.0 |
- | exclam       | 38.783020821373505 |                39.0 |
- | quotesingle  |               39.0 | -1.7598547334076642 |
- | at           | 39.229928128979466 |                38.0 |
- | slash        |               39.0 |                38.0 |
- | backslash    |               39.0 |                39.0 |
- | quotedbl     |  38.86626375007093 |   37.95034254612182 |
- | asciitilde   |  38.68727157672891 |                38.0 |
- | underscore   |               39.0 |                39.0 |
- | numbersign   |               39.0 |  38.740379553133494 |
- | dollar       |               39.0 |  38.734693877551024 |
- | percent      |    39.200007286174 |   38.10774096287298 |
- | ampersand    |  38.96710425694502 |   38.68428307198798 |
- | parenleft    | 39.286819706621706 |                39.0 |
- | parenright   |               39.0 |   39.05824335912013 |
- | asterisk     |               39.0 |                38.0 |
- | plus         |               39.0 |                38.0 |
- | comma        |  38.96546178699183 |   38.55278640450004 |
- | period       |  38.83875395420776 |   37.87092262792087 |
- | less         |  38.97840529870042 |                39.0 |
- | greater      |               39.0 |   37.69246464578106 |
- | bracketleft  | 38.788380868145794 |                38.0 |
- | bracketright |               39.0 |                39.0 |
- | asciicircum  |               39.0 |                38.0 |
- | grave        |               39.0 |                39.0 |
- | braceleft    |   38.7827057593821 |                39.0 |
- | bar          |               39.0 |  38.406427221172024 |
- | braceright   |               39.0 |  38.206693605650514 |
- | space        |                0.0 |               243.0 |
-  
- kern_name = f.gpos_lookups[0]
- lookup_info = f.getLookupInfo(kern_name)
- sub = f.getLookupSubtables(kern_name)
- (classes_left, classes_right, array) = f.getKerningClass(sub[0])
- classes_left = list(map(lambda x: ''.join(x or ('Other')), classes_left))
- classes_right = list(map(lambda x: ''.join(x or ('Other')), classes_right))
- kerning = np.array(array).reshape(len(classes_left), len(classes_right))
- df = pd.DataFrame(data=kerning, index=classes_left, columns=classes_right)
- return [classes_right] + df.reset_index().values.tolist()
- #+end_src
-
-** Get the kerning information
-
- #+begin_src python :results output drawer :var font="/home/sacha/code/font/files/SachaHandEdited.sfd"
- import fontforge
- import numpy as np
- import pandas as pd
- import orgbabelhelper as ob
- def out(df, **kwargs):
-   print(ob.dataframe_to_orgtable(df, **kwargs))
- f = fontforge.open(font)
- kern_name = f.gpos_lookups[0]
- print(kern_name)
- lookup_info = f.getLookupInfo(kern_name)
- print(lookup_info)
- sub = f.getLookupSubtables(kern_name)
- print(sub)
- for subtable in sub:
-   (classes_left, classes_right, array) = f.getKerningClass(subtable)
-   print(classes_left, classes_right, array)
-   classes_left = list(map(lambda x: ''.join(x or ('Other')), classes_left))
-   classes_right = list(map(lambda x: ''.join(x or ('Other')), classes_right))
-   kerning = np.array(array).reshape(len(classes_left), len(classes_right))
-   df = pd.DataFrame(data=kerning, index=classes_left, columns=classes_right)
-   out(df)
- #+end_src
-
- #+RESULTS:
- :results:
- hello
- 'kern' Horizontal Kerning in Latin lookup 0
- ('gpos_pair', (), (('kern', (('DFLT', ('dflt',)), ('latn', ('dflt',)))),))
- ("'kern' Horizontal Kerning in Latin lookup 0-1",)
- (None, ('f', 'k', 'r', 't'), ('c',), ('T',), ('l',), ('a', 'b', 'e', 'm', 'n', 'o', 'p', 'u'), ('g', 'j'), ('d', 'h'), ('s',), ('x',), ('space',), ('P',)) (None, ('a', 'c', 'd', 'e', 'o', 'q', 'u', 'w', 'y'), ('f', 't'), ('s',), ('b', 'h', 'k', 'l'), ('j',), ('i',), ('m', 'n', 'r'), ('A', 'C', 'G', 'O', 'Q', 'U'), ('x',), ()) (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -143, -92, -68, -17, -146, -43, -39, 0, -75, 0, 0, -33, -70, -29, -26, 0, 0, 0, 0, 0, 0, 0, -186, -146, -208, -39, -139, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 24, 0, 0, 0, 0, 0, -25, -38, -89, -31, -18, 45, 0, -30, 0, -23, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -21, -31, 0, 0, -98, 0, 0, 0, 0, 0, 0, 0, -45, -29, 0, 0, 0, 0, 0, 0, 0, 0, -24, -41, 0, 0, 0, 0, 0, 0, 0, 0, 0, -21, 0, 0, 0, 0, 0, 0, -68, 0, 0, 0, -138, -80, -151, 0, -184, -26, -103, 0, 0, 0)
- ||Other|acdeoquwy|ft|s|bhkl|j|i|mnr|ACGOQU|x|Other|
- |-----
- |Other|0|0|0|0|0|0|0|0|0|0|0|
- |fkrt|0|-143|-92|-68|-17|-146|-43|-39|0|-75|0|
- |c|0|-33|-70|-29|-26|0|0|0|0|0|0|
- |T|0|-186|-146|-208|-39|-139|0|0|0|0|0|
- |l|0|0|0|0|0|24|0|0|0|0|0|
- |abemnopu|-25|-38|-89|-31|-18|45|0|-30|0|-23|0|
- |gj|0|0|0|0|0|0|0|0|0|0|0|
- |dh|0|-21|-31|0|0|-98|0|0|0|0|0|
- |s|0|0|-45|-29|0|0|0|0|0|0|0|
- |x|0|-24|-41|0|0|0|0|0|0|0|0|
- |space|0|-21|0|0|0|0|0|0|-68|0|0|
- |P|0|-138|-80|-151|0|-184|-26|-103|0|0|0|
-
- :end:
-
-
+* Ideas
+** TODO Alternate glyphs
+** TODO Ligatures
+** TODO Accents
 * Extra stuff
+:PROPERTIES:
+:header-args: :eval no
+:END:
 ** Figure out what glyphs I want based on my blog headings
 
  #+NAME: connect-to-db
@@ -683,6 +639,177 @@ return ''.join([x[0] for x in common])
 
 #+RESULTS[5a3f821b4bbfcb462cebc176c66bcb697c6bf4f2]: digrams
 : innge g s  treeron aanesy entit orndthn ee: ted atarr hetont, acstou o fekne rieWe smaalewo 20roea mle w 2itvi e pk rimedietioomchev cly01edlil ve i braisseha Wotdece dcotahih looouticurel laseccssila
+
+** Copy metrics from my edited font
+
+*** Get the glyph bearings
+
+  #+begin_src python :results table
+  import fontforge
+  import numpy as np
+  import pandas as pd
+  f = fontforge.open("/home/sacha/code/font/files/SachaHandEdited.sfd")
+  return list(map(lambda g: [g.glyphname, g.left_side_bearing, g.right_side_bearing], f.glyphs()))
+  #+end_src
+
+  #+RESULTS:
+  | a            |               39.0 |                38.0 |
+  | b            |               39.0 |   38.59677350874102 |
+  | c            | 38.807172523099524 |                39.0 |
+  | d            | 38.853036079593494 |   37.70218462414317 |
+  | e            |               23.0 |                39.0 |
+  | f            |               22.0 |                28.0 |
+  | g            |               39.0 |  38.839263397187665 |
+  | h            |  42.44897959183673 |  32.244897959183675 |
+  | i            |               39.0 |                39.0 |
+  | j            |               29.0 |   37.07269908475212 |
+  | k            |            38.7232 |                38.0 |
+  | l            | 38.849996883261696 |                24.0 |
+  | m            |  38.88120540762966 |  61.872974804436524 |
+  | n            |  38.41699749411689 |   50.09722712588024 |
+  | o            | 38.861850745445174 |   38.36155030599474 |
+  | p            |  38.72189349112426 |  38.806185204215126 |
+  | q            | 38.635016803781454 |                38.0 |
+  | r            | 39.183503419072274 |                39.0 |
+  | s            |               39.0 |                38.0 |
+  | t            |               39.0 |                39.0 |
+  | u            |  38.68004732178092 |   38.39916483580083 |
+  | v            |               39.0 |                39.0 |
+  | w            |   38.5881853639986 |   38.21114561800016 |
+  | x            |               39.0 |                39.0 |
+  | y            |              -25.0 |   36.43496760281849 |
+  | z            |               39.0 |                39.0 |
+  | A            |  39.38789400666183 |                39.0 |
+  | B            |               39.0 |   37.98737993209943 |
+  | C            |  39.16280761404536 |                38.0 |
+  | D            |               39.0 |   39.51459156482764 |
+  | E            |               39.0 |                39.0 |
+  | F            |               39.0 |                38.0 |
+  | G            |               39.0 |  38.966489765633526 |
+  | H            |               39.0 |                38.0 |
+  | I            |  38.96694214876033 |               39.25 |
+  | J            |               39.0 |  38.464468801750854 |
+  | K            |  38.59617220614814 |                38.0 |
+  | L            |               39.0 |                38.0 |
+  | M            | 38.745166004060955 |                38.0 |
+  | N            |  38.73987423309397 |  38.115654115187624 |
+  | O            |  38.98891966759004 |   38.81665596263048 |
+  | P            | 39.107438016528924 |   38.65155124501666 |
+  | Q            |  39.08006855188009 |   38.01570072979803 |
+  | R            |               39.0 |                38.0 |
+  | S            |               39.0 |   37.81373873377618 |
+  | T            |               39.0 |                38.0 |
+  | U            |              38.75 |   37.93218925782895 |
+  | V            |  38.64979175001243 |                38.0 |
+  | W            |               39.0 |   38.97697312351511 |
+  | X            |               39.0 |                39.0 |
+  | Y            |   39.2011995420152 |  38.493344292403606 |
+  | Z            | 38.920094771357476 |                39.0 |
+  | zero         |  39.02557980683008 |     38.934353847767 |
+  | one          |               39.0 |   37.86668813070091 |
+  | two          |               39.0 |                38.0 |
+  | three        |               39.0 |   38.30090715487154 |
+  | four         |  38.61480785064145 |                38.0 |
+  | five         |               39.0 |  38.759568693514495 |
+  | six          |   39.2019689704218 |   38.50115350183796 |
+  | seven        |               39.0 |   39.45880036173975 |
+  | eight        |  39.30732386691426 |   38.81767097798502 |
+  | nine         |  39.04800948718441 |  37.956930045381114 |
+  | question     |  39.35264826217293 |   38.26531143335521 |
+  | colon        |               38.5 |   38.70624687253556 |
+  | semicolon    |               39.0 |   39.27324858612964 |
+  | hyphen       |               39.0 |                38.0 |
+  | equal        |               39.0 |                38.0 |
+  | exclam       | 38.783020821373505 |                39.0 |
+  | quotesingle  |               39.0 | -1.7598547334076642 |
+  | at           | 39.229928128979466 |                38.0 |
+  | slash        |               39.0 |                38.0 |
+  | backslash    |               39.0 |                39.0 |
+  | quotedbl     |  38.86626375007093 |   37.95034254612182 |
+  | asciitilde   |  38.68727157672891 |                38.0 |
+  | underscore   |               39.0 |                39.0 |
+  | numbersign   |               39.0 |  38.740379553133494 |
+  | dollar       |               39.0 |  38.734693877551024 |
+  | percent      |    39.200007286174 |   38.10774096287298 |
+  | ampersand    |  38.96710425694502 |   38.68428307198798 |
+  | parenleft    | 39.286819706621706 |                39.0 |
+  | parenright   |               39.0 |   39.05824335912013 |
+  | asterisk     |               39.0 |                38.0 |
+  | plus         |               39.0 |                38.0 |
+  | comma        |  38.96546178699183 |   38.55278640450004 |
+  | period       |  38.83875395420776 |   37.87092262792087 |
+  | less         |  38.97840529870042 |                39.0 |
+  | greater      |               39.0 |   37.69246464578106 |
+  | bracketleft  | 38.788380868145794 |                38.0 |
+  | bracketright |               39.0 |                39.0 |
+  | asciicircum  |               39.0 |                38.0 |
+  | grave        |               39.0 |                39.0 |
+  | braceleft    |   38.7827057593821 |                39.0 |
+  | bar          |               39.0 |  38.406427221172024 |
+  | braceright   |               39.0 |  38.206693605650514 |
+  | space        |                0.0 |               243.0 |
+  
+  kern_name = f.gpos_lookups[0]
+  lookup_info = f.getLookupInfo(kern_name)
+  sub = f.getLookupSubtables(kern_name)
+  (classes_left, classes_right, array) = f.getKerningClass(sub[0])
+  classes_left = list(map(lambda x: ''.join(x or ('Other')), classes_left))
+  classes_right = list(map(lambda x: ''.join(x or ('Other')), classes_right))
+  kerning = np.array(array).reshape(len(classes_left), len(classes_right))
+  df = pd.DataFrame(data=kerning, index=classes_left, columns=classes_right)
+  return [classes_right] + df.reset_index().values.tolist()
+  #+end_src
+
+*** Get the kerning information
+
+  #+begin_src python :results output drawer :var font="/home/sacha/code/font/files/SachaHandEdited.sfd"
+  import fontforge
+  import numpy as np
+  import pandas as pd
+  import orgbabelhelper as ob
+  def out(df, **kwargs):
+    print(ob.dataframe_to_orgtable(df, **kwargs))
+  f = fontforge.open(font)
+  kern_name = f.gpos_lookups[0]
+  print(kern_name)
+  lookup_info = f.getLookupInfo(kern_name)
+  print(lookup_info)
+  sub = f.getLookupSubtables(kern_name)
+  print(sub)
+  for subtable in sub:
+    (classes_left, classes_right, array) = f.getKerningClass(subtable)
+    print(classes_left, classes_right, array)
+    classes_left = list(map(lambda x: ''.join(x or ('Other')), classes_left))
+    classes_right = list(map(lambda x: ''.join(x or ('Other')), classes_right))
+    kerning = np.array(array).reshape(len(classes_left), len(classes_right))
+    df = pd.DataFrame(data=kerning, index=classes_left, columns=classes_right)
+    out(df)
+  #+end_src
+
+  #+RESULTS:
+  :results:
+  hello
+  'kern' Horizontal Kerning in Latin lookup 0
+  ('gpos_pair', (), (('kern', (('DFLT', ('dflt',)), ('latn', ('dflt',)))),))
+  ("'kern' Horizontal Kerning in Latin lookup 0-1",)
+  (None, ('f', 'k', 'r', 't'), ('c',), ('T',), ('l',), ('a', 'b', 'e', 'm', 'n', 'o', 'p', 'u'), ('g', 'j'), ('d', 'h'), ('s',), ('x',), ('space',), ('P',)) (None, ('a', 'c', 'd', 'e', 'o', 'q', 'u', 'w', 'y'), ('f', 't'), ('s',), ('b', 'h', 'k', 'l'), ('j',), ('i',), ('m', 'n', 'r'), ('A', 'C', 'G', 'O', 'Q', 'U'), ('x',), ()) (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -143, -92, -68, -17, -146, -43, -39, 0, -75, 0, 0, -33, -70, -29, -26, 0, 0, 0, 0, 0, 0, 0, -186, -146, -208, -39, -139, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 24, 0, 0, 0, 0, 0, -25, -38, -89, -31, -18, 45, 0, -30, 0, -23, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -21, -31, 0, 0, -98, 0, 0, 0, 0, 0, 0, 0, -45, -29, 0, 0, 0, 0, 0, 0, 0, 0, -24, -41, 0, 0, 0, 0, 0, 0, 0, 0, 0, -21, 0, 0, 0, 0, 0, 0, -68, 0, 0, 0, -138, -80, -151, 0, -184, -26, -103, 0, 0, 0)
+  ||Other|acdeoquwy|ft|s|bhkl|j|i|mnr|ACGOQU|x|Other|
+  |-----
+  |Other|0|0|0|0|0|0|0|0|0|0|0|
+  |fkrt|0|-143|-92|-68|-17|-146|-43|-39|0|-75|0|
+  |c|0|-33|-70|-29|-26|0|0|0|0|0|0|
+  |T|0|-186|-146|-208|-39|-139|0|0|0|0|0|
+  |l|0|0|0|0|0|24|0|0|0|0|0|
+  |abemnopu|-25|-38|-89|-31|-18|45|0|-30|0|-23|0|
+  |gj|0|0|0|0|0|0|0|0|0|0|0|
+  |dh|0|-21|-31|0|0|-98|0|0|0|0|0|
+  |s|0|0|-45|-29|0|0|0|0|0|0|0|
+  |x|0|-24|-41|0|0|0|0|0|0|0|0|
+  |space|0|-21|0|0|0|0|0|0|-68|0|0|
+  |P|0|-138|-80|-151|0|-184|-26|-103|0|0|0|
+
+  :end:
+
 
 * Other resources
 
