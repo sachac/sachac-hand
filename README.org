@@ -9,7 +9,7 @@ tablet PC or my phone.
 Quick links:
 
 | https://github.com/sachac/sachac-hand | Github repo           |
-| [[file:files/sample.png][files/sample.png]]                 | My handwriting sample |
+| [[file:files/sample.png][My handwriting sample]]                 |                       |
 | [[file:files/SachaHandEdited.sfd]]        | Edited FontForge file |
 | [[file:files/sachacHand.otf]]             | OpenType font         |
 | [[file:files/sachacHand.woff]]            | Web font              |
