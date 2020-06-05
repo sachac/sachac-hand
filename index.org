@@ -110,6 +110,70 @@ FROM, OUT OF THE USE OR INABILITY TO USE THE FONT SOFTWARE OR FROM
 OTHER DEALINGS IN THE FONT SOFTWARE.
 
 
+* Blog post
+  :PROPERTIES:
+  :ID:       o2b:cbd413ee-7c20-47da-9cda-666a2909b0d0
+  :POST_DATE: [2020-06-05 Fri 00:20]
+  :POSTID:   29568
+  :BLOG:     sacha
+  :END:
+
+I wanted to make a font based on my handwriting using only free
+software. It turns out that FontForge can be scripted with Python. I
+know just a little about Python and even less about typography, but I
+managed to hack together something that worked for me. If you're
+reading this on my blog at https://sachachua.com/blog/ , you'll
+probably see the new font being used on the blog post titles. Whee!
+
+My rough notes are at
+https://github.com/sachac/sachac-hand/blob/master/index.org . I wanted
+to write it as a literate program using Org Babel blocks. It's not
+really fully reproducible yet, but it might be a handy starting point.
+The basic workflow was:
+
+1. Generate a template using other fonts as the base.
+2. Import the template into Medibang Paint on my phone and draw
+   letters on a different layer. (I almost forgot the letter =q=, so I
+   had to add it at the last minute.)
+3. Export just the layer with my writing.
+4. Cut the image into separate glyphs using Python and autotrace each one.
+5. Import each glyph into FontForge as an SVG and a PNG.
+6. Set the left side and right side bearing, overriding as needed based on a table.
+7. Figure out kerning classes. 
+8. Hand-tweak the contours and kerning.
+9. Use =sfnt2woff= to export the web font file for use on my blog, and modify the stylesheet to include it.
+
+I really liked being able to specify kerning classes through an Org
+Mode table like this:
+
+  |       | None | o,a,c,e,d,g,q,w | f,t,x,v,y,z | h,b,l,i,k | j | m,n,p,r,u |    s |    T | zero |
+  | None  |    0 |               0 |           0 |         0 | 0 |         0 |    0 |    0 |    0 |
+  | f     |    0 |            -102 |         -61 |       -30 | 0 |       -60 |    0 | -120 |  -70 |
+  | t     |    0 |             -70 |         -41 |       -25 | 0 |         0 |    0 | -120 |  -10 |
+  | r     |    0 |             -82 |         -41 |       -25 | 0 |       -20 |    0 | -120 |   29 |
+  | k     |    0 |             -50 |         -81 |       -20 | 0 |       -20 |  -48 | -120 |  -79 |
+  | l     |    0 |             -41 |         -50 |         0 | 0 |         0 |    0 | -120 |  -52 |
+  | v     |    0 |             -40 |         -35 |       -30 | 0 |         0 |    0 | -120 |   30 |
+  | b,o,p |    0 |             -20 |         -80 |         0 | 0 |         0 |    0 | -120 |   43 |
+  | a     |    0 |             -23 |         -60 |         0 | 0 |         0 |    0 | -120 |    7 |
+  | W     |    0 |             -40 |         -30 |       -20 | 0 |         0 |    0 | -120 |   17 |
+  | T     |    0 |            -190 |        -120 |       -60 | 0 |      -130 |    0 |    0 | -188 |
+  | F     |    0 |            -100 |         -90 |       -60 | 0 |       -70 | -100 |  -40 | -166 |
+  | two   |    0 |               0 |           0 |         0 | 0 |         0 |    0 |    0 |  -53 |
+
+I had a hard time defining classes using the FontForge interface
+because I occasionally ended up clearing my glyph selection, so it was
+great being able to just edit my columns and rows. 
+
+Clearly my kerning is still very rough--no actual values for j, for
+example--but it's a start. Also, I can probably figure out how to
+combine this with character pair kerning and have two tables for
+easier tweaking.
+
+A- insisted on tracing my handwriting template a few times, so I might
+actually be able to go through the same process to convert her
+handwriting into a font. Whee!
+
 * Things I needed to install 
 
 =sudo apt-get install fontforge python3-fontforge python3-numpy python3-sqlalchemy python3-pandas python3-pymysql python3-nltk woff-tools=
@@ -348,19 +412,20 @@ save_font(font, params)
 Rows are first characters, columns are second characters.
 
 #+NAME: kerning_matrix
-|       | None | o,a,c,e,d,g,q,w | f,t,x,v,y,z | h,b,l,i,k | j | m,n,p,r,u |   s |    T |
-| None  |      |                 |             |           |   |           |     |      |
-| f     |      |            -102 |         -61 |       -30 |   |       -60 |     | -120 |
-| t     |      |             -70 |         -41 |       -25 |   |           |     | -120 |
-| r     |      |             -82 |         -41 |       -25 |   |       -20 |     | -120 |
-| k     |      |             -50 |         -81 |       -20 |   |       -20 | -48 | -120 |
-| l     |      |             -41 |         -50 |           |   |           |     | -120 |
-| v     |      |             -40 |         -35 |       -30 |   |           |     | -120 |
-| b,o,p |      |             -20 |         -80 |           |   |           |     | -120 |
-| a     |      |             -40 |         -60 |           |   |           |     | -120 |
-| W     |      |             -40 |         -30 |       -20 |   |           |     | -120 |
-| T     |      |            -190 |        -120 |       -60 |   |      -130 |     |      |
-| F     |      |            -190 |        -120 |       -60 |   |      -130 |     | -120 |
+  |       | None | o,a,c,e,d,g,q,w | f,t,x,v,y,z | h,b,l,i,k | j | m,n,p,r,u |    s |    T | zero |
+  | None  |    0 |               0 |           0 |         0 | 0 |         0 |    0 |    0 |    0 |
+  | f     |    0 |            -102 |         -61 |       -30 | 0 |       -60 |    0 | -120 |  -70 |
+  | t     |    0 |             -70 |         -41 |       -25 | 0 |         0 |    0 | -120 |  -10 |
+  | r     |    0 |             -82 |         -41 |       -25 | 0 |       -20 |    0 | -120 |   29 |
+  | k     |    0 |             -50 |         -81 |       -20 | 0 |       -20 |  -48 | -120 |  -79 |
+  | l     |    0 |             -41 |         -50 |         0 | 0 |         0 |    0 | -120 |  -52 |
+  | v     |    0 |             -40 |         -35 |       -30 | 0 |         0 |    0 | -120 |   30 |
+  | b,o,p |    0 |             -20 |         -80 |         0 | 0 |         0 |    0 | -120 |   43 |
+  | a     |    0 |             -23 |         -60 |         0 | 0 |         0 |    0 | -120 |    7 |
+  | W     |    0 |             -40 |         -30 |       -20 | 0 |         0 |    0 | -120 |   17 |
+  | T     |    0 |            -190 |        -120 |       -60 | 0 |      -130 |    0 |    0 | -188 |
+  | F     |    0 |            -100 |         -90 |       -60 | 0 |       -70 | -100 |  -40 | -166 |
+  | two   |    0 |               0 |           0 |         0 | 0 |         0 |    0 |    0 |  -53 |
 
 #+NAME: kern_classes
 #+begin_src python :results output :var kerning=kerning_matrix :session "kern"
@@ -375,11 +440,17 @@ Rows are first characters, columns are second characters.
   classes_right = [None if (x == "" or x == "None") else x.split(",") for x in offsets[0,1:]]
   classes_left = [None if (x == "" or x == "None") else x.split(',') for x in offsets[1:,0]]
   offset_list = [0 if x == "" else int(x) for x in offsets[1:,1:].reshape(-1)]
+  print(classes_left)
+  print(classes_right)
+  print(offset_list)
   font.addKerningClass("kern", "kern-1", classes_left, classes_right, offset_list)
   save_font(font, params)
 #+end_src
 
 #+RESULTS: kern_classes
+: [None, ['f'], ['t'], ['r'], ['k'], ['l'], ['v'], ['b', 'o', 'p'], ['a'], ['W'], ['T'], ['F'], ['two']]
+: [None, ['o', 'a', 'c', 'e', 'd', 'g', 'q', 'w'], ['f', 't', 'x', 'v', 'y', 'z'], ['h', 'b', 'l', 'i', 'k'], ['j'], ['m', 'n', 'p', 'r', 'u'], ['s'], ['T'], ['zero']]
+: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -102, -61, -30, 0, -60, 0, -120, -70, 0, -70, -41, -25, 0, 0, 0, -120, -10, 0, -82, -41, -25, 0, -20, 0, -120, 29, 0, -50, -81, -20, 0, -20, -48, -120, -79, 0, -41, -50, 0, 0, 0, 0, -120, -52, 0, -40, -35, -30, 0, 0, 0, -120, 30, 0, -20, -80, 0, 0, 0, 0, -120, 43, 0, -23, -60, 0, 0, 0, 0, -120, 7, 0, -40, -30, -20, 0, 0, 0, -120, 17, 0, -190, -120, -60, 0, -130, 0, 0, -188, 0, -100, -90, -60, 0, -70, -100, -40, -166, 0, 0, 0, 0, 0, 0, 0, 0, -53]
 
 * Display sample text
 
@@ -521,6 +592,7 @@ Test string from http://www.ninastoessinger.com/stringmaker/index.php
 [[file:files/SachaHandEdited.sfd]]
 
 * Ideas
+** TODO Copy glyphs from hand-edited font
 ** TODO Alternate glyphs
 ** TODO Ligatures
 ** TODO Accents
@@ -755,7 +827,7 @@ return ''.join([x[0] for x in common])
 
 *** Get the kerning information
 
-  #+begin_src python :results output drawer :var font="/home/sacha/code/font/files/SachaHandEdited.sfd"
+  #+begin_src python :results output drawer :var font="/home/sacha/code/font/files/SachaHandEdited.sfd" :eval yes
   import fontforge
   import numpy as np
   import pandas as pd
@@ -764,16 +836,12 @@ return ''.join([x[0] for x in common])
     print(ob.dataframe_to_orgtable(df, **kwargs))
   f = fontforge.open(font)
   kern_name = f.gpos_lookups[0]
-  print(kern_name)
   lookup_info = f.getLookupInfo(kern_name)
-  print(lookup_info)
   sub = f.getLookupSubtables(kern_name)
-  print(sub)
   for subtable in sub:
     (classes_left, classes_right, array) = f.getKerningClass(subtable)
-    print(classes_left, classes_right, array)
-    classes_left = list(map(lambda x: ''.join(x or ('Other')), classes_left))
-    classes_right = list(map(lambda x: ''.join(x or ('Other')), classes_right))
+    classes_left = list(map(lambda x: 'None' if x is None else ','.join(x), classes_left))
+    classes_right = list(map(lambda x: 'None' if x is None else ','.join(x), classes_right))
     kerning = np.array(array).reshape(len(classes_left), len(classes_right))
     df = pd.DataFrame(data=kerning, index=classes_left, columns=classes_right)
     out(df)
@@ -781,25 +849,21 @@ return ''.join([x[0] for x in common])
 
   #+RESULTS:
   :results:
-  hello
-  'kern' Horizontal Kerning in Latin lookup 0
-  ('gpos_pair', (), (('kern', (('DFLT', ('dflt',)), ('latn', ('dflt',)))),))
-  ("'kern' Horizontal Kerning in Latin lookup 0-1",)
-  (None, ('f', 'k', 'r', 't'), ('c',), ('T',), ('l',), ('a', 'b', 'e', 'm', 'n', 'o', 'p', 'u'), ('g', 'j'), ('d', 'h'), ('s',), ('x',), ('space',), ('P',)) (None, ('a', 'c', 'd', 'e', 'o', 'q', 'u', 'w', 'y'), ('f', 't'), ('s',), ('b', 'h', 'k', 'l'), ('j',), ('i',), ('m', 'n', 'r'), ('A', 'C', 'G', 'O', 'Q', 'U'), ('x',), ()) (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -143, -92, -68, -17, -146, -43, -39, 0, -75, 0, 0, -33, -70, -29, -26, 0, 0, 0, 0, 0, 0, 0, -186, -146, -208, -39, -139, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 24, 0, 0, 0, 0, 0, -25, -38, -89, -31, -18, 45, 0, -30, 0, -23, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -21, -31, 0, 0, -98, 0, 0, 0, 0, 0, 0, 0, -45, -29, 0, 0, 0, 0, 0, 0, 0, 0, -24, -41, 0, 0, 0, 0, 0, 0, 0, 0, 0, -21, 0, 0, 0, 0, 0, 0, -68, 0, 0, 0, -138, -80, -151, 0, -184, -26, -103, 0, 0, 0)
-  ||Other|acdeoquwy|ft|s|bhkl|j|i|mnr|ACGOQU|x|Other|
-  |-----
-  |Other|0|0|0|0|0|0|0|0|0|0|0|
-  |fkrt|0|-143|-92|-68|-17|-146|-43|-39|0|-75|0|
-  |c|0|-33|-70|-29|-26|0|0|0|0|0|0|
-  |T|0|-186|-146|-208|-39|-139|0|0|0|0|0|
-  |l|0|0|0|0|0|24|0|0|0|0|0|
-  |abemnopu|-25|-38|-89|-31|-18|45|0|-30|0|-23|0|
-  |gj|0|0|0|0|0|0|0|0|0|0|0|
-  |dh|0|-21|-31|0|0|-98|0|0|0|0|0|
-  |s|0|0|-45|-29|0|0|0|0|0|0|0|
-  |x|0|-24|-41|0|0|0|0|0|0|0|0|
-  |space|0|-21|0|0|0|0|0|0|-68|0|0|
-  |P|0|-138|-80|-151|0|-184|-26|-103|0|0|0|
+  |       | None | o,a,c,e,d,g,q,w | f,t,x,v,y,z | h,b,l,i,k | j | m,n,p,r,u |    s |    T | zero |
+  |-------+------+-----------------+-------------+-----------+---+-----------+------+------+------|
+  | None  |    0 |               0 |           0 |         0 | 0 |         0 |    0 |    0 |    0 |
+  | f     |    0 |            -102 |         -61 |       -30 | 0 |       -60 |    0 | -120 |  -70 |
+  | t     |    0 |             -70 |         -41 |       -25 | 0 |         0 |    0 | -120 |  -10 |
+  | r     |    0 |             -82 |         -41 |       -25 | 0 |       -20 |    0 | -120 |   29 |
+  | k     |    0 |             -50 |         -81 |       -20 | 0 |       -20 |  -48 | -120 |  -79 |
+  | l     |    0 |             -41 |         -50 |         0 | 0 |         0 |    0 | -120 |  -52 |
+  | v     |    0 |             -40 |         -35 |       -30 | 0 |         0 |    0 | -120 |   30 |
+  | b,o,p |    0 |             -20 |         -80 |         0 | 0 |         0 |    0 | -120 |   43 |
+  | a     |    0 |             -23 |         -60 |         0 | 0 |         0 |    0 | -120 |    7 |
+  | W     |    0 |             -40 |         -30 |       -20 | 0 |         0 |    0 | -120 |   17 |
+  | T     |    0 |            -190 |        -120 |       -60 | 0 |      -130 |    0 |    0 | -188 |
+  | F     |    0 |            -100 |         -90 |       -60 | 0 |       -70 | -100 |  -40 | -166 |
+  | two   |    0 |               0 |           0 |         0 | 0 |         0 |    0 |    0 |  -53 |
 
   :end:
 
