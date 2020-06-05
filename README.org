@@ -126,7 +126,7 @@ reading this on my blog at https://sachachua.com/blog/ , you'll
 probably see the new font being used on the blog post titles. Whee!
 
 My rough notes are at
-https://github.com/sachac/sachac-hand/blob/master/index.org . I wanted
+https://github.com/sachac/sachac-hand/ . I wanted
 to write it as a literate program using Org Babel blocks. It's not
 really fully reproducible yet, but it might be a handy starting point.
 The basic workflow was:
