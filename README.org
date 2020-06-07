@@ -176,7 +176,7 @@ handwriting into a font. Whee!
 
 * Things I needed to install 
 
-=sudo apt-get install fontforge python3-fontforge python3-numpy python3-sqlalchemy python3-pandas python3-pymysql python3-nltk woff-tools=
+=sudo apt-get install fontforge python3-fontforge python3-numpy python3-sqlalchemy python3-pandas python3-pymysql python3-nltk woff-tools woff2=
 
 I compiled autotrace based on my fork at https://github.com/sachac/autotrace so that it uses Graphicsmagick instead of Imagemagick.
 
@@ -192,14 +192,16 @@ I also needed =(setenv "LD_LIBRARY_PATH" "/usr/local/lib")=. There are probably 
 #+NAME: params
 #+begin_src python :results none :eval no
 import numpy as np
+import pandas as pd
 import aglfn
 import fontforge
+import subprocess
 
 params = {'template': 'template-256.png',
   'sample_file': 'sample.png',
   'name_list': 'aglfn.txt',
-  'new_font_file': 'SachaHand.sfd',
-  'new_otf': 'SachaHand.otf',
+  'new_font_file': 'SachacHand.sfd',
+  'new_otf': 'sachacHand.otf',
   'new_font_name': 'sachacHand',
   'default_bearing': 40,
   'new_family_name': 'sachacFonts',
@@ -243,6 +245,13 @@ def load_font(params):
 def save_font(font, params):
   font.save(params['new_font_file'])
   font.generate(params['new_otf'])
+  subprocess.call(['sfnt2woff', params['new_otf']])
+  print("Saved %s" % params['new_font_file'])
+
+import orgbabelhelper as ob
+def out(df, **kwargs):
+  print(ob.dataframe_to_orgtable(df, **kwargs))
+
 #+end_src
 
 
@@ -409,6 +418,45 @@ save_font(font, params)
 
 * Kern the font
 
+#+NAME: def_kern_classes
+#+begin_src python :eval no
+
+# NOTE: This removes the old kerning table
+def kern_classes(font, kerning_matrix):
+  try:
+    font.removeLookup('kern')
+    print("Old table removed.")
+  except:
+    print("Starting from scratch")    
+  font.addLookup("kern", "gpos_pair", 0, [["kern",[["latn",["dflt"]]]]])
+  offsets = np.asarray(kerning_matrix)
+  classes_right = [None if (x == "" or x == "None") else x.split(",") for x in offsets[0,1:]]
+  classes_left = [None if (x == "" or x == "None") else x.split(',') for x in offsets[1:,0]]
+  offset_list = [0 if x == "" else int(x) for x in offsets[1:,1:].reshape(-1)]
+  print(classes_left)
+  print(classes_right)
+  print(offset_list)
+  font.addKerningClass("kern", "kern-1", classes_left, classes_right, offset_list)
+  return font
+
+def kern_by_char(font, kerning_matrix):
+  # Add kerning by character as backup
+  font.addLookupSubtable("kern", "kern-2")
+  offsets = np.asarray(kerning_matrix)
+  classes_right = [None if (x == "" or x == "None") else x.split(",") for x in offsets[0,1:]]
+  classes_left = [None if (x == "" or x == "None") else x.split(',') for x in offsets[1:,0]]
+  for r, row in enumerate(classes_left):
+    if row is None: continue
+    for first_letter in row:
+      g = font.createMappedChar(first_letter)
+      for c, column in enumerate(classes_right):
+        if column is None: continue
+        for second_letter in column:
+          if kerning_matrix[r + 1][c + 1]:
+            g.addPosSub("kern-2", second_letter, 0, 0, kerning_matrix[r + 1][c + 1], 0, 0, 0, 0, 0)
+  return font
+#+end_src
+
 Rows are first characters, columns are second characters.
 
 #+NAME: kerning_matrix
@@ -425,32 +473,35 @@ Rows are first characters, columns are second characters.
   | W     |    0 |             -40 |         -30 |       -20 | 0 |         0 |    0 | -120 |   17 |
   | T     |    0 |            -190 |        -120 |       -60 | 0 |      -130 |    0 |    0 | -188 |
   | F     |    0 |            -100 |         -90 |       -60 | 0 |       -70 | -100 |  -40 | -166 |
+  | P     |    0 |            -100 |         -90 |       -60 | 0 |       -70 | -100 |      |      |
   | two   |    0 |               0 |           0 |         0 | 0 |         0 |    0 |    0 |  -53 |
 
 #+NAME: kern_classes
-#+begin_src python :results output :var kerning=kerning_matrix :session "kern"
+#+begin_src python :results output :var kerning_matrix=kerning_matrix :session "kern"
   <<params>>
-  font = load_font(params)
-  try:
-    font.removeLookup('kern')
-  except:
-    print("Starting from scratch")    
-  font.addLookup("kern", "gpos_pair", 0, [["kern",[["latn",["dflt"]]]]])
-  offsets = np.asarray(kerning)
-  classes_right = [None if (x == "" or x == "None") else x.split(",") for x in offsets[0,1:]]
-  classes_left = [None if (x == "" or x == "None") else x.split(',') for x in offsets[1:,0]]
-  offset_list = [0 if x == "" else int(x) for x in offsets[1:,1:].reshape(-1)]
-  print(classes_left)
-  print(classes_right)
-  print(offset_list)
-  font.addKerningClass("kern", "kern-1", classes_left, classes_right, offset_list)
-  save_font(font, params)
+  <<def_kern_classes>>
+  font = load_font({**params, "new_font_file": "SachaHandEdited.sfd"})
+  font = kern_classes(font, kerning_matrix)
+  font = kern_by_char(font, kerning_matrix)
+  save_font(font, {**params, "new_font_file": "SachaHandEdited.sfd"})
 #+end_src
 
 #+RESULTS: kern_classes
-: [None, ['f'], ['t'], ['r'], ['k'], ['l'], ['v'], ['b', 'o', 'p'], ['a'], ['W'], ['T'], ['F'], ['two']]
+: Old table removed.
+: [None, ['f'], ['t'], ['r'], ['k'], ['l'], ['v'], ['b', 'o', 'p'], ['a'], ['W'], ['T'], ['F'], ['P'], ['two']]
 : [None, ['o', 'a', 'c', 'e', 'd', 'g', 'q', 'w'], ['f', 't', 'x', 'v', 'y', 'z'], ['h', 'b', 'l', 'i', 'k'], ['j'], ['m', 'n', 'p', 'r', 'u'], ['s'], ['T'], ['zero']]
-: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -102, -61, -30, 0, -60, 0, -120, -70, 0, -70, -41, -25, 0, 0, 0, -120, -10, 0, -82, -41, -25, 0, -20, 0, -120, 29, 0, -50, -81, -20, 0, -20, -48, -120, -79, 0, -41, -50, 0, 0, 0, 0, -120, -52, 0, -40, -35, -30, 0, 0, 0, -120, 30, 0, -20, -80, 0, 0, 0, 0, -120, 43, 0, -23, -60, 0, 0, 0, 0, -120, 7, 0, -40, -30, -20, 0, 0, 0, -120, 17, 0, -190, -120, -60, 0, -130, 0, 0, -188, 0, -100, -90, -60, 0, -70, -100, -40, -166, 0, 0, 0, 0, 0, 0, 0, 0, -53]
+: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -102, -61, -30, 0, -60, 0, -120, -70, 0, -70, -41, -25, 0, 0, 0, -120, -10, 0, -82, -41, -25, 0, -20, 0, -120, 29, 0, -50, -81, -20, 0, -20, -48, -120, -79, 0, -41, -50, 0, 0, 0, 0, -120, -52, 0, -40, -35, -30, 0, 0, 0, -120, 30, 0, -20, -80, 0, 0, 0, 0, -120, 43, 0, -23, -60, 0, 0, 0, 0, -120, 7, 0, -40, -30, -20, 0, 0, 0, -120, 17, 0, -190, -120, -60, 0, -130, 0, 0, -188, 0, -100, -90, -60, 0, -70, -100, -40, -166, 0, -100, -90, -60, 0, -70, -100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -53]
+: Saved SachaHandEdited.sfd
+
+#+CALL: sample(text="Python+FontForge+Org: I made a font based on my handwriting!")
+
+#+RESULTS:
+[[file:files/check/7f7d213455479b511ac154048ac06475.png]]
+
+#+CALL: sample(text="Monthly review: May 2020")
+
+#+RESULTS:
+[[file:files/check/2dbfe8e81fc02f730e39e90b4f647b4f.png]]
 
 * Display sample text
 
@@ -479,6 +530,11 @@ return filename
 #+CALL: sample(text="hhhhhoooohhhhhoooohooo")
 #+RESULTS:
 [[file:files/check/df63774e9861483fab011918259a0101.png]]
+
+#+CALL: sample(text="Python+FontForge+Org: I made a font based on my handwriting!")
+
+#+RESULTS:
+[[file:files/check/7f7d213455479b511ac154048ac06475.png]]
 
 * Test the font
 
@@ -598,7 +654,7 @@ Test string from http://www.ninastoessinger.com/stringmaker/index.php
 ** TODO Accents
 * Extra stuff
 :PROPERTIES:
-:header-args: :eval no
+:header-args: :eval no :noweb yes
 :END:
 ** Figure out what glyphs I want based on my blog headings
 
@@ -813,40 +869,30 @@ return ''.join([x[0] for x in common])
   | bar          |               39.0 |  38.406427221172024 |
   | braceright   |               39.0 |  38.206693605650514 |
   | space        |                0.0 |               243.0 |
-  
-  kern_name = f.gpos_lookups[0]
-  lookup_info = f.getLookupInfo(kern_name)
-  sub = f.getLookupSubtables(kern_name)
-  (classes_left, classes_right, array) = f.getKerningClass(sub[0])
-  classes_left = list(map(lambda x: ''.join(x or ('Other')), classes_left))
-  classes_right = list(map(lambda x: ''.join(x or ('Other')), classes_right))
-  kerning = np.array(array).reshape(len(classes_left), len(classes_right))
-  df = pd.DataFrame(data=kerning, index=classes_left, columns=classes_right)
-  return [classes_right] + df.reset_index().values.tolist()
-  #+end_src
 
 *** Get the kerning information
 
-  #+begin_src python :results output drawer :var font="/home/sacha/code/font/files/SachaHandEdited.sfd" :eval yes
-  import fontforge
-  import numpy as np
-  import pandas as pd
-  import orgbabelhelper as ob
-  def out(df, **kwargs):
-    print(ob.dataframe_to_orgtable(df, **kwargs))
-  f = fontforge.open(font)
-  kern_name = f.gpos_lookups[0]
-  lookup_info = f.getLookupInfo(kern_name)
-  sub = f.getLookupSubtables(kern_name)
-  for subtable in sub:
-    (classes_left, classes_right, array) = f.getKerningClass(subtable)
-    classes_left = list(map(lambda x: 'None' if x is None else ','.join(x), classes_left))
-    classes_right = list(map(lambda x: 'None' if x is None else ','.join(x), classes_right))
-    kerning = np.array(array).reshape(len(classes_left), len(classes_right))
-    df = pd.DataFrame(data=kerning, index=classes_left, columns=classes_right)
-    out(df)
+  #+NAME: def_show_kerning_classes
+  #+begin_src python :eval no 
+  <<params>>
+  def show_kerning_classes(f):
+    kern_name = f.gpos_lookups[0]
+    lookup_info = f.getLookupInfo(kern_name)
+    sub = f.getLookupSubtables(kern_name)
+    for subtable in sub:
+      (classes_left, classes_right, array) = f.getKerningClass(subtable)
+      classes_left = list(map(lambda x: 'None' if x is None else ','.join(x), classes_left))
+      classes_right = list(map(lambda x: 'None' if x is None else ','.join(x), classes_right))
+      kerning = np.array(array).reshape(len(classes_left), len(classes_right))
+      df = pd.DataFrame(data=kerning, index=classes_left, columns=classes_right)
+      out(df)
   #+end_src
 
+  #+begin_src python :results output drawer :var font="/home/sacha/code/font/files/SachaHandEdited.sfd" :eval yes 
+  import fontforge
+  <<def_show_kerning_classes>>
+  show_kerning_classes(fontforge.open(font))
+  #+end_src
   #+RESULTS:
   :results:
   |       | None | o,a,c,e,d,g,q,w | f,t,x,v,y,z | h,b,l,i,k | j | m,n,p,r,u |    s |    T | zero |
