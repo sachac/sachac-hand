@@ -1,4 +1,4 @@
-#+PROPERTY: header-args python  :noweb yes :dir "/home/sacha/code/font/files" :exports both
+#+PROPERTY: header-args python  :noweb yes :dir "/home/sacha/code/font/files" :exports both 
 
 * Summary
 
@@ -200,16 +200,13 @@ import subprocess
 params = {'template': 'template-256.png',
   'sample_file': 'sample.png',
   'name_list': 'aglfn.txt',
-  'new_font_file': 'SachacHand.sfd',
+  'new_font_file': 'sachacHand.sfd',
   'new_otf': 'sachacHand.otf',
   'new_font_name': 'sachacHand',
-  'default_bearing': 40,
   'new_family_name': 'sachacFonts',
   'text_color': 'lightgray',
   'new_full_name': 'sachacHand',
   'glyph_dir': 'glyphs/',
-  'output_text': 'ooooooooonnnnnnnnn hhhhhhhooooohhhhhoooohohohoho',
-  'output_file': 'output.pdf',
   'letters': 'HOnodpagscebhklftijmnruwvxyzCGABRDLEFIJKMNPQSTUVWXYZ0123456789?:;-–—=!\'’"“”@/\\~_#$%&()*+,.<>[]^`{|}q',
   'direction': 'vertical',
   'rows': 10, 
@@ -222,7 +219,8 @@ params = {'template': 'template-256.png',
   'height': 500, 
   'width': 500, 
   'caps': 650,
-  'line_width': 3
+  'line_width': 3,
+  'text': "Python+FontForge+Org: I made a font based on my handwriting!"
   }
 params['font_size'] = int(params['em'] * 0.88)
 params['baseline'] = params['em'] - params['descent']
@@ -240,7 +238,10 @@ def glyph_filename_base(ch):
   return 'uni%s-%s' % (hex(ord(ch)).replace('0x', '').zfill(4), aglfn.name(ch))
 
 def load_font(params):
-  return fontforge.open(params['new_font_file'])
+  if type(params) == str:
+    return fontforge.open(params)
+  else:
+    return fontforge.open(params['new_font_file'])
 
 def save_font(font, params):
   font.save(params['new_font_file'])
@@ -258,10 +259,10 @@ def out(df, **kwargs):
 * Generate guidelines
 ** Code to make the template
 
-#+NAME: template
+#+NAME: def_make_template
 #+begin_src python :results none :eval no
 from PIL import Image, ImageFont, ImageDraw
-<<params>>
+
 #LETTERS = 'abcd'
 # Baseline is red
 # descent: lightblue
@@ -290,8 +291,9 @@ def make_template(params):
 
 ** Actually make the templates
 
-#+begin_src python :results file
-  <<template>>
+#+begin_src python :results file :eval no
+  <<params>>
+  <<def_make_template>>
   make_template({**params, 'font_name': '/home/sacha/.fonts/Romochka.otf', 'template': 'template-romochka.png'}) 
   make_template({**params, 'font_name': '/home/sacha/.fonts/Breip.ttf', 'template': 'template-breip.png'}) 
   # return make_template({**params, 'font_name': '/home/sacha/.fonts/KGPrimaryDots.ttf', 
@@ -306,117 +308,130 @@ def make_template(params):
 
 * Cut into glyphs
 
-#+NAME: glyph_filename
-#+begin_src python 
-#+end_src
-
-#+begin_src python :results output
+#+NAME: def_cut_glyphs
+#+begin_src python :eval no
 import os
 import libxml2
 from PIL import Image, ImageOps
 import subprocess
-<<params>>
-<<glyph_filename>>
-im = Image.open(params['sample_file']).convert('1')
-letters = params['letters']
-if params['direction'] == 'vertical':
-  letters = transpose_letters(letters, params['columns'], params['rows'])
-matrix = np.reshape(list(letters), (params['rows'], params['columns']))
-for r, row in enumerate(matrix):
-  top = r * params['height']
-  bottom = top + params['height']
-  for c, ch in enumerate(row):
-    left = c * params['width']
-    right = left + params['width']
-    small = im.crop((left, top, right, bottom))
-    filename = os.path.join(params['glyph_dir'], glyph_filename_base(ch) + '.pbm')
-    small.save(filename)
-    svg = filename.replace('.pbm', '.svg')
-    png = filename.replace('.pbm', '.png')
-    small.save(png)
-    subprocess.call(['autotrace', '-output-file', svg, filename])
-    doc = libxml2.parseFile(svg)
-    root = doc.children
-    child = root.children
-    child.next.unlinkNode()
-    doc.saveFile(svg)
+def cut_glyphs(params):
+  im = Image.open(params['sample_file']).convert('1')
+  letters = params['letters']
+  if params['direction'] == 'vertical':
+    letters = transpose_letters(letters, params['columns'], params['rows'])
+  matrix = np.reshape(list(letters), (params['rows'], params['columns']))
+  for r, row in enumerate(matrix):
+    top = r * params['height']
+    bottom = top + params['height']
+    for c, ch in enumerate(row):
+      left = c * params['width']
+      right = left + params['width']
+      small = im.crop((left, top, right, bottom))
+      filename = os.path.join(params['glyph_dir'], glyph_filename_base(ch) + '.pbm')
+      small.save(filename)
+      svg = filename.replace('.pbm', '.svg')
+      png = filename.replace('.pbm', '.png')
+      small.save(png)
+      subprocess.call(['autotrace', '-output-file', svg, filename])
+      doc = libxml2.parseFile(svg)
+      root = doc.children
+      child = root.children
+      child.next.unlinkNode()
+      doc.saveFile(svg)
 #+end_src
-
-#+RESULTS:
 
 * Import SVG outlines into font
 
-#+BEGIN_SRC python :results output
+#+NAME: def_import_glyphs
+#+BEGIN_SRC python :results output :eval no
 import fontforge
 import os
 import aglfn
-<<params>>
-fontforge.loadNamelist(params['name_list'])
-font = fontforge.font()
-font.em = params['height']
-font.encoding = 'UnicodeFull'
-font.fontname = params['new_font_name']
-font.familyname = params['new_family_name']
-font.fullname = params['new_family_name']
-cut_letters = params['letters']
-if params['direction'] == 'vertical':
-  cut_letters = transpose_letters(cut_letters, params['columns'], params['rows'])
-for i, ch in enumerate(cut_letters):
-  if ch == ' ': continue
-  try:
-    name = aglfn.name(ch)
-    glyph = font.createMappedChar(name)
-    base = 'uni%s-%s' % (hex(ord(ch)).replace('0x', '').zfill(4), name)
-    svg_filename = os.path.join(params['glyph_dir'], base + '.svg')
-    png_filename = os.path.join(params['glyph_dir'], base + '.png')
-    glyph.importOutlines(png_filename)
-    glyph.importOutlines(svg_filename)
-  except:
-    print("Error with ", ch)
-    pass
-font.em = params['em']
-font.descent = params['descent']
-font.ascent = params['ascent']
-save_font(font, params)
+def import_glyphs(font, params):
+  fontforge.loadNamelist(params['name_list'])
+  font.em = params['height']
+  font.encoding = 'UnicodeFull'
+  font.fontname = params['new_font_name']
+  font.familyname = params['new_family_name']
+  font.fullname = params['new_family_name']
+  cut_letters = params['letters']
+  if params['direction'] == 'vertical':
+    cut_letters = transpose_letters(cut_letters, params['columns'], params['rows'])
+  for i, ch in enumerate(cut_letters):
+    if ch == ' ': continue
+    try:
+      name = aglfn.name(ch)
+      glyph = font.createMappedChar(name)
+      base = 'uni%s-%s' % (hex(ord(ch)).replace('0x', '').zfill(4), name)
+      svg_filename = os.path.join(params['glyph_dir'], base + '.svg')
+      png_filename = os.path.join(params['glyph_dir'], base + '.png')
+      glyph.importOutlines(png_filename)
+      glyph.importOutlines(svg_filename)
+    except:
+      print("Error with ", ch)
+      pass
+  font.em = params['em']
+  font.descent = params['descent']
+  font.ascent = params['ascent']
+  return font
 #+END_SRC
-
-#+RESULTS:
 
 * Adjust bearings
 
 #+NAME: bearings
-|   | Left | Right |
-|---+------+-------|
-| k |    4 |       |
-| r |   22 |       |
-| j |  -90 |       |
-| s |   24 |       |
+|         | Left | Right |
+|---------+------+-------|
+| Default |   40 |    40 |
+| k       |    4 |       |
+| r       |   43 |       |
+| j       |  -90 |       |
+| s       |   24 |       |
+| t       |   58 |    58 |
+| i       |   62 |    62 |
+| n       |   50 |    50 |
+| l       |   60 |    40 |
+| colon   |   62 |    62 |
+| w       |   60 |    40 |
+| o       |   40 |    40 |
+| exclam  |   55 |    55 |
 
-#+NAME: set_bearings
-#+begin_src python :results output :var bearings=bearings
+#+NAME: def_set_bearings
+#+begin_src python :eval no
+def set_bearings(font, bearings):
+  space = font.createMappedChar(' ')
+  space.width = int(params['em'] / 5)
+  (default_left, default_right) = next(o for o in bearings if o[0] == 'Default')[1:]
+  for ch in params['letters']:
+    if ch == ' ': continue
+    try:
+      glyph = font.createMappedChar(aglfn.name(ch))
+      glyph.left_side_bearing = default_left
+      glyph.right_side_bearing = default_right
+    except:
+      print("Error with ", ch)
+  for row in bearings:
+    if row[0] == 'Default': continue
+    g = font.createMappedChar(row[0])
+    if row[1] != "":
+      g.left_side_bearing = row[1]
+    if row[2] != "":
+      g.right_side_bearing = row[2]
+  return font
+#+end_src
+
+For testing:
+
+#+begin_src python :results output :var bearings=bearings :eval no
 <<params>>
+<<def_set_bearings>>
 font = load_font(params)
-space = font.createMappedChar(' ')
-space.width = int(params['em'] / 5)
-for ch in params['letters']:
-  if ch == ' ': continue
-  try:
-    glyph = font.createMappedChar(aglfn.name(ch))
-    glyph.left_side_bearing = glyph.right_side_bearing = params['default_bearing'] 
-  except:
-    print("Error with ", ch)
-for row in bearings:
-  g = font.createMappedChar(row[0])
-  if row[1]:
-    g.left_side_bearing = row[1]
-  if row[2]:
-    g.right_side_bearing = row[2]
+font = set_bearings(font, bearings)
 save_font(font, params)
 #+end_src
 
-#+RESULTS: set_bearings
-
 * Kern the font
+
+** Kern by classes
 
 #+NAME: def_kern_classes
 #+begin_src python :eval no
@@ -460,24 +475,28 @@ def kern_by_char(font, kerning_matrix):
 Rows are first characters, columns are second characters.
 
 #+NAME: kerning_matrix
-  |       | None | o,a,c,e,d,g,q,w | f,t,x,v,y,z | h,b,l,i,k | j | m,n,p,r,u |    s |    T | zero |
-  | None  |    0 |               0 |           0 |         0 | 0 |         0 |    0 |    0 |    0 |
-  | f     |    0 |            -102 |         -61 |       -30 | 0 |       -60 |    0 | -120 |  -70 |
-  | t     |    0 |             -70 |         -41 |       -25 | 0 |         0 |    0 | -120 |  -10 |
-  | r     |    0 |             -82 |         -41 |       -25 | 0 |       -20 |    0 | -120 |   29 |
-  | k     |    0 |             -50 |         -81 |       -20 | 0 |       -20 |  -48 | -120 |  -79 |
-  | l     |    0 |             -41 |         -50 |         0 | 0 |         0 |    0 | -120 |  -52 |
-  | v     |    0 |             -40 |         -35 |       -30 | 0 |         0 |    0 | -120 |   30 |
-  | b,o,p |    0 |             -20 |         -80 |         0 | 0 |         0 |    0 | -120 |   43 |
-  | a     |    0 |             -23 |         -60 |         0 | 0 |         0 |    0 | -120 |    7 |
-  | W     |    0 |             -40 |         -30 |       -20 | 0 |         0 |    0 | -120 |   17 |
-  | T     |    0 |            -190 |        -120 |       -60 | 0 |      -130 |    0 |    0 | -188 |
-  | F     |    0 |            -100 |         -90 |       -60 | 0 |       -70 | -100 |  -40 | -166 |
-  | P     |    0 |            -100 |         -90 |       -60 | 0 |       -70 | -100 |      |      |
-  | two   |    0 |               0 |           0 |         0 | 0 |         0 |    0 |    0 |  -53 |
+  |       | None | o,a,c,e,d,g,q,w | f,t,x,v,z | h,b,l,i,k | j | m,n,p,r,u |    s |    T | F | zero |
+  | None  |    0 |               0 |         0 |         0 | 0 |         0 |    0 |    0 |   |    0 |
+  | f     |    0 |            -100 |       -61 |       -30 | 0 |       -60 |    0 | -120 |   |  -70 |
+  | t     |    0 |             -50 |       -41 |       -25 | 0 |         0 |    0 | -120 |   |  -10 |
+  | i     |      |                 |       -40 |           |   |           |      |      |   |      |
+  | r     |    0 |             -32 |       -41 |       -25 | 0 |       -20 |    0 | -120 |   |   29 |
+  | k     |    0 |             -50 |       -81 |       -20 | 0 |       -20 |  -48 | -120 |   |  -79 |
+  | l     |    0 |             -41 |       -50 |         0 | 0 |         0 |    0 | -120 |   |  -52 |
+  | v     |    0 |             -40 |       -35 |       -30 | 0 |         0 |    0 | -120 |   |   30 |
+  | b,o,p |    0 |             -20 |       -80 |         0 | 0 |         0 |    0 | -120 |   |   43 |
+  | n,m   |      |                 |      -30  |           |   |           |      |      |   |      |
+  | a     |    0 |             -23 |       -60 |         0 | 0 |         0 |    0 | -120 |   |    7 |
+  | W     |    0 |             -40 |       -30 |       -20 | 0 |         0 |    0 | -120 |   |   17 |
+  | T     |    0 |            -190 |      -120 |       -60 | 0 |      -130 |    0 |    0 |   | -188 |
+  | F     |    0 |             -90 |       -90 |       -60 | 0 |       -70 | -100 |  -40 |   | -166 |
+  | P     |    0 |            -100 |       -70 |       -60 | 0 |       -70 | -100 |      |   |      |
+
+
+For testing:
 
 #+NAME: kern_classes
-#+begin_src python :results output :var kerning_matrix=kerning_matrix :session "kern"
+#+begin_src python :results output :var kerning_matrix=kerning_matrix :eval no
   <<params>>
   <<def_kern_classes>>
   font = load_font({**params, "new_font_file": "SachaHandEdited.sfd"})
@@ -490,23 +509,82 @@ Rows are first characters, columns are second characters.
 : Old table removed.
 : [None, ['f'], ['t'], ['r'], ['k'], ['l'], ['v'], ['b', 'o', 'p'], ['a'], ['W'], ['T'], ['F'], ['P'], ['two']]
 : [None, ['o', 'a', 'c', 'e', 'd', 'g', 'q', 'w'], ['f', 't', 'x', 'v', 'y', 'z'], ['h', 'b', 'l', 'i', 'k'], ['j'], ['m', 'n', 'p', 'r', 'u'], ['s'], ['T'], ['zero']]
-: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -102, -61, -30, 0, -60, 0, -120, -70, 0, -70, -41, -25, 0, 0, 0, -120, -10, 0, -82, -41, -25, 0, -20, 0, -120, 29, 0, -50, -81, -20, 0, -20, -48, -120, -79, 0, -41, -50, 0, 0, 0, 0, -120, -52, 0, -40, -35, -30, 0, 0, 0, -120, 30, 0, -20, -80, 0, 0, 0, 0, -120, 43, 0, -23, -60, 0, 0, 0, 0, -120, 7, 0, -40, -30, -20, 0, 0, 0, -120, 17, 0, -190, -120, -60, 0, -130, 0, 0, -188, 0, -100, -90, -60, 0, -70, -100, -40, -166, 0, -100, -90, -60, 0, -70, -100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -53]
+: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -102, -61, -30, 0, -60, 0, -120, -70, 0, -70, -41, -25, 0, 0, 0, -120, -10, 0, -82, -41, -25, 0, -20, 0, -120, 29, 0, -50, -81, -20, 0, -20, -48, -120, -79, 0, -41, -50, 0, 0, 0, 0, -120, -52, 0, -40, -35, -30, 0, 0, 0, -120, 30, 0, -20, -80, 0, 0, 0, 0, -120, 43, 0, -23, -60, 0, 0, 0, 0, -120, 7, 0, -40, -30, -20, 0, 0, 0, -120, 17, 0, -190, -120, -60, 0, -130, 0, 0, -188, 0, -100, -90, -60, 0, -70, -100, -40, -166, 0, -100, -70, -60, 0, -70, -100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -53]
 : Saved SachaHandEdited.sfd
 
 #+CALL: sample(text="Python+FontForge+Org: I made a font based on my handwriting!")
 
 #+RESULTS:
-[[file:files/check/7f7d213455479b511ac154048ac06475.png]]
+[[file:files/check/1388eb67e18a9cce86d591d50e01945a.png]]
 
-#+CALL: sample(text="Monthly review: May 2020")
 
 #+RESULTS:
-[[file:files/check/2dbfe8e81fc02f730e39e90b4f647b4f.png]]
+[[file:files/check/d64a57420879bd1833e36725d4a9e69c.png]]
 
-* Display sample text
+* Hand-tweak the glyphs
+
+#+NAME: def_copy_glyphs
+#+begin_src python :eval no
+def copy_glyphs(font, edited):
+  edited.selection.all()
+  edited.copy()
+  font.selection.all()
+  font.paste()
+  return font
+#+end_src
+
+* Let's put it all together
+
+#+RESULTS:
+#+begin_src python :var bearings=bearings :var kerning_matrix=kerning_matrix
+<<params>>
+<<def_import_glyphs>>
+<<def_set_bearings>>
+<<def_kern_classes>>
+<<def_kern_by_char>>
+font = fontforge.font()
+font = import_glyphs(font, params)
+font = set_bearings(font, bearings)
+save_font(font, {**params, "new_otf": "sachacHandRaw.otf"})
+font = kern_classes(font, kerning_matrix)
+font = kern_by_char(font, kerning_matrix)
+save_font(font, {**params, "new_otf": "sachacHandKerned.otf"})
+font = load_font('SachaHandEdited.sfd')
+font = set_bearings(font, bearings)
+font.removeLookup('kern')
+save_font(font, {**params, "new_otf": "sachacHandEdited.otf"})
+font = kern_classes(font, kerning_matrix)
+font = kern_by_char(font, kerning_matrix)
+save_font(font, {**params, "new_otf": "sachacHand.otf"})
+#+end_src
+
+#+RESULTS:
+: None
+
+After importing the glyphs, but before kerning:
+
+#+CALL: sample(font_file="sachacHandRaw.otf", filename="check/unkerned.png")
+
+#+RESULTS:
+[[file:files/check/unkerned.png]]
+
+After kerning:
+
+#+CALL: sample(font_file="sachacHandKerned.otf", filename="check/kerned.png")
+
+#+RESULTS:
+[[file:files/check/kerned.png]]
+
+After tweaking the glyphs to make them more even.
+#+CALL: sample(font_file="sachacHand.otf", filename="check/edited-glyphs.png") 
+
+#+RESULTS:
+[[file:files/check/edited-glyphs.png]]
+
+* Code for displaying sample text
 
 #+NAME: sample
-#+begin_src python :results file :var filename="check" :var text="Hello world" :var size=70 :var font_file="" :var bg="white" :var fg="black"
+#+begin_src python :results file :var filename="check" :var text="" :var size=50 :var font_file="" :var bg="white" :var fg="black"
 from PIL import Image, ImageFont, ImageDraw
 import os
 import hashlib
@@ -514,141 +592,157 @@ import hashlib
 if font_file == "":
   font_file = params['new_otf']
 font = ImageFont.truetype(font_file, size)
-font_size = font.getsize(text)
+draw_text = text
+if text == "":
+  draw_text = params["text"] 
+font_size = font.getsize(draw_text)
 img = Image.new('LA', (font_size[0] + 20, font_size[1] + 20), bg)
 draw = ImageDraw.Draw(img)
-draw.text((10, 10), text, fg, font)
+draw.text((10, 10), draw_text, fg, font)
 if os.path.isdir(filename):
-  filename = os.path.join(filename, hashlib.md5(text.encode()).hexdigest() + '.png')
+  filename = os.path.join(filename, hashlib.md5((font_file + draw_text).encode()).hexdigest() + '.png')
 img.save(filename)
 return filename
 #+end_src
 
 #+RESULTS: sample
-[[file:files/check/3e25960a79dbc69b674cd4ec67a72c62.png]]
-
-#+CALL: sample(text="hhhhhoooohhhhhoooohooo")
-#+RESULTS:
-[[file:files/check/df63774e9861483fab011918259a0101.png]]
-
-#+CALL: sample(text="Python+FontForge+Org: I made a font based on my handwriting!")
-
-#+RESULTS:
-[[file:files/check/7f7d213455479b511ac154048ac06475.png]]
+[[file:files/check/1388eb67e18a9cce86d591d50e01945a.png]]
 
 * Test the font
 
 [[file:files/test.html]]
 
-#+begin_src html :tangle "files/test.html"
-<html>
-  <head>
-    <style>
-     @font-face { font-family: 'SachaHand'; src: url('SachaHand.otf') format('opentype'); }
-     body { font-family: 'SachaHand', Alegreya; font-size: 30pt }
-    </style>
-  </head>
-  <body>
-    nnnnnaaannnnbbbbnn
-    This is a test
-    ohohohohohoho
-    Emacs News 2020-04-05
-    The quick brown fox jumps over the lazy dog.
+#+begin_src html :tangle "files/test.html" :eval no
+  <html>
+    <head>
+      <style>
+       @font-face { font-family: 'sachacHand'; src: url('sachacHand.woff'); }
+       @font-face { font-family: 'sachacHandOTF'; src: url('sachacHand.otf'); }
+       @font-face { font-family: 'sachacHandRaw'; src: url('sachacHandRaw.otf'); }
+       @font-face { font-family: 'sachacHandKerned'; src: url('sachacHandKerned.otf'); }
+       @font-face { font-family: 'sachacHandEdited'; src: url('sachacHandEdited.otf'); }
+       .otf { font-family: 'sachacHandOTF'; }
+       .raw { font-family: 'sachacHandRaw'; }
+       .kerned { font-family: 'sachacHandKerned'; }
+       .edited { font-family: 'sachacHandEdited'; }
+       table { font-size: inherit; font-weight: inherit }
+       body { font-family: 'sachacHand', Alegreya; font-size: 32px }
+      </style>
+    </head>
+    <body>
+<div class="test"><strong>Python+FontForge+Org: I made a font based on my handwriting!</strong></div>
+<div class="test"><strong>Monthly review: May 2020</strong></div>
+      nnnnnaaannnnbbbbnn
+      This is a test
+      ohohohohohoho
+      Emacs News 2020-04-05
+      The quick brown fox jumps over the lazy dog.
 
-nnaannnnabnnnnacnnnnadnnnnaennnnafnnnnagnnnnahnnnn
-ainnnnajnnnnaknnnnalnnnnamnnnnannnnnaonnnnapnnnnaq
-nnnnarnnnnasnnnnatnnnnaunnnnavnnnnawnnnnaxnnnnaynn
-nnaznnnnbannnnbbnnnnbcnnnnbdnnnnbennnnbfnnnnbgnnnn
-bhnnnnbinnnnbjnnnnbknnnnblnnnnbmnnnnbnnnnnbonnnnbp
-nnnnbqnnnnbrnnnnbsnnnnbtnnnnbunnnnbvnnnnbwnnnnbxnn
-nnbynnnnbznnnncannnncbnnnnccnnnncdnnnncennnncfnnnn
-cgnnnnchnnnncinnnncjnnnncknnnnclnnnncmnnnncnnnnnco
-nnnncpnnnncqnnnncrnnnncsnnnnctnnnncunnnncvnnnncwnn
-nncxnnnncynnnncznnnndannnndbnnnndcnnnnddnnnndennnn
-dfnnnndgnnnndhnnnndinnnndjnnnndknnnndlnnnndmnnnndn
-nnnndonnnndpnnnndqnnnndrnnnndsnnnndtnnnndunnnndvnn
-nndwnnnndxnnnndynnnndznnnneannnnebnnnnecnnnnednnnn
-eennnnefnnnnegnnnnehnnnneinnnnejnnnneknnnnelnnnnem
-nnnnennnnneonnnnepnnnneqnnnnernnnnesnnnnetnnnneunn
-nnevnnnnewnnnnexnnnneynnnneznnnnfannnnfbnnnnfcnnnn
-fdnnnnfennnnffnnnnfgnnnnfhnnnnfinnnnfjnnnnfknnnnfl
-nnnnfmnnnnfnnnnnfonnnnfpnnnnfqnnnnfrnnnnfsnnnnftnn
-nnfunnnnfvnnnnfwnnnnfxnnnnfynnnnfznnnngannnngbnnnn
-gcnnnngdnnnngennnngfnnnnggnnnnghnnnnginnnngjnnnngk
-nnnnglnnnngmnnnngnnnnngonnnngpnnnngqnnnngrnnnngsnn
-nngtnnnngunnnngvnnnngwnnnngxnnnngynnnngznnnnhannnn
-hbnnnnhcnnnnhdnnnnhennnnhfnnnnhgnnnnhhnnnnhinnnnhj
-nnnnhknnnnhlnnnnhmnnnnhnnnnnhonnnnhpnnnnhqnnnnhrnn
-nnhsnnnnhtnnnnhunnnnhvnnnnhwnnnnhxnnnnhynnnnhznnnn
-iannnnibnnnnicnnnnidnnnniennnnifnnnnignnnnihnnnnii
-nnnnijnnnniknnnnilnnnnimnnnninnnnnionnnnipnnnniqnn
-nnirnnnnisnnnnitnnnniunnnnivnnnniwnnnnixnnnniynnnn
-iznnnnjannnnjbnnnnjcnnnnjdnnnnjennnnjfnnnnjgnnnnjh
-nnnnjinnnnjjnnnnjknnnnjlnnnnjmnnnnjnnnnnjonnnnjpnn
-nnjqnnnnjrnnnnjsnnnnjtnnnnjunnnnjvnnnnjwnnnnjxnnnn
-jynnnnjznnnnkannnnkbnnnnkcnnnnkdnnnnkennnnkfnnnnkg
-nnnnkhnnnnkinnnnkjnnnnkknnnnklnnnnkmnnnnknnnnnkonn
-nnkpnnnnkqnnnnkrnnnnksnnnnktnnnnkunnnnkvnnnnkwnnnn
-kxnnnnkynnnnkznnnnlannnnlbnnnnlcnnnnldnnnnlennnnlf
-nnnnlgnnnnlhnnnnlinnnnljnnnnlknnnnllnnnnlmnnnnlnnn
-nnlonnnnlpnnnnlqnnnnlrnnnnlsnnnnltnnnnlunnnnlvnnnn
-lwnnnnlxnnnnlynnnnlznnnnmannnnmbnnnnmcnnnnmdnnnnme
-nnnnmfnnnnmgnnnnmhnnnnminnnnmjnnnnmknnnnmlnnnnmmnn
-nnmnnnnnmonnnnmpnnnnmqnnnnmrnnnnmsnnnnmtnnnnmunnnn
-mvnnnnmwnnnnmxnnnnmynnnnmznnnnnannnnnbnnnnncnnnnnd
-nnnnnennnnnfnnnnngnnnnnhnnnnninnnnnjnnnnnknnnnnlnn
-nnnmnnnnnnnnnnnonnnnnpnnnnnqnnnnnrnnnnnsnnnnntnnnn
-nunnnnnvnnnnnwnnnnnxnnnnnynnnnnznnnnoannnnobnnnnoc
-nnnnodnnnnoennnnofnnnnognnnnohnnnnoinnnnojnnnnoknn
-nnolnnnnomnnnnonnnnnoonnnnopnnnnoqnnnnornnnnosnnnn
-otnnnnounnnnovnnnnownnnnoxnnnnoynnnnoznnnnpannnnpb
-nnnnpcnnnnpdnnnnpennnnpfnnnnpgnnnnphnnnnpinnnnpjnn
-nnpknnnnplnnnnpmnnnnpnnnnnponnnnppnnnnpqnnnnprnnnn
-psnnnnptnnnnpunnnnpvnnnnpwnnnnpxnnnnpynnnnpznnnnqa
-nnnnqbnnnnqcnnnnqdnnnnqennnnqfnnnnqgnnnnqhnnnnqinn
-nnqjnnnnqknnnnqlnnnnqmnnnnqnnnnnqonnnnqpnnnnqqnnnn
-qrnnnnqsnnnnqtnnnnqunnnnqvnnnnqwnnnnqxnnnnqynnnnqz
-nnnnrannnnrbnnnnrcnnnnrdnnnnrennnnrfnnnnrgnnnnrhnn
-nnrinnnnrjnnnnrknnnnrlnnnnrmnnnnrnnnnnronnnnrpnnnn
-rqnnnnrrnnnnrsnnnnrtnnnnrunnnnrvnnnnrwnnnnrxnnnnry
-nnnnrznnnnsannnnsbnnnnscnnnnsdnnnnsennnnsfnnnnsgnn
-nnshnnnnsinnnnsjnnnnsknnnnslnnnnsmnnnnsnnnnnsonnnn
-spnnnnsqnnnnsrnnnnssnnnnstnnnnsunnnnsvnnnnswnnnnsx
-nnnnsynnnnsznnnntannnntbnnnntcnnnntdnnnntennnntfnn
-nntgnnnnthnnnntinnnntjnnnntknnnntlnnnntmnnnntnnnnn
-tonnnntpnnnntqnnnntrnnnntsnnnnttnnnntunnnntvnnnntw
-nnnntxnnnntynnnntznnnnuannnnubnnnnucnnnnudnnnnuenn
-nnufnnnnugnnnnuhnnnnuinnnnujnnnnuknnnnulnnnnumnnnn
-unnnnnuonnnnupnnnnuqnnnnurnnnnusnnnnutnnnnuunnnnuv
-nnnnuwnnnnuxnnnnuynnnnuznnnnvannnnvbnnnnvcnnnnvdnn
-nnvennnnvfnnnnvgnnnnvhnnnnvinnnnvjnnnnvknnnnvlnnnn
-vmnnnnvnnnnnvonnnnvpnnnnvqnnnnvrnnnnvsnnnnvtnnnnvu
-nnnnvvnnnnvwnnnnvxnnnnvynnnnvznnnnwannnnwbnnnnwcnn
-nnwdnnnnwennnnwfnnnnwgnnnnwhnnnnwinnnnwjnnnnwknnnn
-wlnnnnwmnnnnwnnnnnwonnnnwpnnnnwqnnnnwrnnnnwsnnnnwt
-nnnnwunnnnwvnnnnwwnnnnwxnnnnwynnnnwznnnnxannnnxbnn
-nnxcnnnnxdnnnnxennnnxfnnnnxgnnnnxhnnnnxinnnnxjnnnn
-xknnnnxlnnnnxmnnnnxnnnnnxonnnnxpnnnnxqnnnnxrnnnnxs
-nnnnxtnnnnxunnnnxvnnnnxwnnnnxxnnnnxynnnnxznnnnyann
-nnybnnnnycnnnnydnnnnyennnnyfnnnnygnnnnyhnnnnyinnnn
-yjnnnnyknnnnylnnnnymnnnnynnnnnyonnnnypnnnnyqnnnnyr
-nnnnysnnnnytnnnnyunnnnyvnnnnywnnnnyxnnnnyynnnnyznn
-nnzannnnzbnnnnzcnnnnzdnnnnzennnnzfnnnnzgnnnnzhnnnn
-zinnnnzjnnnnzknnnnzlnnnnzmnnnnznnnnnzonnnnzpnnnnzq
-nnnnzrnnnnzsnnnnztnnnnzunnnnzvnnnnzwnnnnzxnnnnzynn
-nnzznn
+  nnaannnnabnnnnacnnnnadnnnnaennnnafnnnnagnnnnahnnnn
+  ainnnnajnnnnaknnnnalnnnnamnnnnannnnnaonnnnapnnnnaq
+  nnnnarnnnnasnnnnatnnnnaunnnnavnnnnawnnnnaxnnnnaynn
+  nnaznnnnbannnnbbnnnnbcnnnnbdnnnnbennnnbfnnnnbgnnnn
+  bhnnnnbinnnnbjnnnnbknnnnblnnnnbmnnnnbnnnnnbonnnnbp
+  nnnnbqnnnnbrnnnnbsnnnnbtnnnnbunnnnbvnnnnbwnnnnbxnn
+  nnbynnnnbznnnncannnncbnnnnccnnnncdnnnncennnncfnnnn
+  cgnnnnchnnnncinnnncjnnnncknnnnclnnnncmnnnncnnnnnco
+  nnnncpnnnncqnnnncrnnnncsnnnnctnnnncunnnncvnnnncwnn
+  nncxnnnncynnnncznnnndannnndbnnnndcnnnnddnnnndennnn
+  dfnnnndgnnnndhnnnndinnnndjnnnndknnnndlnnnndmnnnndn
+  nnnndonnnndpnnnndqnnnndrnnnndsnnnndtnnnndunnnndvnn
+  nndwnnnndxnnnndynnnndznnnneannnnebnnnnecnnnnednnnn
+  eennnnefnnnnegnnnnehnnnneinnnnejnnnneknnnnelnnnnem
+  nnnnennnnneonnnnepnnnneqnnnnernnnnesnnnnetnnnneunn
+  nnevnnnnewnnnnexnnnneynnnneznnnnfannnnfbnnnnfcnnnn
+  fdnnnnfennnnffnnnnfgnnnnfhnnnnfinnnnfjnnnnfknnnnfl
+  nnnnfmnnnnfnnnnnfonnnnfpnnnnfqnnnnfrnnnnfsnnnnftnn
+  nnfunnnnfvnnnnfwnnnnfxnnnnfynnnnfznnnngannnngbnnnn
+  gcnnnngdnnnngennnngfnnnnggnnnnghnnnnginnnngjnnnngk
+  nnnnglnnnngmnnnngnnnnngonnnngpnnnngqnnnngrnnnngsnn
+  nngtnnnngunnnngvnnnngwnnnngxnnnngynnnngznnnnhannnn
+  hbnnnnhcnnnnhdnnnnhennnnhfnnnnhgnnnnhhnnnnhinnnnhj
+  nnnnhknnnnhlnnnnhmnnnnhnnnnnhonnnnhpnnnnhqnnnnhrnn
+  nnhsnnnnhtnnnnhunnnnhvnnnnhwnnnnhxnnnnhynnnnhznnnn
+  iannnnibnnnnicnnnnidnnnniennnnifnnnnignnnnihnnnnii
+  nnnnijnnnniknnnnilnnnnimnnnninnnnnionnnnipnnnniqnn
+  nnirnnnnisnnnnitnnnniunnnnivnnnniwnnnnixnnnniynnnn
+  iznnnnjannnnjbnnnnjcnnnnjdnnnnjennnnjfnnnnjgnnnnjh
+  nnnnjinnnnjjnnnnjknnnnjlnnnnjmnnnnjnnnnnjonnnnjpnn
+  nnjqnnnnjrnnnnjsnnnnjtnnnnjunnnnjvnnnnjwnnnnjxnnnn
+  jynnnnjznnnnkannnnkbnnnnkcnnnnkdnnnnkennnnkfnnnnkg
+  nnnnkhnnnnkinnnnkjnnnnkknnnnklnnnnkmnnnnknnnnnkonn
+  nnkpnnnnkqnnnnkrnnnnksnnnnktnnnnkunnnnkvnnnnkwnnnn
+  kxnnnnkynnnnkznnnnlannnnlbnnnnlcnnnnldnnnnlennnnlf
+  nnnnlgnnnnlhnnnnlinnnnljnnnnlknnnnllnnnnlmnnnnlnnn
+  nnlonnnnlpnnnnlqnnnnlrnnnnlsnnnnltnnnnlunnnnlvnnnn
+  lwnnnnlxnnnnlynnnnlznnnnmannnnmbnnnnmcnnnnmdnnnnme
+  nnnnmfnnnnmgnnnnmhnnnnminnnnmjnnnnmknnnnmlnnnnmmnn
+  nnmnnnnnmonnnnmpnnnnmqnnnnmrnnnnmsnnnnmtnnnnmunnnn
+  mvnnnnmwnnnnmxnnnnmynnnnmznnnnnannnnnbnnnnncnnnnnd
+  nnnnnennnnnfnnnnngnnnnnhnnnnninnnnnjnnnnnknnnnnlnn
+  nnnmnnnnnnnnnnnonnnnnpnnnnnqnnnnnrnnnnnsnnnnntnnnn
+  nunnnnnvnnnnnwnnnnnxnnnnnynnnnnznnnnoannnnobnnnnoc
+  nnnnodnnnnoennnnofnnnnognnnnohnnnnoinnnnojnnnnoknn
+  nnolnnnnomnnnnonnnnnoonnnnopnnnnoqnnnnornnnnosnnnn
+  otnnnnounnnnovnnnnownnnnoxnnnnoynnnnoznnnnpannnnpb
+  nnnnpcnnnnpdnnnnpennnnpfnnnnpgnnnnphnnnnpinnnnpjnn
+  nnpknnnnplnnnnpmnnnnpnnnnnponnnnppnnnnpqnnnnprnnnn
+  psnnnnptnnnnpunnnnpvnnnnpwnnnnpxnnnnpynnnnpznnnnqa
+  nnnnqbnnnnqcnnnnqdnnnnqennnnqfnnnnqgnnnnqhnnnnqinn
+  nnqjnnnnqknnnnqlnnnnqmnnnnqnnnnnqonnnnqpnnnnqqnnnn
+  qrnnnnqsnnnnqtnnnnqunnnnqvnnnnqwnnnnqxnnnnqynnnnqz
+  nnnnrannnnrbnnnnrcnnnnrdnnnnrennnnrfnnnnrgnnnnrhnn
+  nnrinnnnrjnnnnrknnnnrlnnnnrmnnnnrnnnnnronnnnrpnnnn
+  rqnnnnrrnnnnrsnnnnrtnnnnrunnnnrvnnnnrwnnnnrxnnnnry
+  nnnnrznnnnsannnnsbnnnnscnnnnsdnnnnsennnnsfnnnnsgnn
+  nnshnnnnsinnnnsjnnnnsknnnnslnnnnsmnnnnsnnnnnsonnnn
+  spnnnnsqnnnnsrnnnnssnnnnstnnnnsunnnnsvnnnnswnnnnsx
+  nnnnsynnnnsznnnntannnntbnnnntcnnnntdnnnntennnntfnn
+  nntgnnnnthnnnntinnnntjnnnntknnnntlnnnntmnnnntnnnnn
+  tonnnntpnnnntqnnnntrnnnntsnnnnttnnnntunnnntvnnnntw
+  nnnntxnnnntynnnntznnnnuannnnubnnnnucnnnnudnnnnuenn
+  nnufnnnnugnnnnuhnnnnuinnnnujnnnnuknnnnulnnnnumnnnn
+  unnnnnuonnnnupnnnnuqnnnnurnnnnusnnnnutnnnnuunnnnuv
+  nnnnuwnnnnuxnnnnuynnnnuznnnnvannnnvbnnnnvcnnnnvdnn
+  nnvennnnvfnnnnvgnnnnvhnnnnvinnnnvjnnnnvknnnnvlnnnn
+  vmnnnnvnnnnnvonnnnvpnnnnvqnnnnvrnnnnvsnnnnvtnnnnvu
+  nnnnvvnnnnvwnnnnvxnnnnvynnnnvznnnnwannnnwbnnnnwcnn
+  nnwdnnnnwennnnwfnnnnwgnnnnwhnnnnwinnnnwjnnnnwknnnn
+  wlnnnnwmnnnnwnnnnnwonnnnwpnnnnwqnnnnwrnnnnwsnnnnwt
+  nnnnwunnnnwvnnnnwwnnnnwxnnnnwynnnnwznnnnxannnnxbnn
+  nnxcnnnnxdnnnnxennnnxfnnnnxgnnnnxhnnnnxinnnnxjnnnn
+  xknnnnxlnnnnxmnnnnxnnnnnxonnnnxpnnnnxqnnnnxrnnnnxs
+  nnnnxtnnnnxunnnnxvnnnnxwnnnnxxnnnnxynnnnxznnnnyann
+  nnybnnnnycnnnnydnnnnyennnnyfnnnnygnnnnyhnnnnyinnnn
+  yjnnnnyknnnnylnnnnymnnnnynnnnnyonnnnypnnnnyqnnnnyr
+  nnnnysnnnnytnnnnyunnnnyvnnnnywnnnnyxnnnnyynnnnyznn
+  nnzannnnzbnnnnzcnnnnzdnnnnzennnnzfnnnnzgnnnnzhnnnn
+  zinnnnzjnnnnzknnnnzlnnnnzmnnnnznnnnnzonnnnzpnnnnzq
+  nnnnzrnnnnzsnnnnztnnnnzunnnnzvnnnnzwnnnnzxnnnnzynn
+  nnzznn
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
+  <script>
+  $(document).ready(function() {
+    $('.test').each(function() {
+      let html = $(this).html();
+      const styles = [['raw', 'raw'], ['raw+kerned', 'kerned'], ['edited', 'edited'], ['edited+kerned', 'sachacHand']];
+      $(this).html('<table>' + styles.map(o => `<tr><td>${o[0]}</td><td><div class="${o[1]}">${html}</div></td></tr>`).join("\n") + '</table>');
+    });
+  });      
+  </script>
+  
+</body>
+</html>
 #+end_src
 
 Test string from http://www.ninastoessinger.com/stringmaker/index.php
 
-* And then a lot of hand-hacking of the contours later, I have a font!
-
-[[file:files/sachacHand.otf]]
-[[file:files/sachacHand.woff]]
-[[file:files/SachaHandEdited.sfd]]
-
 * Ideas
-** TODO Copy glyphs from hand-edited font
+** DONE Copy glyphs from hand-edited font
+   CLOSED: [2020-06-06 Sat 22:33]
+   :LOGBOOK:
+   - State "DONE"       from "TODO"       [2020-06-06 Sat 22:33]
+   :END:
 ** TODO Alternate glyphs
 ** TODO Ligatures
 ** TODO Accents
@@ -895,24 +989,15 @@ return ''.join([x[0] for x in common])
   #+end_src
   #+RESULTS:
   :results:
-  |       | None | o,a,c,e,d,g,q,w | f,t,x,v,y,z | h,b,l,i,k | j | m,n,p,r,u |    s |    T | zero |
-  |-------+------+-----------------+-------------+-----------+---+-----------+------+------+------|
-  | None  |    0 |               0 |           0 |         0 | 0 |         0 |    0 |    0 |    0 |
-  | f     |    0 |            -102 |         -61 |       -30 | 0 |       -60 |    0 | -120 |  -70 |
-  | t     |    0 |             -70 |         -41 |       -25 | 0 |         0 |    0 | -120 |  -10 |
-  | r     |    0 |             -82 |         -41 |       -25 | 0 |       -20 |    0 | -120 |   29 |
-  | k     |    0 |             -50 |         -81 |       -20 | 0 |       -20 |  -48 | -120 |  -79 |
-  | l     |    0 |             -41 |         -50 |         0 | 0 |         0 |    0 | -120 |  -52 |
-  | v     |    0 |             -40 |         -35 |       -30 | 0 |         0 |    0 | -120 |   30 |
-  | b,o,p |    0 |             -20 |         -80 |         0 | 0 |         0 |    0 | -120 |   43 |
-  | a     |    0 |             -23 |         -60 |         0 | 0 |         0 |    0 | -120 |    7 |
-  | W     |    0 |             -40 |         -30 |       -20 | 0 |         0 |    0 | -120 |   17 |
-  | T     |    0 |            -190 |        -120 |       -60 | 0 |      -130 |    0 |    0 | -188 |
-  | F     |    0 |            -100 |         -90 |       -60 | 0 |       -70 | -100 |  -40 | -166 |
-  | two   |    0 |               0 |           0 |         0 | 0 |         0 |    0 |    0 |  -53 |
-
   :end:
 
+** Copy it to my website
+
+#+begin_src sh :eval yes
+scp files/sachacHand.woff web:~/sacha-v3/
+#+end_src
+
+#+RESULTS:
 
 * Other resources
 
