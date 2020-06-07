@@ -993,7 +993,7 @@ return ''.join([x[0] for x in common])
 
 ** Copy it to my website
 
-#+begin_src sh :eval yes
+#+begin_src sh :eval no
 scp files/sachacHand.woff web:~/sacha-v3/
 #+end_src
 
