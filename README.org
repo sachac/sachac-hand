@@ -563,24 +563,22 @@ save_font(font, {**params, "new_otf": "sachacHand.otf"})
 
 After importing the glyphs, but before kerning:
 
-#+CALL: sample(font_file="sachacHandRaw.otf", filename="check/unkerned.png") :exports both
+#+CALL: sample(font_file="sachacHandRaw.otf", filename="check/unkerned.png") :exports code
 
 #+RESULTS:
-[[file:files/check/unkerned.png]]
+[[./files/check/unkerned.png]]
 
 After tweaking the glyphs to make them more even:
 
-#+CALL: sample(font_file="sachacHandEdited.otf", filename="check/edited-glyphs.png")  :exports both
+#+CALL: sample(font_file="sachacHandEdited.otf", filename="check/edited-glyphs.png")  :exports code
 
-#+RESULTS:
-[[file:files/check/edited-glyphs.png]]
+[[./files/check/edited-glyphs.png]]
 
 After kerning:
 
-#+CALL: sample(font_file="sachacHand.otf", filename="check/kerned.png") :exports both 
+#+CALL: sample(font_file="sachacHand.otf", filename="check/kerned.png") :exports code
 
-#+RESULTS:
-[[file:files/check/kerned.png]]
+[[./files/check/kerned.png]]
 
 * Code for displaying sample text
 
