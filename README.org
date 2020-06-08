@@ -1,3 +1,4 @@
+#+OPTIONS: toc:2
 #+PROPERTY: header-args python  :noweb yes :dir "/home/sacha/code/font/files" :exports both 
 
 * Summary
@@ -535,7 +536,6 @@ def copy_glyphs(font, edited):
 
 * Let's put it all together
 
-#+RESULTS:
 #+begin_src python :var bearings=bearings :var kerning_matrix=kerning_matrix
 <<params>>
 <<def_import_glyphs>>
@@ -563,23 +563,24 @@ save_font(font, {**params, "new_otf": "sachacHand.otf"})
 
 After importing the glyphs, but before kerning:
 
-#+CALL: sample(font_file="sachacHandRaw.otf", filename="check/unkerned.png")
+#+CALL: sample(font_file="sachacHandRaw.otf", filename="check/unkerned.png") :exports both
 
 #+RESULTS:
 [[file:files/check/unkerned.png]]
 
-After kerning:
+After tweaking the glyphs to make them more even:
 
-#+CALL: sample(font_file="sachacHandKerned.otf", filename="check/kerned.png")
-
-#+RESULTS:
-[[file:files/check/kerned.png]]
-
-After tweaking the glyphs to make them more even.
-#+CALL: sample(font_file="sachacHand.otf", filename="check/edited-glyphs.png") 
+#+CALL: sample(font_file="sachacHandEdited.otf", filename="check/edited-glyphs.png")  :exports both
 
 #+RESULTS:
 [[file:files/check/edited-glyphs.png]]
+
+After kerning:
+
+#+CALL: sample(font_file="sachacHand.otf", filename="check/kerned.png") :exports both 
+
+#+RESULTS:
+[[file:files/check/kerned.png]]
 
 * Code for displaying sample text
 
@@ -747,9 +748,7 @@ Test string from http://www.ninastoessinger.com/stringmaker/index.php
 ** TODO Ligatures
 ** TODO Accents
 * Extra stuff
-:PROPERTIES:
-:header-args: :eval no :noweb yes
-:END:
+
 ** Figure out what glyphs I want based on my blog headings
 
  #+NAME: connect-to-db
@@ -767,7 +766,7 @@ Test string from http://www.ninastoessinger.com/stringmaker/index.php
 
 ** Check glyphs
 
-#+begin_src python :results table
+#+begin_src python :results table :eval no
 <<connect-to-db>>
 df           = pd.read_sql("select post_title from wp_posts WHERE post_type='post' AND post_status='publish'", dbConnection);
 # Debugging
@@ -827,7 +826,7 @@ return res.most_common()
 ** Look up posts with weird glyphs
 
 #+NAME: check-posts
-#+begin_src python :results output :var char="–"
+#+begin_src python :results output :var char="–" :eval no
 <<connect-to-db>>
 df           = pd.read_sql("select id, post_title from wp_posts WHERE post_type='post' AND post_status='publish' AND post_title LIKE %(char)s limit 10;", dbConnection, params={"char": '%' + char + '%'});
 print(df)
@@ -842,7 +841,7 @@ print(df)
 ** Get frequency of pairs of characters
 
 #+NAME: digrams
-#+begin_src python :results value scalar :cache yes
+#+begin_src python :results value scalar :cache yes :eval no
 <<connect-to-db>>
 df = pd.read_sql("select post_title from wp_posts WHERE post_type='post' AND post_status='publish'", dbConnection);
 from collections import Counter
@@ -859,7 +858,7 @@ return ''.join([x[0] for x in common])
 
 *** Get the glyph bearings
 
-  #+begin_src python :results table
+  #+begin_src python :results table :eval no
   import fontforge
   import numpy as np
   import pandas as pd
@@ -982,7 +981,7 @@ return ''.join([x[0] for x in common])
       out(df)
   #+end_src
 
-  #+begin_src python :results output drawer :var font="/home/sacha/code/font/files/SachaHandEdited.sfd" :eval yes 
+  #+begin_src python :results output drawer :var font="/home/sacha/code/font/files/SachaHandEdited.sfd" :eval no
   import fontforge
   <<def_show_kerning_classes>>
   show_kerning_classes(fontforge.open(font))
@@ -1002,3 +1001,11 @@ scp files/sachacHand.woff web:~/sacha-v3/
 * Other resources
 
 http://ctan.localhost.net.ar/fonts/amiri/tools/build.py
+
+#+begin_export html
+<style type="text/css">
+       @font-face { font-family: 'sachacHand'; src: url('files/sachacHand.woff'); }
+       h1, h2 { font-family: 'sachacHand', sans-serif; font-weight: bold }
+       code { font-size: 0.8rem; border: none }
+</style>
+#+end_export
