@@ -1,0 +1,911 @@
+#+OPTIONS: toc:2
+#+PROPERTY: header-args python  :noweb yes :dir "/home/sacha/code/font/files" :exports both 
+
+* Summary
+
+I wanted to make my own handwriting font. I also wanted to be able to
+generate fonts quickly from the handwriting samples I can draw on my
+tablet PC or my phone.
+
+Quick links:
+
+| https://github.com/sachac/sachac-hand | Github repo           |
+| [[file:files/sample.png][My handwriting sample]]                 |                       |
+| [[file:files/SachaHandEdited.sfd]]        | Edited FontForge file |
+| [[file:files/sachacHand.otf]]             | OpenType font         |
+| [[file:files/sachacHand.woff]]            | Web font              |
+
+* License
+
+Feel free to use the font under the SIL Open Font License. That means
+you can freely create and distribute things that use the font. See
+conditions below if you plan to bundle or modify the font.
+
+(c) 2020 Sacha Chua \\
+Reserved font name: sachacHand \\
+This Font Software is licensed under the SIL Open Font License, Version 1.1. \\
+
+** sachacHand - SIL Open Font License
+
+This license is copied below, and is also available with a FAQ at: http://scripts.sil.org/OFL
+
+
+SIL OPEN FONT LICENSE
+
+Version 1.1 - 26 February 2007
+
+
+PREAMBLE
+
+The goals of the Open Font License (OFL) are to stimulate worldwide
+development of collaborative font projects, to support the font creation
+efforts of academic and linguistic communities, and to provide a free and
+open framework in which fonts may be shared and improved in partnership
+with others.
+
+The OFL allows the licensed fonts to be used, studied, modified and
+redistributed freely as long as they are not sold by themselves. The
+fonts, including any derivative works, can be bundled, embedded,
+redistributed and/or sold with any software provided that any reserved
+names are not used by derivative works. The fonts and derivatives,
+however, cannot be released under any other type of license. The
+requirement for fonts to remain under this license does not apply
+to any document created using the fonts or their derivatives.
+
+
+DEFINITIONS
+
+"Font Software" refers to the set of files released by the Copyright
+Holder(s) under this license and clearly marked as such. This may
+include source files, build scripts and documentation.
+
+"Reserved Font Name" refers to any names specified as such after the
+copyright statement(s).
+
+"Original Version" refers to the collection of Font Software components as
+distributed by the Copyright Holder(s).
+
+"Modified Version" refers to any derivative made by adding to, deleting,
+or substituting - in part or in whole - any of the components of the
+Original Version, by changing formats or by porting the Font Software to a
+new environment.
+
+"Author" refers to any designer, engineer, programmer, technical
+writer or other person who contributed to the Font Software.
+
+
+PERMISSION & CONDITIONS
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of the Font Software, to use, study, copy, merge, embed, modify,
+redistribute, and sell modified and unmodified copies of the Font
+Software, subject to the following conditions:
+
+1. Neither the Font Software nor any of its individual components, in Original or Modified Versions, may be sold by itself.
+
+2. Original or Modified Versions of the Font Software may be bundled, redistributed and/or sold with any software, provided that each copy contains the above copyright notice and this license. These can be included either as stand-alone text files, human-readable headers or in the appropriate machine-readable metadata fields within text or binary files as long as those fields can be easily viewed by the user.
+
+3. No Modified Version of the Font Software may use the Reserved Font Name(s) unless explicit written permission is granted by the corresponding Copyright Holder. This restriction only applies to the primary font name as presented to the users.
+
+4. The name(s) of the Copyright Holder(s) or the Author(s) of the Font Software shall not be used to promote, endorse or advertise any Modified Version, except to acknowledge the contribution(s) of the Copyright Holder(s) and the Author(s) or with their explicit written permission.
+
+5. The Font Software, modified or unmodified, in part or in whole, must be distributed entirely under this license, and must not be distributed under any other license. The requirement for fonts to remain under this license does not apply to any document created using the Font Software.
+
+
+TERMINATION
+
+This license becomes null and void if any of the above conditions are
+not met.
+
+
+DISCLAIMER
+
+THE FONT SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO ANY WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT
+OF COPYRIGHT, PATENT, TRADEMARK, OR OTHER RIGHT. IN NO EVENT SHALL THE
+COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+INCLUDING ANY GENERAL, SPECIAL, INDIRECT, INCIDENTAL, OR CONSEQUENTIAL
+DAMAGES, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+FROM, OUT OF THE USE OR INABILITY TO USE THE FONT SOFTWARE OR FROM
+OTHER DEALINGS IN THE FONT SOFTWARE.
+
+
+* Blog post
+  :PROPERTIES:
+  :ID:       o2b:cbd413ee-7c20-47da-9cda-666a2909b0d0
+  :POST_DATE: [2020-06-05 Fri 00:20]
+  :POSTID:   29568
+  :BLOG:     sacha
+  :END:
+
+I wanted to make a font based on my handwriting using only free
+software. It turns out that FontForge can be scripted with Python. I
+know just a little about Python and even less about typography, but I
+managed to hack together something that worked for me. If you're
+reading this on my blog at https://sachachua.com/blog/ , you'll
+probably see the new font being used on the blog post titles. Whee!
+
+My rough notes are at
+https://github.com/sachac/sachac-hand/ . I wanted
+to write it as a literate program using Org Babel blocks. It's not
+really fully reproducible yet, but it might be a handy starting point.
+The basic workflow was:
+
+1. Generate a template using other fonts as the base.
+2. Import the template into Medibang Paint on my phone and draw
+   letters on a different layer. (I almost forgot the letter =q=, so I
+   had to add it at the last minute.)
+3. Export just the layer with my writing.
+4. Cut the image into separate glyphs using Python and autotrace each one.
+5. Import each glyph into FontForge as an SVG and a PNG.
+6. Set the left side and right side bearing, overriding as needed based on a table.
+7. Figure out kerning classes. 
+8. Hand-tweak the contours and kerning.
+9. Use =sfnt2woff= to export the web font file for use on my blog, and modify the stylesheet to include it.
+
+I really liked being able to specify kerning classes through an Org
+Mode table like this:
+
+  |       | None | o,a,c,e,d,g,q,w | f,t,x,v,y,z | h,b,l,i,k | j | m,n,p,r,u |    s |    T | zero |
+  | None  |    0 |               0 |           0 |         0 | 0 |         0 |    0 |    0 |    0 |
+  | f     |    0 |            -102 |         -61 |       -30 | 0 |       -60 |    0 | -120 |  -70 |
+  | t     |    0 |             -70 |         -41 |       -25 | 0 |         0 |    0 | -120 |  -10 |
+  | r     |    0 |             -82 |         -41 |       -25 | 0 |       -20 |    0 | -120 |   29 |
+  | k     |    0 |             -50 |         -81 |       -20 | 0 |       -20 |  -48 | -120 |  -79 |
+  | l     |    0 |             -41 |         -50 |         0 | 0 |         0 |    0 | -120 |  -52 |
+  | v     |    0 |             -40 |         -35 |       -30 | 0 |         0 |    0 | -120 |   30 |
+  | b,o,p |    0 |             -20 |         -80 |         0 | 0 |         0 |    0 | -120 |   43 |
+  | a     |    0 |             -23 |         -60 |         0 | 0 |         0 |    0 | -120 |    7 |
+  | W     |    0 |             -40 |         -30 |       -20 | 0 |         0 |    0 | -120 |   17 |
+  | T     |    0 |            -190 |        -120 |       -60 | 0 |      -130 |    0 |    0 | -188 |
+  | F     |    0 |            -100 |         -90 |       -60 | 0 |       -70 | -100 |  -40 | -166 |
+  | two   |    0 |               0 |           0 |         0 | 0 |         0 |    0 |    0 |  -53 |
+
+I had a hard time defining classes using the FontForge interface
+because I occasionally ended up clearing my glyph selection, so it was
+great being able to just edit my columns and rows. 
+
+Clearly my kerning is still very rough--no actual values for j, for
+example--but it's a start. Also, I can probably figure out how to
+combine this with character pair kerning and have two tables for
+easier tweaking.
+
+A- insisted on tracing my handwriting template a few times, so I might
+actually be able to go through the same process to convert her
+handwriting into a font. Whee!
+
+* Things I needed to install 
+
+=sudo apt-get install fontforge python3-fontforge python3-numpy python3-sqlalchemy python3-pandas python3-pymysql python3-nltk woff-tools woff2 python3-yattag=
+
+I compiled autotrace based on my fork at https://github.com/sachac/autotrace so that it uses Graphicsmagick instead of Imagemagick.
+
+I also needed =(setenv "LD_LIBRARY_PATH" "/usr/local/lib")=. There are probably a bunch of other prerequisites I've forgotten to write down.
+
+** Errors fixed along the way
+
+- =FileNotFoundError: [Errno 2] No such file or directory: '/home/sacha/.local/lib/python3.8/site-packages/aglfn/agl-aglfn/aglfn.txt'=
+  - symlink or copy the one from /usr/share/aglfn to the right place
+
+* Parameters and common functions
+
+#+NAME: params
+#+begin_src python :results none :eval no
+import numpy as np
+import pandas as pd
+import aglfn
+import fontforge
+import subprocess
+
+params = {'template': 'template-256.png',
+  'sample_file': 'sample.png',
+  'name_list': 'aglfn.txt',
+  'new_font_file': 'sachacHand.sfd',
+  'new_otf': 'sachacHand.otf',
+  'new_font_name': 'sachacHand',
+  'new_family_name': 'sachacFonts',
+  'text_color': 'lightgray',
+  'new_full_name': 'sachacHand',
+  'glyph_dir': 'glyphs/',
+  'letters': 'HOnodpagscebhklftijmnruwvxyzCGABRDLEFIJKMNPQSTUVWXYZ0123456789?:;-–—=!\'’"“”@/\\~_#$%&()*+,.<>[]^`{|}q',
+  'direction': 'vertical',
+  'rows': 10, 
+  'columns': 10, 
+  'x_height': 325,
+  'em': 1000, 
+  'em_width': 1000, 
+  'ascent': 800, 
+  'descent': 200, 
+  'height': 500, 
+  'width': 500, 
+  'caps': 650,
+  'line_width': 3,
+  'text': "Python+FontForge+Org: I made a font based on my handwriting!"
+  }
+params['font_size'] = int(params['em'] * 0.88)
+params['baseline'] = params['em'] - params['descent']
+
+def transpose_letters(letters, width, height):
+  return ''.join(np.reshape(list(letters.ljust(width * height)), (height, width)).transpose().reshape(-1))
+
+def get_letter_matrix(params):
+  matrix = np.reshape(list(params['letters'].ljust(params['rows'] * params['columns']))[0:params['rows'] * params['columns']], (params['rows'], params['columns']))
+  if params['direction'] == 'vertical':
+    matrix = matrix.transpose()
+  return matrix
+
+def glyph_filename_base(ch):
+  return 'uni%s-%s' % (hex(ord(ch)).replace('0x', '').zfill(4), aglfn.name(ch))
+
+def load_font(params):
+  if type(params) == str:
+    return fontforge.open(params)
+  else:
+    return fontforge.open(params['new_font_file'])
+
+def save_font(font, params):
+  font.save(params['new_font_file'])
+  font.generate(params['new_otf'])
+  subprocess.call(['sfnt2woff', params['new_otf']])
+  print("Saved %s" % params['new_font_file'])
+
+import orgbabelhelper as ob
+def out(df, **kwargs):
+  print(ob.dataframe_to_orgtable(df, **kwargs))
+
+#+end_src
+
+
+* Generate guidelines
+** Code to make the template
+
+#+NAME: def_make_template
+#+begin_src python :results none :eval no
+from PIL import Image, ImageFont, ImageDraw
+
+#LETTERS = 'abcd'
+# Baseline is red
+# descent: lightblue
+def draw_letter(origin, letter, params):
+  draw = params['draw']
+  draw.line((origin[0], origin[1], origin[0], origin[1] + params['em']), fill='lightgray', width=params['line_width'])
+  draw.line((origin[0], origin[1] + params['ascent'] - params['x_height'], origin[0] + params['em_width'], origin[1] + params['ascent'] - params['x_height']), fill='lightgray', width=params['line_width'])
+  draw.line((origin[0], origin[1] + params['ascent'], origin[0] + params['em_width'], origin[1] + params['ascent']), fill='red', width=params['line_width'])
+  draw.line((origin[0], origin[1] + params['ascent'] - params['caps'], origin[0] + params['em_width'], origin[1] + params['ascent'] - params['caps']), fill='lightgreen', width=params['line_width'])
+  draw.line((origin[0], origin[1], origin[0] + params['em_width'], origin[1]), fill='black', width=params['line_width'])
+  width, height = draw.textsize(letter, font=params['font'])
+  draw.text((origin[0] + (params['em_width'] - width) / 2, origin[1]), letter, font=params['font'], fill=params['text_color'])
+
+def make_template(params):
+  img = Image.new('RGB', (params['columns'] * params['em'], params['rows'] * params['em_width']), 'white')
+  params['draw'] = ImageDraw.Draw(img)
+  params['font'] = ImageFont.truetype(params['font_name'], params['font_size'])
+  matrix = get_letter_matrix(params)
+  for r, row in enumerate(matrix):
+    for c, ch in enumerate(row):
+      draw_letter((c * params['em_width'], r * params['em']), ch, params)
+  img.thumbnail((params['columns'] * params['height'], params['columns'] * params['width']))
+  img.save(params['template'])
+  return params['template']
+#+end_src
+
+** Actually make the templates
+
+#+begin_src python :results file :eval no
+  <<params>>
+  <<def_make_template>>
+  make_template({**params, 'font_name': '/home/sacha/.fonts/Romochka.otf', 'template': 'template-romochka.png'}) 
+  make_template({**params, 'font_name': '/home/sacha/.fonts/Breip.ttf', 'template': 'template-breip.png'}) 
+  # return make_template({**params, 'font_name': '/home/sacha/.fonts/KGPrimaryDots.ttf', 
+  # 'letters': 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890?:;-–—=!\'’"“”@/\\~_#$%&()*+,.<>[]^`{|}', 'direction': 'horizontal', 'text_color': 'black',
+  # 'template': 'template-kg.png', 'ascent': 675, 'descent': 375, 'caps': 525, 'x_height': 300}) 
+  return make_template({**params, 'font_name': '/home/sacha/.fonts/Romochka.otf', 
+  'template': 'template-sample.png', 'direction': 'horizontal', 'rows': 4, 'columns': 4, 'height': 100, 'width': 100 }) 
+#+end_src
+
+#+RESULTS:
+[[file:files/template-sample.png]]
+
+* Cut into glyphs
+
+#+NAME: def_cut_glyphs
+#+begin_src python :eval no
+import os
+import libxml2
+from PIL import Image, ImageOps
+import subprocess
+def cut_glyphs(params):
+  im = Image.open(params['sample_file']).convert('1')
+  letters = params['letters']
+  if params['direction'] == 'vertical':
+    letters = transpose_letters(letters, params['columns'], params['rows'])
+  matrix = np.reshape(list(letters), (params['rows'], params['columns']))
+  for r, row in enumerate(matrix):
+    top = r * params['height']
+    bottom = top + params['height']
+    for c, ch in enumerate(row):
+      left = c * params['width']
+      right = left + params['width']
+      small = im.crop((left, top, right, bottom))
+      filename = os.path.join(params['glyph_dir'], glyph_filename_base(ch) + '.pbm')
+      small.save(filename)
+      svg = filename.replace('.pbm', '.svg')
+      png = filename.replace('.pbm', '.png')
+      small.save(png)
+      subprocess.call(['autotrace', '-output-file', svg, filename])
+      doc = libxml2.parseFile(svg)
+      root = doc.children
+      child = root.children
+      child.next.unlinkNode()
+      doc.saveFile(svg)
+#+end_src
+
+* Import SVG outlines into font
+
+#+NAME: def_import_glyphs
+#+BEGIN_SRC python :results output :eval no
+import fontforge
+import os
+import aglfn
+def import_glyphs(font, params):
+  fontforge.loadNamelist(params['name_list'])
+  font.em = params['height']
+  font.encoding = 'UnicodeFull'
+  font.fontname = params['new_font_name']
+  font.familyname = params['new_family_name']
+  font.fullname = params['new_family_name']
+  cut_letters = params['letters']
+  if params['direction'] == 'vertical':
+    cut_letters = transpose_letters(cut_letters, params['columns'], params['rows'])
+  for i, ch in enumerate(cut_letters):
+    if ch == ' ': continue
+    try:
+      name = aglfn.name(ch)
+      glyph = font.createMappedChar(name)
+      base = 'uni%s-%s' % (hex(ord(ch)).replace('0x', '').zfill(4), name)
+      svg_filename = os.path.join(params['glyph_dir'], base + '.svg')
+      png_filename = os.path.join(params['glyph_dir'], base + '.png')
+      glyph.importOutlines(png_filename)
+      glyph.importOutlines(svg_filename)
+    except:
+      print("Error with ", ch)
+      pass
+  font.em = params['em']
+  font.descent = params['descent']
+  font.ascent = params['ascent']
+  return font
+#+END_SRC
+
+* Adjust bearings
+
+#+NAME: bearings
+|         | Left | Right |
+|---------+------+-------|
+| Default |   40 |    40 |
+| k       |   40 |       |
+| r       |   43 |       |
+| j       |  -90 |       |
+| s       |   24 |       |
+| t       |   58 |    58 |
+| i       |   62 |    70 |
+| n       |   50 |    50 |
+| l       |   60 |    40 |
+| F       |   60 |       |
+| colon   |   62 |    62 |
+| w       |   60 |    40 |
+| o       |   40 |    40 |
+| exclam  |   55 |    55 |
+
+#+NAME: def_set_bearings
+#+begin_src python :eval no
+def set_bearings(font, bearings):
+  space = font.createMappedChar(' ')
+  space.width = int(params['em'] / 5)
+  (default_left, default_right) = next(o for o in bearings if o[0] == 'Default')[1:]
+  for ch in params['letters']:
+    if ch == ' ': continue
+    try:
+      glyph = font.createMappedChar(aglfn.name(ch))
+      glyph.left_side_bearing = default_left
+      glyph.right_side_bearing = default_right
+    except:
+      print("Error with ", ch)
+  for row in bearings:
+    if row[0] == 'Default': continue
+    g = font.createMappedChar(row[0])
+    if row[1] != "":
+      g.left_side_bearing = row[1]
+    if row[2] != "":
+      g.right_side_bearing = row[2]
+  return font
+#+end_src
+
+For testing:
+
+#+begin_src python :results output :var bearings=bearings :eval no
+<<params>>
+<<def_set_bearings>>
+font = load_font(params)
+font = set_bearings(font, bearings)
+save_font(font, params)
+#+end_src
+
+* Kern the font
+
+** Values
+
+Rows are first characters, columns are second characters.
+
+#+NAME: kerning_matrix
+  |                         | None | o,a,c,e,d,g,q,w | f,t,x,v,z | h,b,l,i |   j | m,n,p,r,u | k,y |    s |    T | F | zero |
+  | None                    |    0 |               0 |         0 |       0 |   0 |         0 |     |    0 |    0 |   |    0 |
+  | f                       |    0 |            -100 |       -61 |         |   0 |       -60 |     |    0 | -130 |   |  -70 |
+  | t                       |    0 |             -50 |       -41 |         |   0 |         0 |     |    0 | -170 |   |  -10 |
+  | i                       |      |                 |       -40 |         |     |           |     |      | -170 |   |      |
+  | r                       |    0 |             -32 |       -40 |         |   0 |       -20 |     |    0 | -170 |   |   29 |
+  | k                       |    0 |             -40 |       -80 |         |   0 |       -20 |     |  -48 | -170 |   |  -79 |
+  | l                       |    0 |             -41 |       -50 |       0 |   0 |         0 |     |    0 | -110 |   |  -20 |
+  | v                       |    0 |             -40 |       -35 |         |   0 |         0 |     |    0 | -170 |   |   30 |
+  | b,o,p                   |    0 |             -20 |       -40 |       0 |   0 |         0 |     |    0 | -170 |   |   43 |
+  | n,m                     |      |                 |       -10 |         |     |           |     |      | -170 |   |      |
+  | a                       |    0 |             -23 |       -30 |       0 |   0 |         0 |     |    0 | -170 |   |    7 |
+  | W                       |    0 |             -40 |       -30 |         |   0 |         0 |     |    0 |      |   |      |
+  | T                       |    0 |            -190 |      -120 |     -60 | -40 |      -130 |     |    0 |    0 |   |      |
+  | F                       |    0 |             -90 |       -90 |     -60 |   0 |       -70 |     | -100 |  -40 |   |      |
+  | P                       |    0 |            -100 |       -70 |         |   0 |       -70 |     | -100 |  -20 |   |      |
+  | g                       |      |                 |           |         |  40 |           |     |      | -100 |   |      |
+  | c,d,e,h,j,q,s,u,w,x,y,z |      |                 |           |         |     |           |     |      | -120 |   |      |
+
+** Kern by classes
+
+NOTE: This removes the old kerning table.
+
+#+NAME: def_kern_classes
+#+begin_src python :eval no
+def kern_classes(font, kerning_matrix):
+  try:
+    font.removeLookup('kern')
+    print("Old table removed.")
+  except:
+    print("Starting from scratch")    
+  font.addLookup("kern", "gpos_pair", 0, [["kern",[["latn",["dflt"]]]]])
+  offsets = np.asarray(kerning_matrix)
+  classes_right = [None if (x == "" or x == "None") else x.split(",") for x in offsets[0,1:]]
+  classes_left = [None if (x == "" or x == "None") else x.split(',') for x in offsets[1:,0]]
+  offset_list = [0 if x == "" else int(x) for x in offsets[1:,1:].reshape(-1)]
+  print(classes_left)
+  print(classes_right)
+  print(offset_list)
+  font.addKerningClass("kern", "kern-1", classes_left, classes_right, offset_list)
+  return font
+#+end_src
+
+** Kern by character
+
+While trying to figure out kerning, I came across this issue that
+described how you sometimes need a [[https://www.dafont.com/forum/read/405813/the-kerning-is-set-in-a-way-that-doesn-t-work-at-dafont-we-use-the-gd-library-of-php][character-pair kern table instead
+of just class-based kerning]]. Since I had figured out character-based
+kerning before I figured out class-based kerning, it was easy to
+restore my Python code that takes the same kerning matrix and
+generates character pairs. Here's what that code looks like.
+
+#+NAME: def_kern_by_char
+#+begin_src python :eval no
+def kern_by_char(font, kerning_matrix):
+  # Add kerning by character as backup
+  font.addLookupSubtable("kern", "kern-2")
+  offsets = np.asarray(kerning_matrix)
+  classes_right = [None if (x == "" or x == "None") else x.split(",") for x in offsets[0,1:]]
+  classes_left = [None if (x == "" or x == "None") else x.split(',') for x in offsets[1:,0]]
+  for r, row in enumerate(classes_left):
+    if row is None: continue
+    for first_letter in row:
+      g = font.createMappedChar(first_letter)
+      for c, column in enumerate(classes_right):
+        if column is None: continue
+        for second_letter in column:
+          if kerning_matrix[r + 1][c + 1]:
+            g.addPosSub("kern-2", second_letter, 0, 0, kerning_matrix[r + 1][c + 1], 0, 0, 0, 0, 0)
+  return font
+#+end_src
+
+* Hand-tweak the glyphs
+
+#+NAME: def_copy_glyphs
+#+begin_src python :eval no
+def copy_glyphs(font, edited):
+  edited.selection.all()
+  edited.copy()
+  font.selection.all()
+  font.paste()
+  return font
+#+end_src
+
+* Generate fonts
+
+I wanted to be able to easily compare different versions of my font:
+my original glyphs versus my tweaked glyphs, simple spacing versus
+kerned. This was a hassle with FontForge, since I had to open
+different font files in different Metrics windows. If I execute a
+little bit of source code in my Org Mode, though, I can use my test
+web page to view all the different versions. By arranging my Emacs
+windows a certain way and adding =:eval no= to the Org Babel blocks
+I'm not currently using, I can easily change the relevant table
+entries and evaluate the whole buffer to regenerate the font versions,
+including exports to OTF and WOFF. Here's the code for that:
+
+#+begin_src python :var bearings=bearings :var kerning_matrix=kerning_matrix
+<<params>>
+<<def_import_glyphs>>
+<<def_set_bearings>>
+<<def_kern_classes>>
+<<def_kern_by_char>>
+font = fontforge.font()
+font = import_glyphs(font, params)
+font = set_bearings(font, bearings)
+save_font(font, {**params, "new_otf": "sachacHandRaw.otf"})
+font = kern_classes(font, kerning_matrix)
+font = kern_by_char(font, kerning_matrix)
+save_font(font, {**params, "new_otf": "sachacHandRawKerned.otf"})
+font = load_font('SachaHandEdited.sfd')
+font = set_bearings(font, bearings)
+font.removeLookup('kern')
+save_font(font, {**params, "new_otf": "sachacHandEdited.otf"})
+font = kern_classes(font, kerning_matrix)
+font = kern_by_char(font, kerning_matrix)
+save_font(font, {**params, "new_otf": "sachacHand.otf"})
+#+end_src
+
+#+RESULTS:
+: None
+
+* Test the font
+
+This lets me quickly try text with different versions of my font. I
+can also look at lots of kerning pairs at the same time.
+
+#+NAME: def_test_html
+#+begin_src python :eval no
+def test_css(fonts):
+  doc, tag, text, line = Doc().ttl()
+  with tag('style'):
+    for f in fonts:
+      text("@font-face { font-family: '%s'; src: url('%s'); }" % (f[0], f[1]))
+      text(".%s { font-family: '%s'; }" % (f[0], f[0]))
+    text("table { font-size: inherit; font-weight: inherit }")
+    text("td { text-align: left }")
+    text(".blog-heading { font-weight: bold; font-size: 32px }")
+    text(".default { color: gray }")
+    text("body { font-family: woff, Arial, sans-serif; font-size: 32px; padding: 10px }")
+  return doc.getvalue()
+def test_html(strings):
+  doc, tag, text, line = Doc().ttl()
+  with doc.tag('table', style='border-bottom: 1px solid gray; width: 100%; border-collapse: collapse'):
+    for s in strings:
+      for i, f in enumerate(fonts):
+        style = 'border-top: 1px solid gray' if (i == 0) else ""
+        with tag('tr', klass=f[0], style=style):
+          line('td', f[0])
+          line('td', s)
+  return doc.getvalue()
+def test_kerning_matrix(kerning_matrix):
+  doc, tag, text, line = Doc().ttl()
+  with tag('table'):
+    for r, row in enumerate(classes_left):
+      if row is None: continue
+      for first_letter in row:
+        with tag('tr'):
+          line('td', first_letter)
+          for c, column in enumerate(classes_right):
+            if column is None: continue
+            for second_letter in column:
+              klass = "kerned" if kerning_matrix[r + 1][c + 1] else "default"
+              line('td', aglfn.to_glyph(first_letter) + aglfn.to_glyph(second_letter), klass=klass)
+  return doc.getvalue()
+#+end_src
+
+This code actually generates the test file.
+
+#+begin_src python :results file :file "test.html" :var kerning_matrix=kerning_matrix
+from yattag import Doc
+import numpy as np
+import aglfn
+<<def_test_html>>
+doc, tag, text, line = Doc().ttl()
+fonts = [['raw', 'sachacHandRaw.otf'],
+         ['raw-kerned', 'sachacHandRawKerned.otf'],
+         ['edited', 'sachacHandEdited.otf'],
+         ['woff', 'sachacHand.woff']]
+strings = ["Python+FontForge+Org: I made a font based on my handwriting!",
+           "Monthly review: May 2020",
+           "Emacs News 2020-06-01"]
+offsets = np.asarray(kerning_matrix)
+classes_left = [None if (x == "" or x == "None") else x.split(',') for x in offsets[1:,0]]
+classes_right = [None if (x == "" or x == "None") else x.split(",") for x in offsets[0,1:]]
+with tag('html'):
+  with tag('head'): 
+    doc.asis(test_css(fonts))
+  with tag('body'):
+    line('h1', 'Test headings')
+    with tag('div', klass="blog-heading"):
+      doc.asis(test_html(strings))
+    line('h1', 'Kerning matrix')
+    doc.asis(test_kerning_matrix(kerning_matrix))
+return doc.getvalue()
+#+end_src
+
+#+RESULTS:
+[[file:files/test.html]]
+
+* Ideas
+** DONE Copy glyphs from hand-edited font
+   CLOSED: [2020-06-06 Sat 22:33]
+   :LOGBOOK:
+   - State "DONE"       from "TODO"       [2020-06-06 Sat 22:33]
+   :END:
+** TODO Alternate glyphs
+** TODO Ligatures
+** TODO Accents
+* Extra stuff
+
+** Figure out what glyphs I want based on my blog headings
+
+ #+NAME: connect-to-db
+ #+begin_src python :eval no
+ from dotenv import load_dotenv
+ from sqlalchemy import create_engine
+ import os
+ import pandas as pd
+ import pymysql
+ load_dotenv(dotenv_path="/home/sacha/code/docker/blog/.env", verbose=True)
+
+ sqlEngine       = create_engine('mysql+pymysql://' + os.getenv('PYTHON_DB'), pool_recycle=3600)
+ dbConnection    = sqlEngine.connect()
+ #+end_src
+
+** Check glyphs
+
+#+begin_src python :results table :eval no
+<<connect-to-db>>
+df           = pd.read_sql("select post_title from wp_posts WHERE post_type='post' AND post_status='publish'", dbConnection);
+# Debugging
+#q = df[~df['post_title'].str.match('^[A-Za-z0-9\? "\'(),\-:\.\*;/@\!\[\]=_&\?\$\+#^{}\~]+$')]
+#print(q)
+from collections import Counter
+df['filtered'] = df.post_title.str.replace('[A-Za-z0-9\? "\'(),\-:\.\*;/@\!\[\]=_&\?\$\+#^{}\~]+', '')
+#print(df['filtered'].apply(list).sum())
+res = Counter(df.filtered.apply(list).sum())
+return res.most_common()
+#+end_src
+
+#+RESULTS:
+| Â    | 65 |
+| Ã    | 57 |
+| ‚    | 39 |
+| ƒ    | 33 |
+| ’    | 13 |
+| £    |  8 |
+| \x81 |  4 |
+| ¤    |  4 |
+| »    |  4 |
+| ¦    |  3 |
+| ¿    |  3 |
+| –    |  3 |
+| —    |  2 |
+| ¥    |  2 |
+| ¨    |  2 |
+| €    |  2 |
+| ō    |  2 |
+| %    |  2 |
+| \t   |  1 |
+| „    |  1 |
+| Ÿ    |  1 |
+| Š    |  1 |
+| œ    |  1 |
+| ¬    |  1 |
+| ª    |  1 |
+| ž    |  1 |
+| <    |  1 |
+| >    |  1 |
+| ¹    |  1 |
+| …    |  1 |
+| §    |  1 |
+| ¸    |  1 |
+| Ž    |  1 |
+| ¼    |  1 |
+| Œ    |  1 |
+| \xa0 |  1 |
+| \x8d |  1 |
+| †    |  1 |
+| «    |  1 |
+| ā    |  1 |
+| ē    |  1 |
+| č    |  1 |
+
+** Look up posts with weird glyphs
+
+#+NAME: check-posts
+#+begin_src python :results output :var char="–" :eval no
+<<connect-to-db>>
+df           = pd.read_sql("select id, post_title from wp_posts WHERE post_type='post' AND post_status='publish' AND post_title LIKE %(char)s limit 10;", dbConnection, params={"char": '%' + char + '%'});
+print(df)
+#+end_src
+
+#+RESULTS: check-posts
+:       id                                         post_title
+: 0   7059    Wiki organization challenge – thinking out loud
+: 1   7330   Setting up my new tablet PC – apps, config, etc.
+: 2  22038  Work on the business from the outside, not in ...
+
+** Get frequency of pairs of characters
+
+#+NAME: digrams
+#+begin_src python :results value scalar :cache yes :eval no
+<<connect-to-db>>
+df = pd.read_sql("select post_title from wp_posts WHERE post_type='post' AND post_status='publish'", dbConnection);
+from collections import Counter
+s = df.post_title.apply(list).sum()
+res = Counter('{}{}'.format(a, b) for a, b in zip(s, s[1:]))
+common = res.most_common(100)
+return ''.join([x[0] for x in common])
+#+end_src
+
+#+RESULTS[5a3f821b4bbfcb462cebc176c66bcb697c6bf4f2]: digrams
+: innge g s  treeron aanesy entit orndthn ee: ted atarr hetont, acstou o fekne rieWe smaalewo 20roea mle w 2itvi e pk rimedietioomchev cly01edlil ve i braisseha Wotdece dcotahih looouticurel laseccssila
+
+** Copy metrics from my edited font
+
+*** Get the glyph bearings
+
+  #+begin_src python :results table :eval no
+  import fontforge
+  import numpy as np
+  import pandas as pd
+  f = fontforge.open("/home/sacha/code/font/files/SachaHandEdited.sfd")
+  return list(map(lambda g: [g.glyphname, g.left_side_bearing, g.right_side_bearing], f.glyphs()))
+  #+end_src
+
+  #+RESULTS:
+  | a            |               39.0 |                38.0 |
+  | b            |               39.0 |   38.59677350874102 |
+  | c            | 38.807172523099524 |                39.0 |
+  | d            | 38.853036079593494 |   37.70218462414317 |
+  | e            |               23.0 |                39.0 |
+  | f            |               22.0 |                28.0 |
+  | g            |               39.0 |  38.839263397187665 |
+  | h            |  42.44897959183673 |  32.244897959183675 |
+  | i            |               39.0 |                39.0 |
+  | j            |               29.0 |   37.07269908475212 |
+  | k            |            38.7232 |                38.0 |
+  | l            | 38.849996883261696 |                24.0 |
+  | m            |  38.88120540762966 |  61.872974804436524 |
+  | n            |  38.41699749411689 |   50.09722712588024 |
+  | o            | 38.861850745445174 |   38.36155030599474 |
+  | p            |  38.72189349112426 |  38.806185204215126 |
+  | q            | 38.635016803781454 |                38.0 |
+  | r            | 39.183503419072274 |                39.0 |
+  | s            |               39.0 |                38.0 |
+  | t            |               39.0 |                39.0 |
+  | u            |  38.68004732178092 |   38.39916483580083 |
+  | v            |               39.0 |                39.0 |
+  | w            |   38.5881853639986 |   38.21114561800016 |
+  | x            |               39.0 |                39.0 |
+  | y            |              -25.0 |   36.43496760281849 |
+  | z            |               39.0 |                39.0 |
+  | A            |  39.38789400666183 |                39.0 |
+  | B            |               39.0 |   37.98737993209943 |
+  | C            |  39.16280761404536 |                38.0 |
+  | D            |               39.0 |   39.51459156482764 |
+  | E            |               39.0 |                39.0 |
+  | F            |               39.0 |                38.0 |
+  | G            |               39.0 |  38.966489765633526 |
+  | H            |               39.0 |                38.0 |
+  | I            |  38.96694214876033 |               39.25 |
+  | J            |               39.0 |  38.464468801750854 |
+  | K            |  38.59617220614814 |                38.0 |
+  | L            |               39.0 |                38.0 |
+  | M            | 38.745166004060955 |                38.0 |
+  | N            |  38.73987423309397 |  38.115654115187624 |
+  | O            |  38.98891966759004 |   38.81665596263048 |
+  | P            | 39.107438016528924 |   38.65155124501666 |
+  | Q            |  39.08006855188009 |   38.01570072979803 |
+  | R            |               39.0 |                38.0 |
+  | S            |               39.0 |   37.81373873377618 |
+  | T            |               39.0 |                38.0 |
+  | U            |              38.75 |   37.93218925782895 |
+  | V            |  38.64979175001243 |                38.0 |
+  | W            |               39.0 |   38.97697312351511 |
+  | X            |               39.0 |                39.0 |
+  | Y            |   39.2011995420152 |  38.493344292403606 |
+  | Z            | 38.920094771357476 |                39.0 |
+  | zero         |  39.02557980683008 |     38.934353847767 |
+  | one          |               39.0 |   37.86668813070091 |
+  | two          |               39.0 |                38.0 |
+  | three        |               39.0 |   38.30090715487154 |
+  | four         |  38.61480785064145 |                38.0 |
+  | five         |               39.0 |  38.759568693514495 |
+  | six          |   39.2019689704218 |   38.50115350183796 |
+  | seven        |               39.0 |   39.45880036173975 |
+  | eight        |  39.30732386691426 |   38.81767097798502 |
+  | nine         |  39.04800948718441 |  37.956930045381114 |
+  | question     |  39.35264826217293 |   38.26531143335521 |
+  | colon        |               38.5 |   38.70624687253556 |
+  | semicolon    |               39.0 |   39.27324858612964 |
+  | hyphen       |               39.0 |                38.0 |
+  | equal        |               39.0 |                38.0 |
+  | exclam       | 38.783020821373505 |                39.0 |
+  | quotesingle  |               39.0 | -1.7598547334076642 |
+  | at           | 39.229928128979466 |                38.0 |
+  | slash        |               39.0 |                38.0 |
+  | backslash    |               39.0 |                39.0 |
+  | quotedbl     |  38.86626375007093 |   37.95034254612182 |
+  | asciitilde   |  38.68727157672891 |                38.0 |
+  | underscore   |               39.0 |                39.0 |
+  | numbersign   |               39.0 |  38.740379553133494 |
+  | dollar       |               39.0 |  38.734693877551024 |
+  | percent      |    39.200007286174 |   38.10774096287298 |
+  | ampersand    |  38.96710425694502 |   38.68428307198798 |
+  | parenleft    | 39.286819706621706 |                39.0 |
+  | parenright   |               39.0 |   39.05824335912013 |
+  | asterisk     |               39.0 |                38.0 |
+  | plus         |               39.0 |                38.0 |
+  | comma        |  38.96546178699183 |   38.55278640450004 |
+  | period       |  38.83875395420776 |   37.87092262792087 |
+  | less         |  38.97840529870042 |                39.0 |
+  | greater      |               39.0 |   37.69246464578106 |
+  | bracketleft  | 38.788380868145794 |                38.0 |
+  | bracketright |               39.0 |                39.0 |
+  | asciicircum  |               39.0 |                38.0 |
+  | grave        |               39.0 |                39.0 |
+  | braceleft    |   38.7827057593821 |                39.0 |
+  | bar          |               39.0 |  38.406427221172024 |
+  | braceright   |               39.0 |  38.206693605650514 |
+  | space        |                0.0 |               243.0 |
+
+*** Get the kerning information
+
+  #+NAME: def_show_kerning_classes
+  #+begin_src python :eval no 
+  <<params>>
+  def show_kerning_classes(f):
+    kern_name = f.gpos_lookups[0]
+    lookup_info = f.getLookupInfo(kern_name)
+    sub = f.getLookupSubtables(kern_name)
+    for subtable in sub:
+      (classes_left, classes_right, array) = f.getKerningClass(subtable)
+      classes_left = list(map(lambda x: 'None' if x is None else ','.join(x), classes_left))
+      classes_right = list(map(lambda x: 'None' if x is None else ','.join(x), classes_right))
+      kerning = np.array(array).reshape(len(classes_left), len(classes_right))
+      df = pd.DataFrame(data=kerning, index=classes_left, columns=classes_right)
+      out(df)
+  #+end_src
+
+  #+begin_src python :results output drawer :var font="/home/sacha/code/font/files/SachaHandEdited.sfd" :eval no
+  import fontforge
+  <<def_show_kerning_classes>>
+  show_kerning_classes(fontforge.open(font))
+  #+end_src
+  #+RESULTS:
+  :results:
+  :end:
+
+** Copy it to my website
+
+#+begin_src sh :eval no
+scp sachacHand.woff web:~/sacha-v3/
+#+end_src
+
+#+RESULTS:
+
+* Other resources
+
+http://ctan.localhost.net.ar/fonts/amiri/tools/build.py
+
+#+begin_export html
+<style type="text/css">
+       @font-face { font-family: 'sachacHand'; src: url('files/sachacHand.woff'); }
+       h1, h2 { font-family: 'sachacHand', sans-serif; font-weight: bold }
+       code { font-size: 0.8rem; border: none }
+</style>
+#+end_export
