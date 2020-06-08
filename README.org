@@ -177,7 +177,7 @@ handwriting into a font. Whee!
 
 * Things I needed to install 
 
-=sudo apt-get install fontforge python3-fontforge python3-numpy python3-sqlalchemy python3-pandas python3-pymysql python3-nltk woff-tools woff2=
+=sudo apt-get install fontforge python3-fontforge python3-numpy python3-sqlalchemy python3-pandas python3-pymysql python3-nltk woff-tools woff2 python3-yattag=
 
 I compiled autotrace based on my fork at https://github.com/sachac/autotrace so that it uses Graphicsmagick instead of Imagemagick.
 
@@ -476,22 +476,22 @@ def kern_by_char(font, kerning_matrix):
 Rows are first characters, columns are second characters.
 
 #+NAME: kerning_matrix
-  |       | None | o,a,c,e,d,g,q,w | f,t,x,v,z | h,b,l,i,k | j | m,n,p,r,u |    s |    T | F | zero |
-  | None  |    0 |               0 |         0 |         0 | 0 |         0 |    0 |    0 |   |    0 |
-  | f     |    0 |            -100 |       -61 |       -30 | 0 |       -60 |    0 | -120 |   |  -70 |
-  | t     |    0 |             -50 |       -41 |       -25 | 0 |         0 |    0 | -120 |   |  -10 |
-  | i     |      |                 |       -40 |           |   |           |      |      |   |      |
-  | r     |    0 |             -32 |       -41 |       -25 | 0 |       -20 |    0 | -120 |   |   29 |
-  | k     |    0 |             -50 |       -81 |       -20 | 0 |       -20 |  -48 | -120 |   |  -79 |
-  | l     |    0 |             -41 |       -50 |         0 | 0 |         0 |    0 | -120 |   |  -52 |
-  | v     |    0 |             -40 |       -35 |       -30 | 0 |         0 |    0 | -120 |   |   30 |
-  | b,o,p |    0 |             -20 |       -80 |         0 | 0 |         0 |    0 | -120 |   |   43 |
-  | n,m   |      |                 |      -30  |           |   |           |      |      |   |      |
-  | a     |    0 |             -23 |       -60 |         0 | 0 |         0 |    0 | -120 |   |    7 |
-  | W     |    0 |             -40 |       -30 |       -20 | 0 |         0 |    0 | -120 |   |   17 |
-  | T     |    0 |            -190 |      -120 |       -60 | 0 |      -130 |    0 |    0 |   | -188 |
-  | F     |    0 |             -90 |       -90 |       -60 | 0 |       -70 | -100 |  -40 |   | -166 |
-  | P     |    0 |            -100 |       -70 |       -60 | 0 |       -70 | -100 |      |   |      |
+  |       | None | o,a,c,e,d,g,q,w | f,t,x,v,z | h,b,l,i,k | j | m,n,p,r,u |    s |    T |  F | zero |
+  | None  |    0 |               0 |         0 |         0 | 0 |         0 |    0 |    0 |    |    0 |
+  | f     |    0 |            -100 |       -61 |       -30 | 0 |       -60 |    0 | -170 |    |  -70 |
+  | t     |    0 |             -50 |       -41 |       -25 | 0 |         0 |    0 | -170 |    |  -10 |
+  | i     |      |                 |       -40 |           |   |           |      | -170 |    |      |
+  | r     |    0 |             -32 |       -41 |       -25 | 0 |       -20 |    0 | -170 |    |   29 |
+  | k     |    0 |             -50 |       -81 |       -20 | 0 |       -20 |  -48 | -170 |    |  -79 |
+  | l     |    0 |             -41 |       -50 |         0 | 0 |         0 |    0 | -170 |    |  -52 |
+  | v     |    0 |             -40 |       -35 |       -30 | 0 |         0 |    0 | -170 |    |   30 |
+  | b,o,p |    0 |             -20 |       -80 |         0 | 0 |         0 |    0 | -170 |    |   43 |
+  | n,m   |      |                 |       -50 |           |   |           |      | -170 |    |      |
+  | a     |    0 |             -23 |       -60 |         0 | 0 |         0 |    0 | -170 |    |    7 |
+  | W     |    0 |             -40 |       -30 |       -20 | 0 |         0 |    0 |      | 17 |      |
+  | T     |    0 |            -190 |      -120 |       -60 | 0 |      -130 |    0 |    0 |    | -188 |
+  | F     |    0 |             -90 |       -90 |       -60 | 0 |       -70 | -100 |  -40 |    | -166 |
+  | P     |    0 |            -100 |       -70 |       -60 | 0 |       -70 | -100 |  -20 |    |      |
 
 
 For testing:
@@ -548,36 +548,19 @@ font = set_bearings(font, bearings)
 save_font(font, {**params, "new_otf": "sachacHandRaw.otf"})
 font = kern_classes(font, kerning_matrix)
 font = kern_by_char(font, kerning_matrix)
-save_font(font, {**params, "new_otf": "sachacHandKerned.otf"})
+save_font(font, {**params, "new_otf": "sachacHandRawKerned.otf"})
 font = load_font('SachaHandEdited.sfd')
 font = set_bearings(font, bearings)
 font.removeLookup('kern')
 save_font(font, {**params, "new_otf": "sachacHandEdited.otf"})
 font = kern_classes(font, kerning_matrix)
+save_font(font, {**params, "new_otf": "sachacHandEditedClasses.otf"})
 font = kern_by_char(font, kerning_matrix)
 save_font(font, {**params, "new_otf": "sachacHand.otf"})
 #+end_src
 
 #+RESULTS:
 : None
-
-After importing the glyphs, but before kerning:
-
-#+CALL: sample(font_file="sachacHandRaw.otf", filename="check/unkerned.png") :exports code
-
-[[./files/check/unkerned.png]]
-
-After tweaking the glyphs to make them more even:
-
-#+CALL: sample(font_file="sachacHandEdited.otf", filename="check/edited-glyphs.png")  :exports code
-
-[[./files/check/edited-glyphs.png]]
-
-After kerning:
-
-#+CALL: sample(font_file="sachacHand.otf", filename="check/kerned.png") :exports code
-
-[[./files/check/kerned.png]]
 
 * Code for displaying sample text
 
@@ -610,130 +593,75 @@ return filename
 
 [[file:files/test.html]]
 
-#+begin_src html :tangle "files/test.html" :eval no
-  <html>
-    <head>
-      <style>
-       @font-face { font-family: 'sachacHand'; src: url('sachacHand.woff'); }
-       @font-face { font-family: 'sachacHandOTF'; src: url('sachacHand.otf'); }
-       @font-face { font-family: 'sachacHandRaw'; src: url('sachacHandRaw.otf'); }
-       @font-face { font-family: 'sachacHandKerned'; src: url('sachacHandKerned.otf'); }
-       @font-face { font-family: 'sachacHandEdited'; src: url('sachacHandEdited.otf'); }
-       .otf { font-family: 'sachacHandOTF'; }
-       .raw { font-family: 'sachacHandRaw'; }
-       .kerned { font-family: 'sachacHandKerned'; }
-       .edited { font-family: 'sachacHandEdited'; }
-       table { font-size: inherit; font-weight: inherit }
-       body { font-family: 'sachacHand', Alegreya; font-size: 32px }
-      </style>
-    </head>
-    <body>
-<div class="test"><strong>Python+FontForge+Org: I made a font based on my handwriting!</strong></div>
-<div class="test"><strong>Monthly review: May 2020</strong></div>
-      nnnnnaaannnnbbbbnn
-      This is a test
-      ohohohohohoho
-      Emacs News 2020-04-05
-      The quick brown fox jumps over the lazy dog.
-
-  nnaannnnabnnnnacnnnnadnnnnaennnnafnnnnagnnnnahnnnn
-  ainnnnajnnnnaknnnnalnnnnamnnnnannnnnaonnnnapnnnnaq
-  nnnnarnnnnasnnnnatnnnnaunnnnavnnnnawnnnnaxnnnnaynn
-  nnaznnnnbannnnbbnnnnbcnnnnbdnnnnbennnnbfnnnnbgnnnn
-  bhnnnnbinnnnbjnnnnbknnnnblnnnnbmnnnnbnnnnnbonnnnbp
-  nnnnbqnnnnbrnnnnbsnnnnbtnnnnbunnnnbvnnnnbwnnnnbxnn
-  nnbynnnnbznnnncannnncbnnnnccnnnncdnnnncennnncfnnnn
-  cgnnnnchnnnncinnnncjnnnncknnnnclnnnncmnnnncnnnnnco
-  nnnncpnnnncqnnnncrnnnncsnnnnctnnnncunnnncvnnnncwnn
-  nncxnnnncynnnncznnnndannnndbnnnndcnnnnddnnnndennnn
-  dfnnnndgnnnndhnnnndinnnndjnnnndknnnndlnnnndmnnnndn
-  nnnndonnnndpnnnndqnnnndrnnnndsnnnndtnnnndunnnndvnn
-  nndwnnnndxnnnndynnnndznnnneannnnebnnnnecnnnnednnnn
-  eennnnefnnnnegnnnnehnnnneinnnnejnnnneknnnnelnnnnem
-  nnnnennnnneonnnnepnnnneqnnnnernnnnesnnnnetnnnneunn
-  nnevnnnnewnnnnexnnnneynnnneznnnnfannnnfbnnnnfcnnnn
-  fdnnnnfennnnffnnnnfgnnnnfhnnnnfinnnnfjnnnnfknnnnfl
-  nnnnfmnnnnfnnnnnfonnnnfpnnnnfqnnnnfrnnnnfsnnnnftnn
-  nnfunnnnfvnnnnfwnnnnfxnnnnfynnnnfznnnngannnngbnnnn
-  gcnnnngdnnnngennnngfnnnnggnnnnghnnnnginnnngjnnnngk
-  nnnnglnnnngmnnnngnnnnngonnnngpnnnngqnnnngrnnnngsnn
-  nngtnnnngunnnngvnnnngwnnnngxnnnngynnnngznnnnhannnn
-  hbnnnnhcnnnnhdnnnnhennnnhfnnnnhgnnnnhhnnnnhinnnnhj
-  nnnnhknnnnhlnnnnhmnnnnhnnnnnhonnnnhpnnnnhqnnnnhrnn
-  nnhsnnnnhtnnnnhunnnnhvnnnnhwnnnnhxnnnnhynnnnhznnnn
-  iannnnibnnnnicnnnnidnnnniennnnifnnnnignnnnihnnnnii
-  nnnnijnnnniknnnnilnnnnimnnnninnnnnionnnnipnnnniqnn
-  nnirnnnnisnnnnitnnnniunnnnivnnnniwnnnnixnnnniynnnn
-  iznnnnjannnnjbnnnnjcnnnnjdnnnnjennnnjfnnnnjgnnnnjh
-  nnnnjinnnnjjnnnnjknnnnjlnnnnjmnnnnjnnnnnjonnnnjpnn
-  nnjqnnnnjrnnnnjsnnnnjtnnnnjunnnnjvnnnnjwnnnnjxnnnn
-  jynnnnjznnnnkannnnkbnnnnkcnnnnkdnnnnkennnnkfnnnnkg
-  nnnnkhnnnnkinnnnkjnnnnkknnnnklnnnnkmnnnnknnnnnkonn
-  nnkpnnnnkqnnnnkrnnnnksnnnnktnnnnkunnnnkvnnnnkwnnnn
-  kxnnnnkynnnnkznnnnlannnnlbnnnnlcnnnnldnnnnlennnnlf
-  nnnnlgnnnnlhnnnnlinnnnljnnnnlknnnnllnnnnlmnnnnlnnn
-  nnlonnnnlpnnnnlqnnnnlrnnnnlsnnnnltnnnnlunnnnlvnnnn
-  lwnnnnlxnnnnlynnnnlznnnnmannnnmbnnnnmcnnnnmdnnnnme
-  nnnnmfnnnnmgnnnnmhnnnnminnnnmjnnnnmknnnnmlnnnnmmnn
-  nnmnnnnnmonnnnmpnnnnmqnnnnmrnnnnmsnnnnmtnnnnmunnnn
-  mvnnnnmwnnnnmxnnnnmynnnnmznnnnnannnnnbnnnnncnnnnnd
-  nnnnnennnnnfnnnnngnnnnnhnnnnninnnnnjnnnnnknnnnnlnn
-  nnnmnnnnnnnnnnnonnnnnpnnnnnqnnnnnrnnnnnsnnnnntnnnn
-  nunnnnnvnnnnnwnnnnnxnnnnnynnnnnznnnnoannnnobnnnnoc
-  nnnnodnnnnoennnnofnnnnognnnnohnnnnoinnnnojnnnnoknn
-  nnolnnnnomnnnnonnnnnoonnnnopnnnnoqnnnnornnnnosnnnn
-  otnnnnounnnnovnnnnownnnnoxnnnnoynnnnoznnnnpannnnpb
-  nnnnpcnnnnpdnnnnpennnnpfnnnnpgnnnnphnnnnpinnnnpjnn
-  nnpknnnnplnnnnpmnnnnpnnnnnponnnnppnnnnpqnnnnprnnnn
-  psnnnnptnnnnpunnnnpvnnnnpwnnnnpxnnnnpynnnnpznnnnqa
-  nnnnqbnnnnqcnnnnqdnnnnqennnnqfnnnnqgnnnnqhnnnnqinn
-  nnqjnnnnqknnnnqlnnnnqmnnnnqnnnnnqonnnnqpnnnnqqnnnn
-  qrnnnnqsnnnnqtnnnnqunnnnqvnnnnqwnnnnqxnnnnqynnnnqz
-  nnnnrannnnrbnnnnrcnnnnrdnnnnrennnnrfnnnnrgnnnnrhnn
-  nnrinnnnrjnnnnrknnnnrlnnnnrmnnnnrnnnnnronnnnrpnnnn
-  rqnnnnrrnnnnrsnnnnrtnnnnrunnnnrvnnnnrwnnnnrxnnnnry
-  nnnnrznnnnsannnnsbnnnnscnnnnsdnnnnsennnnsfnnnnsgnn
-  nnshnnnnsinnnnsjnnnnsknnnnslnnnnsmnnnnsnnnnnsonnnn
-  spnnnnsqnnnnsrnnnnssnnnnstnnnnsunnnnsvnnnnswnnnnsx
-  nnnnsynnnnsznnnntannnntbnnnntcnnnntdnnnntennnntfnn
-  nntgnnnnthnnnntinnnntjnnnntknnnntlnnnntmnnnntnnnnn
-  tonnnntpnnnntqnnnntrnnnntsnnnnttnnnntunnnntvnnnntw
-  nnnntxnnnntynnnntznnnnuannnnubnnnnucnnnnudnnnnuenn
-  nnufnnnnugnnnnuhnnnnuinnnnujnnnnuknnnnulnnnnumnnnn
-  unnnnnuonnnnupnnnnuqnnnnurnnnnusnnnnutnnnnuunnnnuv
-  nnnnuwnnnnuxnnnnuynnnnuznnnnvannnnvbnnnnvcnnnnvdnn
-  nnvennnnvfnnnnvgnnnnvhnnnnvinnnnvjnnnnvknnnnvlnnnn
-  vmnnnnvnnnnnvonnnnvpnnnnvqnnnnvrnnnnvsnnnnvtnnnnvu
-  nnnnvvnnnnvwnnnnvxnnnnvynnnnvznnnnwannnnwbnnnnwcnn
-  nnwdnnnnwennnnwfnnnnwgnnnnwhnnnnwinnnnwjnnnnwknnnn
-  wlnnnnwmnnnnwnnnnnwonnnnwpnnnnwqnnnnwrnnnnwsnnnnwt
-  nnnnwunnnnwvnnnnwwnnnnwxnnnnwynnnnwznnnnxannnnxbnn
-  nnxcnnnnxdnnnnxennnnxfnnnnxgnnnnxhnnnnxinnnnxjnnnn
-  xknnnnxlnnnnxmnnnnxnnnnnxonnnnxpnnnnxqnnnnxrnnnnxs
-  nnnnxtnnnnxunnnnxvnnnnxwnnnnxxnnnnxynnnnxznnnnyann
-  nnybnnnnycnnnnydnnnnyennnnyfnnnnygnnnnyhnnnnyinnnn
-  yjnnnnyknnnnylnnnnymnnnnynnnnnyonnnnypnnnnyqnnnnyr
-  nnnnysnnnnytnnnnyunnnnyvnnnnywnnnnyxnnnnyynnnnyznn
-  nnzannnnzbnnnnzcnnnnzdnnnnzennnnzfnnnnzgnnnnzhnnnn
-  zinnnnzjnnnnzknnnnzlnnnnzmnnnnznnnnnzonnnnzpnnnnzq
-  nnnnzrnnnnzsnnnnztnnnnzunnnnzvnnnnzwnnnnzxnnnnzynn
-  nnzznn
-  <script src="https://code.jquery.com/jquery-3.5.1.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
-  <script>
-  $(document).ready(function() {
-    $('.test').each(function() {
-      let html = $(this).html();
-      const styles = [['raw', 'raw'], ['raw+kerned', 'kerned'], ['edited', 'edited'], ['edited+kerned', 'sachacHand']];
-      $(this).html('<table>' + styles.map(o => `<tr><td>${o[0]}</td><td><div class="${o[1]}">${html}</div></td></tr>`).join("\n") + '</table>');
-    });
-  });      
-  </script>
-  
-</body>
-</html>
+#+NAME: def_test_html
+#+begin_src python :eval no
+def test_css(fonts):
+  doc, tag, text, line = Doc().ttl()
+  with tag('style'):
+    for f in fonts:
+      text("@font-face { font-family: '%s'; src: url('%s'); }" % (f[0], f[1]))
+      text(".%s { font-family: '%s'; }" % (f[0], f[0]))
+    text("table { font-size: inherit; font-weight: inherit }")
+    text("body { font-family: woff, Arial, sans-serif; font-size: 32px; padding: 10px }")
+  return doc.getvalue()
+def test_html(s):
+  doc, tag, text, line = Doc().ttl()
+  with doc.tag('table'):
+    for f in fonts:
+      with tag('tr', klass=f[0]):
+        line('td', f[0])
+        line('td', s)
+  return doc.getvalue()
+def test_kerning_matrix(kerning_matrix):
+  doc, tag, text, line = Doc().ttl()
+  with tag('table'):
+    for r, row in enumerate(classes_left):
+      if row is None: continue
+      for first_letter in row:
+        with tag('tr'):
+          line('td', first_letter)
+          for c, column in enumerate(classes_right):
+            if column is None: continue
+            for second_letter in column:
+              if kerning_matrix[r + 1][c + 1]:
+                line('td', aglfn.to_glyph(first_letter) + aglfn.to_glyph(second_letter))
+              else:
+                line('td', '')
+  return doc.getvalue()
 #+end_src
 
-Test string from http://www.ninastoessinger.com/stringmaker/index.php
+#+begin_src python :results file :file "test.html" :var kerning_matrix=kerning_matrix
+from yattag import Doc
+import numpy as np
+import aglfn
+<<def_test_html>>
+doc, tag, text, line = Doc().ttl()
+fonts = [['raw', 'sachacHandRaw.otf'],
+         ['raw-kerned', 'sachacHandRawKerned.otf'],
+         ['edited', 'sachacHandEdited.otf'],
+         ['edited-classes', 'sachacHandEditedClasses.otf'],
+         ['woff', 'sachacHand.woff']]
+strings = ["Python+FontForge+Org: I made a font based on my handwriting!",
+           "Monthly review: May 2020",
+           "Emacs News 2020-06-01"]
+offsets = np.asarray(kerning_matrix)
+classes_left = [None if (x == "" or x == "None") else x.split(',') for x in offsets[1:,0]]
+classes_right = [None if (x == "" or x == "None") else x.split(",") for x in offsets[0,1:]]
+with tag('html'):
+  with tag('head'): 
+    doc.asis(test_css(fonts))
+  with tag('body'):
+    line('h1', 'Test headings')
+    with tag('strong'):
+      for s in strings:
+        doc.asis(test_html(s))
+    line('h1', 'Kerning matrix')
+    doc.asis(test_kerning_matrix(kerning_matrix))
+return doc.getvalue()
+#+end_src
+
+#+RESULTS:
+[[file:files/test.html]]
 
 * Ideas
 ** DONE Copy glyphs from hand-edited font

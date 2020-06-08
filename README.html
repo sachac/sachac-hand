@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2020-06-07 Sun 21:22 -->
+<!-- 2020-06-07 Sun 21:55 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>&lrm;</title>
@@ -276,63 +276,63 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org280dea7">Summary</a></li>
-<li><a href="#org3b3bd9a">License</a>
+<li><a href="#org6a818f2">Summary</a></li>
+<li><a href="#org6c653b4">License</a>
 <ul>
-<li><a href="#orgb984eb2">sachacHand - SIL Open Font License</a></li>
+<li><a href="#orgc8219b3">sachacHand - SIL Open Font License</a></li>
 </ul>
 </li>
-<li><a href="#org740e36e">Blog post</a></li>
-<li><a href="#org7e48ae0">Things I needed to install</a>
+<li><a href="#orga9efa94">Blog post</a></li>
+<li><a href="#org65d99de">Things I needed to install</a>
 <ul>
-<li><a href="#orgbed183a">Errors fixed along the way</a></li>
+<li><a href="#orgf37d8e3">Errors fixed along the way</a></li>
 </ul>
 </li>
-<li><a href="#org1c49bc6">Parameters and common functions</a></li>
-<li><a href="#orgb7ac918">Generate guidelines</a>
+<li><a href="#org3dc6621">Parameters and common functions</a></li>
+<li><a href="#org2d5b772">Generate guidelines</a>
 <ul>
-<li><a href="#org533d527">Code to make the template</a></li>
-<li><a href="#orgcddd3fb">Actually make the templates</a></li>
+<li><a href="#org66fed7c">Code to make the template</a></li>
+<li><a href="#org8aa4cf7">Actually make the templates</a></li>
 </ul>
 </li>
-<li><a href="#org17971ff">Cut into glyphs</a></li>
-<li><a href="#orga6fe6cc">Import SVG outlines into font</a></li>
-<li><a href="#org2d5fe7a">Adjust bearings</a></li>
-<li><a href="#orgb76d146">Kern the font</a>
+<li><a href="#org4cceb4a">Cut into glyphs</a></li>
+<li><a href="#orgaa12d1a">Import SVG outlines into font</a></li>
+<li><a href="#org2228c93">Adjust bearings</a></li>
+<li><a href="#org36ba30d">Kern the font</a>
 <ul>
-<li><a href="#orgd6d8931">Kern by classes</a></li>
+<li><a href="#org74a8d88">Kern by classes</a></li>
 </ul>
 </li>
-<li><a href="#org507a897">Hand-tweak the glyphs</a></li>
-<li><a href="#org43bed85">Let's put it all together</a></li>
-<li><a href="#org6c523fd">Code for displaying sample text</a></li>
-<li><a href="#org48a309f">Test the font</a></li>
-<li><a href="#orge72b87c">Ideas</a>
+<li><a href="#org3dad684">Hand-tweak the glyphs</a></li>
+<li><a href="#orga4ce563">Let's put it all together</a></li>
+<li><a href="#orgc5462cb">Code for displaying sample text</a></li>
+<li><a href="#org4753296">Test the font</a></li>
+<li><a href="#org2074320">Ideas</a>
 <ul>
-<li><a href="#orgd039508"><span class="done DONE">DONE</span> Copy glyphs from hand-edited font</a></li>
-<li><a href="#org257932c"><span class="todo TODO">TODO</span> Alternate glyphs</a></li>
-<li><a href="#org6dd1d60"><span class="todo TODO">TODO</span> Ligatures</a></li>
-<li><a href="#org95bc32f"><span class="todo TODO">TODO</span> Accents</a></li>
+<li><a href="#org33aa2aa"><span class="done DONE">DONE</span> Copy glyphs from hand-edited font</a></li>
+<li><a href="#orgf8e32c1"><span class="todo TODO">TODO</span> Alternate glyphs</a></li>
+<li><a href="#org12e073a"><span class="todo TODO">TODO</span> Ligatures</a></li>
+<li><a href="#org95baf93"><span class="todo TODO">TODO</span> Accents</a></li>
 </ul>
 </li>
-<li><a href="#org1d77ae7">Extra stuff</a>
+<li><a href="#org20994a9">Extra stuff</a>
 <ul>
-<li><a href="#org7462bb2">Figure out what glyphs I want based on my blog headings</a></li>
-<li><a href="#org607c194">Check glyphs</a></li>
-<li><a href="#orgace16e1">Look up posts with weird glyphs</a></li>
-<li><a href="#org623e056">Get frequency of pairs of characters</a></li>
-<li><a href="#org647c6e3">Copy metrics from my edited font</a></li>
-<li><a href="#orgb3aa3da">Copy it to my website</a></li>
+<li><a href="#orgc2d2c0c">Figure out what glyphs I want based on my blog headings</a></li>
+<li><a href="#org1334130">Check glyphs</a></li>
+<li><a href="#orgd4e4e2b">Look up posts with weird glyphs</a></li>
+<li><a href="#org1dd2cd0">Get frequency of pairs of characters</a></li>
+<li><a href="#org9b20b0d">Copy metrics from my edited font</a></li>
+<li><a href="#org9f5731a">Copy it to my website</a></li>
 </ul>
 </li>
-<li><a href="#orged99740">Other resources</a></li>
+<li><a href="#org2787699">Other resources</a></li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-org280dea7" class="outline-2">
-<h2 id="org280dea7">Summary</h2>
-<div class="outline-text-2" id="text-org280dea7">
+<div id="outline-container-org6a818f2" class="outline-2">
+<h2 id="org6a818f2">Summary</h2>
+<div class="outline-text-2" id="text-org6a818f2">
 <p>
 I wanted to make my own handwriting font. I also wanted to be able to
 generate fonts quickly from the handwriting samples I can draw on my
@@ -381,9 +381,9 @@ Quick links:
 </div>
 </div>
 
-<div id="outline-container-org3b3bd9a" class="outline-2">
-<h2 id="org3b3bd9a">License</h2>
-<div class="outline-text-2" id="text-org3b3bd9a">
+<div id="outline-container-org6c653b4" class="outline-2">
+<h2 id="org6c653b4">License</h2>
+<div class="outline-text-2" id="text-org6c653b4">
 <p>
 Feel free to use the font under the SIL Open Font License. That means
 you can freely create and distribute things that use the font. See
@@ -397,9 +397,9 @@ This Font Software is licensed under the SIL Open Font License, Version 1.1. <br
 </p>
 </div>
 
-<div id="outline-container-orgb984eb2" class="outline-3">
-<h3 id="orgb984eb2">sachacHand - SIL Open Font License</h3>
-<div class="outline-text-3" id="text-orgb984eb2">
+<div id="outline-container-orgc8219b3" class="outline-3">
+<h3 id="orgc8219b3">sachacHand - SIL Open Font License</h3>
+<div class="outline-text-3" id="text-orgc8219b3">
 <p>
 This license is copied below, and is also available with a FAQ at: <a href="http://scripts.sil.org/OFL">http://scripts.sil.org/OFL</a>
 </p>
@@ -525,9 +525,9 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
 </div>
 
 
-<div id="outline-container-org740e36e" class="outline-2">
-<h2 id="org740e36e">Blog post</h2>
-<div class="outline-text-2" id="text-org740e36e">
+<div id="outline-container-orga9efa94" class="outline-2">
+<h2 id="orga9efa94">Blog post</h2>
+<div class="outline-text-2" id="text-orga9efa94">
 <p>
 I wanted to make a font based on my handwriting using only free
 software. It turns out that FontForge can be scripted with Python. I
@@ -794,11 +794,11 @@ handwriting into a font. Whee!
 </div>
 </div>
 
-<div id="outline-container-org7e48ae0" class="outline-2">
-<h2 id="org7e48ae0">Things I needed to install</h2>
-<div class="outline-text-2" id="text-org7e48ae0">
+<div id="outline-container-org65d99de" class="outline-2">
+<h2 id="org65d99de">Things I needed to install</h2>
+<div class="outline-text-2" id="text-org65d99de">
 <p>
-<code>sudo apt-get install fontforge python3-fontforge python3-numpy python3-sqlalchemy python3-pandas python3-pymysql python3-nltk woff-tools woff2</code>
+<code>sudo apt-get install fontforge python3-fontforge python3-numpy python3-sqlalchemy python3-pandas python3-pymysql python3-nltk woff-tools woff2 python3-yattag</code>
 </p>
 
 <p>
@@ -810,9 +810,9 @@ I also needed <code>(setenv "LD_LIBRARY_PATH" "/usr/local/lib")</code>. There ar
 </p>
 </div>
 
-<div id="outline-container-orgbed183a" class="outline-3">
-<h3 id="orgbed183a">Errors fixed along the way</h3>
-<div class="outline-text-3" id="text-orgbed183a">
+<div id="outline-container-orgf37d8e3" class="outline-3">
+<h3 id="orgf37d8e3">Errors fixed along the way</h3>
+<div class="outline-text-3" id="text-orgf37d8e3">
 <ul class="org-ul">
 <li><code>FileNotFoundError: [Errno 2] No such file or directory: '/home/sacha/.local/lib/python3.8/site-packages/aglfn/agl-aglfn/aglfn.txt'</code>
 <ul class="org-ul">
@@ -823,11 +823,11 @@ I also needed <code>(setenv "LD_LIBRARY_PATH" "/usr/local/lib")</code>. There ar
 </div>
 </div>
 
-<div id="outline-container-org1c49bc6" class="outline-2">
-<h2 id="org1c49bc6">Parameters and common functions</h2>
-<div class="outline-text-2" id="text-org1c49bc6">
+<div id="outline-container-org3dc6621" class="outline-2">
+<h2 id="org3dc6621">Parameters and common functions</h2>
+<div class="outline-text-2" id="text-org3dc6621">
 <div class="org-src-container">
-<pre class="src src-python" id="org29a8c44"><code><span class="org-keyword">import</span> numpy <span class="org-keyword">as</span> np</code>
+<pre class="src src-python" id="orgd9aca1c"><code><span class="org-keyword">import</span> numpy <span class="org-keyword">as</span> np</code>
 <code><span class="org-keyword">import</span> pandas <span class="org-keyword">as</span> pd</code>
 <code><span class="org-keyword">import</span> aglfn</code>
 <code><span class="org-keyword">import</span> fontforge</code>
@@ -895,15 +895,15 @@ I also needed <code>(setenv "LD_LIBRARY_PATH" "/usr/local/lib")</code>. There ar
 </div>
 
 
-<div id="outline-container-orgb7ac918" class="outline-2">
-<h2 id="orgb7ac918">Generate guidelines</h2>
-<div class="outline-text-2" id="text-orgb7ac918">
+<div id="outline-container-org2d5b772" class="outline-2">
+<h2 id="org2d5b772">Generate guidelines</h2>
+<div class="outline-text-2" id="text-org2d5b772">
 </div>
-<div id="outline-container-org533d527" class="outline-3">
-<h3 id="org533d527">Code to make the template</h3>
-<div class="outline-text-3" id="text-org533d527">
+<div id="outline-container-org66fed7c" class="outline-3">
+<h3 id="org66fed7c">Code to make the template</h3>
+<div class="outline-text-3" id="text-org66fed7c">
 <div class="org-src-container">
-<pre class="src src-python" id="org91932d8"><code><span class="org-keyword">from</span> PIL <span class="org-keyword">import</span> Image, ImageFont, ImageDraw</code>
+<pre class="src src-python" id="org4172093"><code><span class="org-keyword">from</span> PIL <span class="org-keyword">import</span> Image, ImageFont, ImageDraw</code>
 <code></code>
 <code><span class="org-comment-delimiter">#</span><span class="org-comment">LETTERS = 'abcd'</span></code>
 <code><span class="org-comment-delimiter"># </span><span class="org-comment">Baseline is red</span></code>
@@ -934,9 +934,9 @@ I also needed <code>(setenv "LD_LIBRARY_PATH" "/usr/local/lib")</code>. There ar
 </div>
 </div>
 
-<div id="outline-container-orgcddd3fb" class="outline-3">
-<h3 id="orgcddd3fb">Actually make the templates</h3>
-<div class="outline-text-3" id="text-orgcddd3fb">
+<div id="outline-container-org8aa4cf7" class="outline-3">
+<h3 id="org8aa4cf7">Actually make the templates</h3>
+<div class="outline-text-3" id="text-org8aa4cf7">
 <div class="org-src-container">
 <pre class="src src-python"><code><span class="org-keyword">import</span> numpy <span class="org-keyword">as</span> np</code>
 <code><span class="org-keyword">import</span> pandas <span class="org-keyword">as</span> pd</code>
@@ -1045,11 +1045,11 @@ I also needed <code>(setenv "LD_LIBRARY_PATH" "/usr/local/lib")</code>. There ar
 </div>
 </div>
 
-<div id="outline-container-org17971ff" class="outline-2">
-<h2 id="org17971ff">Cut into glyphs</h2>
-<div class="outline-text-2" id="text-org17971ff">
+<div id="outline-container-org4cceb4a" class="outline-2">
+<h2 id="org4cceb4a">Cut into glyphs</h2>
+<div class="outline-text-2" id="text-org4cceb4a">
 <div class="org-src-container">
-<pre class="src src-python" id="orga475c50"><code><span class="org-keyword">import</span> os</code>
+<pre class="src src-python" id="orge9b8bde"><code><span class="org-keyword">import</span> os</code>
 <code><span class="org-keyword">import</span> libxml2</code>
 <code><span class="org-keyword">from</span> PIL <span class="org-keyword">import</span> Image, ImageOps</code>
 <code><span class="org-keyword">import</span> subprocess</code>
@@ -1082,11 +1082,11 @@ I also needed <code>(setenv "LD_LIBRARY_PATH" "/usr/local/lib")</code>. There ar
 </div>
 </div>
 
-<div id="outline-container-orga6fe6cc" class="outline-2">
-<h2 id="orga6fe6cc">Import SVG outlines into font</h2>
-<div class="outline-text-2" id="text-orga6fe6cc">
+<div id="outline-container-orgaa12d1a" class="outline-2">
+<h2 id="orgaa12d1a">Import SVG outlines into font</h2>
+<div class="outline-text-2" id="text-orgaa12d1a">
 <div class="org-src-container">
-<pre class="src src-python" id="org8c78b2d"><code><span class="org-keyword">import</span> fontforge</code>
+<pre class="src src-python" id="org7c17358"><code><span class="org-keyword">import</span> fontforge</code>
 <code><span class="org-keyword">import</span> os</code>
 <code><span class="org-keyword">import</span> aglfn</code>
 <code><span class="org-keyword">def</span> <span class="org-function-name">import_glyphs</span>(font, params):</code>
@@ -1121,10 +1121,10 @@ I also needed <code>(setenv "LD_LIBRARY_PATH" "/usr/local/lib")</code>. There ar
 </div>
 </div>
 
-<div id="outline-container-org2d5fe7a" class="outline-2">
-<h2 id="org2d5fe7a">Adjust bearings</h2>
-<div class="outline-text-2" id="text-org2d5fe7a">
-<table id="orgde04c80" border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<div id="outline-container-org2228c93" class="outline-2">
+<h2 id="org2228c93">Adjust bearings</h2>
+<div class="outline-text-2" id="text-org2228c93">
+<table id="orgb50d82b" border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
 
 <colgroup>
@@ -1223,7 +1223,7 @@ I also needed <code>(setenv "LD_LIBRARY_PATH" "/usr/local/lib")</code>. There ar
 </table>
 
 <div class="org-src-container">
-<pre class="src src-python" id="org115f234"><code><span class="org-keyword">def</span> <span class="org-function-name">set_bearings</span>(font, bearings):</code>
+<pre class="src src-python" id="org84a65ac"><code><span class="org-keyword">def</span> <span class="org-function-name">set_bearings</span>(font, bearings):</code>
 <code>  <span class="org-variable-name">space</span> = font.createMappedChar(<span class="org-string">' '</span>)</code>
 <code>  <span class="org-variable-name">space.width</span> = <span class="org-builtin">int</span>(params[<span class="org-string">'em'</span>] / 5)</code>
 <code>  (default_left, default_right) = <span class="org-builtin">next</span>(o <span class="org-keyword">for</span> o <span class="org-keyword">in</span> bearings <span class="org-keyword">if</span> o[0] == <span class="org-string">'Default'</span>)[1:]</code>
@@ -1341,15 +1341,15 @@ For testing:
 </div>
 </div>
 
-<div id="outline-container-orgb76d146" class="outline-2">
-<h2 id="orgb76d146">Kern the font</h2>
-<div class="outline-text-2" id="text-orgb76d146">
+<div id="outline-container-org36ba30d" class="outline-2">
+<h2 id="org36ba30d">Kern the font</h2>
+<div class="outline-text-2" id="text-org36ba30d">
 </div>
-<div id="outline-container-orgd6d8931" class="outline-3">
-<h3 id="orgd6d8931">Kern by classes</h3>
-<div class="outline-text-3" id="text-orgd6d8931">
+<div id="outline-container-org74a8d88" class="outline-3">
+<h3 id="org74a8d88">Kern by classes</h3>
+<div class="outline-text-3" id="text-org74a8d88">
 <div class="org-src-container">
-<pre class="src src-python" id="org54b8677"><code></code>
+<pre class="src src-python" id="orgcdca59f"><code></code>
 <code><span class="org-comment-delimiter"># </span><span class="org-comment">NOTE: This removes the old kerning table</span></code>
 <code><span class="org-keyword">def</span> <span class="org-function-name">kern_classes</span>(font, kerning_matrix):</code>
 <code>  <span class="org-keyword">try</span>:</code>
@@ -1391,7 +1391,7 @@ For testing:
 Rows are first characters, columns are second characters.
 </p>
 
-<table id="org4df58c3" border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<table id="orgfaebd61" border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
 
 <colgroup>
@@ -1455,7 +1455,7 @@ Rows are first characters, columns are second characters.
 <td class="org-right">0</td>
 <td class="org-right">-60</td>
 <td class="org-right">0</td>
-<td class="org-right">-120</td>
+<td class="org-right">-170</td>
 <td class="org-left">&#xa0;</td>
 <td class="org-right">-70</td>
 </tr>
@@ -1469,7 +1469,7 @@ Rows are first characters, columns are second characters.
 <td class="org-right">0</td>
 <td class="org-right">0</td>
 <td class="org-right">0</td>
-<td class="org-right">-120</td>
+<td class="org-right">-170</td>
 <td class="org-left">&#xa0;</td>
 <td class="org-right">-10</td>
 </tr>
@@ -1483,7 +1483,7 @@ Rows are first characters, columns are second characters.
 <td class="org-right">&#xa0;</td>
 <td class="org-right">&#xa0;</td>
 <td class="org-right">&#xa0;</td>
-<td class="org-right">&#xa0;</td>
+<td class="org-right">-170</td>
 <td class="org-left">&#xa0;</td>
 <td class="org-right">&#xa0;</td>
 </tr>
@@ -1497,7 +1497,7 @@ Rows are first characters, columns are second characters.
 <td class="org-right">0</td>
 <td class="org-right">-20</td>
 <td class="org-right">0</td>
-<td class="org-right">-120</td>
+<td class="org-right">-170</td>
 <td class="org-left">&#xa0;</td>
 <td class="org-right">29</td>
 </tr>
@@ -1511,7 +1511,7 @@ Rows are first characters, columns are second characters.
 <td class="org-right">0</td>
 <td class="org-right">-20</td>
 <td class="org-right">-48</td>
-<td class="org-right">-120</td>
+<td class="org-right">-170</td>
 <td class="org-left">&#xa0;</td>
 <td class="org-right">-79</td>
 </tr>
@@ -1525,7 +1525,7 @@ Rows are first characters, columns are second characters.
 <td class="org-right">0</td>
 <td class="org-right">0</td>
 <td class="org-right">0</td>
-<td class="org-right">-120</td>
+<td class="org-right">-170</td>
 <td class="org-left">&#xa0;</td>
 <td class="org-right">-52</td>
 </tr>
@@ -1539,7 +1539,7 @@ Rows are first characters, columns are second characters.
 <td class="org-right">0</td>
 <td class="org-right">0</td>
 <td class="org-right">0</td>
-<td class="org-right">-120</td>
+<td class="org-right">-170</td>
 <td class="org-left">&#xa0;</td>
 <td class="org-right">30</td>
 </tr>
@@ -1553,7 +1553,7 @@ Rows are first characters, columns are second characters.
 <td class="org-right">0</td>
 <td class="org-right">0</td>
 <td class="org-right">0</td>
-<td class="org-right">-120</td>
+<td class="org-right">-170</td>
 <td class="org-left">&#xa0;</td>
 <td class="org-right">43</td>
 </tr>
@@ -1562,12 +1562,12 @@ Rows are first characters, columns are second characters.
 <td class="org-left">n,m</td>
 <td class="org-right">&#xa0;</td>
 <td class="org-right">&#xa0;</td>
-<td class="org-right">-30</td>
+<td class="org-right">-50</td>
 <td class="org-right">&#xa0;</td>
 <td class="org-right">&#xa0;</td>
 <td class="org-right">&#xa0;</td>
 <td class="org-right">&#xa0;</td>
-<td class="org-right">&#xa0;</td>
+<td class="org-right">-170</td>
 <td class="org-left">&#xa0;</td>
 <td class="org-right">&#xa0;</td>
 </tr>
@@ -1581,7 +1581,7 @@ Rows are first characters, columns are second characters.
 <td class="org-right">0</td>
 <td class="org-right">0</td>
 <td class="org-right">0</td>
-<td class="org-right">-120</td>
+<td class="org-right">-170</td>
 <td class="org-left">&#xa0;</td>
 <td class="org-right">7</td>
 </tr>
@@ -1595,9 +1595,9 @@ Rows are first characters, columns are second characters.
 <td class="org-right">0</td>
 <td class="org-right">0</td>
 <td class="org-right">0</td>
-<td class="org-right">-120</td>
-<td class="org-left">&#xa0;</td>
-<td class="org-right">17</td>
+<td class="org-right">&#xa0;</td>
+<td class="org-left">17</td>
+<td class="org-right">&#xa0;</td>
 </tr>
 
 <tr>
@@ -1637,7 +1637,7 @@ Rows are first characters, columns are second characters.
 <td class="org-right">0</td>
 <td class="org-right">-70</td>
 <td class="org-right">-100</td>
-<td class="org-right">&#xa0;</td>
+<td class="org-right">-20</td>
 <td class="org-left">&#xa0;</td>
 <td class="org-right">&#xa0;</td>
 </tr>
@@ -1650,7 +1650,7 @@ For testing:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python" id="org0374a2e"><code><span class="org-keyword">import</span> numpy <span class="org-keyword">as</span> np</code>
+<pre class="src src-python" id="org9eff38d"><code><span class="org-keyword">import</span> numpy <span class="org-keyword">as</span> np</code>
 <code><span class="org-keyword">import</span> pandas <span class="org-keyword">as</span> pd</code>
 <code><span class="org-keyword">import</span> aglfn</code>
 <code><span class="org-keyword">import</span> fontforge</code>
@@ -1779,11 +1779,11 @@ For testing:
 </div>
 </div>
 
-<div id="outline-container-org507a897" class="outline-2">
-<h2 id="org507a897">Hand-tweak the glyphs</h2>
-<div class="outline-text-2" id="text-org507a897">
+<div id="outline-container-org3dad684" class="outline-2">
+<h2 id="org3dad684">Hand-tweak the glyphs</h2>
+<div class="outline-text-2" id="text-org3dad684">
 <div class="org-src-container">
-<pre class="src src-python" id="orge94915d"><code><span class="org-keyword">def</span> <span class="org-function-name">copy_glyphs</span>(font, edited):</code>
+<pre class="src src-python" id="org9f80c83"><code><span class="org-keyword">def</span> <span class="org-function-name">copy_glyphs</span>(font, edited):</code>
 <code>  edited.selection.<span class="org-builtin">all</span>()</code>
 <code>  edited.copy()</code>
 <code>  font.selection.<span class="org-builtin">all</span>()</code>
@@ -1794,9 +1794,9 @@ For testing:
 </div>
 </div>
 
-<div id="outline-container-org43bed85" class="outline-2">
-<h2 id="org43bed85">Let's put it all together</h2>
-<div class="outline-text-2" id="text-org43bed85">
+<div id="outline-container-orga4ce563" class="outline-2">
+<h2 id="orga4ce563">Let's put it all together</h2>
+<div class="outline-text-2" id="text-orga4ce563">
 <div class="org-src-container">
 <pre class="src src-python"><code><span class="org-keyword">import</span> numpy <span class="org-keyword">as</span> np</code>
 <code><span class="org-keyword">import</span> pandas <span class="org-keyword">as</span> pd</code>
@@ -1952,12 +1952,13 @@ For testing:
 <code>save_font(font, {**params, <span class="org-string">"new_otf"</span>: <span class="org-string">"sachacHandRaw.otf"</span>})</code>
 <code><span class="org-variable-name">font</span> = kern_classes(font, kerning_matrix)</code>
 <code><span class="org-variable-name">font</span> = kern_by_char(font, kerning_matrix)</code>
-<code>save_font(font, {**params, <span class="org-string">"new_otf"</span>: <span class="org-string">"sachacHandKerned.otf"</span>})</code>
+<code>save_font(font, {**params, <span class="org-string">"new_otf"</span>: <span class="org-string">"sachacHandRawKerned.otf"</span>})</code>
 <code><span class="org-variable-name">font</span> = load_font(<span class="org-string">'SachaHandEdited.sfd'</span>)</code>
 <code><span class="org-variable-name">font</span> = set_bearings(font, bearings)</code>
 <code>font.removeLookup(<span class="org-string">'kern'</span>)</code>
 <code>save_font(font, {**params, <span class="org-string">"new_otf"</span>: <span class="org-string">"sachacHandEdited.otf"</span>})</code>
 <code><span class="org-variable-name">font</span> = kern_classes(font, kerning_matrix)</code>
+<code>save_font(font, {**params, <span class="org-string">"new_otf"</span>: <span class="org-string">"sachacHandEditedClasses.otf"</span>})</code>
 <code><span class="org-variable-name">font</span> = kern_by_char(font, kerning_matrix)</code>
 <code>save_font(font, {**params, <span class="org-string">"new_otf"</span>: <span class="org-string">"sachacHand.otf"</span>})</code>
 </pre>
@@ -1974,7 +1975,7 @@ After importing the glyphs, but before kerning:
 
 
 <div class="figure">
-<p><img src="files/check/unkerned.png" alt="unkerned.png" />
+<p><img src="./files/check/unkerned.png" alt="unkerned.png" />
 </p>
 </div>
 
@@ -1984,7 +1985,7 @@ After tweaking the glyphs to make them more even:
 
 
 <div class="figure">
-<p><img src="files/check/edited-glyphs.png" alt="edited-glyphs.png" />
+<p><img src="./files/check/edited-glyphs.png" alt="edited-glyphs.png" />
 </p>
 </div>
 
@@ -1994,17 +1995,17 @@ After kerning:
 
 
 <div class="figure">
-<p><img src="files/check/kerned.png" alt="kerned.png" />
+<p><img src="./files/check/kerned.png" alt="kerned.png" />
 </p>
 </div>
 </div>
 </div>
 
-<div id="outline-container-org6c523fd" class="outline-2">
-<h2 id="org6c523fd">Code for displaying sample text</h2>
-<div class="outline-text-2" id="text-org6c523fd">
+<div id="outline-container-orgc5462cb" class="outline-2">
+<h2 id="orgc5462cb">Code for displaying sample text</h2>
+<div class="outline-text-2" id="text-orgc5462cb">
 <div class="org-src-container">
-<pre class="src src-python" id="org812cefd"><code><span class="org-keyword">from</span> PIL <span class="org-keyword">import</span> Image, ImageFont, ImageDraw</code>
+<pre class="src src-python" id="orgac27647"><code><span class="org-keyword">from</span> PIL <span class="org-keyword">import</span> Image, ImageFont, ImageDraw</code>
 <code><span class="org-keyword">import</span> os</code>
 <code><span class="org-keyword">import</span> hashlib</code>
 <code><span class="org-keyword">import</span> numpy <span class="org-keyword">as</span> np</code>
@@ -2094,9 +2095,48 @@ After kerning:
 </div>
 </div>
 
-<div id="outline-container-org48a309f" class="outline-2">
-<h2 id="org48a309f">Test the font</h2>
-<div class="outline-text-2" id="text-org48a309f">
+<div id="outline-container-org4753296" class="outline-2">
+<h2 id="org4753296">Test the font</h2>
+<div class="outline-text-2" id="text-org4753296">
+<p>
+<a href="files/test.html">files/test.html</a>
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><code><span class="org-keyword">from</span> yattag <span class="org-keyword">import</span> Doc</code>
+<code><span class="org-variable-name">doc</span>, <span class="org-variable-name">tag</span>, <span class="org-variable-name">text</span> = Doc().tagtext()</code>
+<code><span class="org-variable-name">fonts</span> = [[<span class="org-string">'woff'</span>, <span class="org-string">'sachacHand.woff'</span>],</code>
+<code>         [<span class="org-string">'raw'</span>, <span class="org-string">'sachacHandRaw.otf'</span>],</code>
+<code>         [<span class="org-string">'raw-kerned'</span>, <span class="org-string">'sachacHandRawKerned.otf'</span>],</code>
+<code>         [<span class="org-string">'edited'</span>, <span class="org-string">'sachacHandEdited.otf'</span>],</code>
+<code>         [<span class="org-string">'edited-classes'</span>, <span class="org-string">'sachacHandEditedClasses.otf'</span>]]</code>
+<code><span class="org-variable-name">strings</span> = [<span class="org-string">"Python+FontForge+Org: I made a font based on my handwriting!"</span>,</code>
+<code>           <span class="org-string">"Monthly review: May 2020"</span>,</code>
+<code>           <span class="org-string">"Emacs News 2020-06-01"</span>]</code>
+<code><span class="org-keyword">def</span> <span class="org-function-name">test_html</span>(s):</code>
+<code>  <span class="org-variable-name">doc</span>, <span class="org-variable-name">tag</span>, <span class="org-variable-name">text</span>, <span class="org-variable-name">line</span> = Doc().ttl()</code>
+<code>  <span class="org-keyword">with</span> doc.tag(<span class="org-string">'table'</span>):</code>
+<code>    <span class="org-keyword">for</span> f <span class="org-keyword">in</span> fonts:</code>
+<code>      <span class="org-keyword">with</span> tag(<span class="org-string">'tr'</span>, klass=f[0]):</code>
+<code>        line(<span class="org-string">'td'</span>, f[0])</code>
+<code>        line(<span class="org-string">'td'</span>, s)</code>
+<code>  <span class="org-keyword">return</span> doc</code>
+<code><span class="org-keyword">with</span> tag(<span class="org-string">'html'</span>):</code>
+<code>  <span class="org-keyword">with</span> tag(<span class="org-string">'head'</span>):</code>
+<code>    <span class="org-keyword">with</span> tag(<span class="org-string">'style'</span>):</code>
+<code>      <span class="org-keyword">for</span> f <span class="org-keyword">in</span> fonts:</code>
+<code>        text(<span class="org-string">"@font-face { font-family: '%s'; src: url('%s'); }"</span> % (f[0], f[1]))</code>
+<code>        text(<span class="org-string">".%s { font-family: '%s'; }"</span> % (f[0], f[0]))</code>
+<code>      text(<span class="org-string">"table { font-size: inherit; font-weight: inherit }"</span>)</code>
+<code>      text(<span class="org-string">"body { font-family: woff, Arial, sans-serif; font-size: 32px }"</span>)</code>
+<code>  <span class="org-keyword">with</span> tag(<span class="org-string">'body'</span>):</code>
+<code>    <span class="org-keyword">with</span> tag(<span class="org-string">'strong'</span>):</code>
+<code>      <span class="org-keyword">for</span> s <span class="org-keyword">in</span> strings:</code>
+<code>        doc.asis(test_html(s).getvalue())</code>
+<code><span class="org-keyword">return</span> doc.getvalue()</code>
+</pre>
+</div>
+
 <p>
 <a href="files/test.html">files/test.html</a>
 </p>
@@ -2114,8 +2154,6 @@ After kerning:
 <code>       .raw { font-family: 'sachacHandRaw'; }</code>
 <code>       .kerned { font-family: 'sachacHandKerned'; }</code>
 <code>       .edited { font-family: 'sachacHandEdited'; }</code>
-<code>       table { font-size: inherit; font-weight: inherit }</code>
-<code>       body { font-family: 'sachacHand', Alegreya; font-size: 32px }</code>
 <code>      &lt;/<span class="org-function-name">style</span>&gt;</code>
 <code>    &lt;/<span class="org-function-name">head</span>&gt;</code>
 <code>    &lt;<span class="org-function-name">body</span>&gt;</code>
@@ -2231,34 +2269,34 @@ Test string from <a href="http://www.ninastoessinger.com/stringmaker/index.php">
 </div>
 </div>
 
-<div id="outline-container-orge72b87c" class="outline-2">
-<h2 id="orge72b87c">Ideas</h2>
-<div class="outline-text-2" id="text-orge72b87c">
+<div id="outline-container-org2074320" class="outline-2">
+<h2 id="org2074320">Ideas</h2>
+<div class="outline-text-2" id="text-org2074320">
 </div>
-<div id="outline-container-orgd039508" class="outline-3">
-<h3 id="orgd039508"><span class="done DONE">DONE</span> Copy glyphs from hand-edited font</h3>
-<div class="outline-text-3" id="text-orgd039508">
-</div>
-</div>
-<div id="outline-container-org257932c" class="outline-3">
-<h3 id="org257932c"><span class="todo TODO">TODO</span> Alternate glyphs</h3>
-</div>
-<div id="outline-container-org6dd1d60" class="outline-3">
-<h3 id="org6dd1d60"><span class="todo TODO">TODO</span> Ligatures</h3>
-</div>
-<div id="outline-container-org95bc32f" class="outline-3">
-<h3 id="org95bc32f"><span class="todo TODO">TODO</span> Accents</h3>
+<div id="outline-container-org33aa2aa" class="outline-3">
+<h3 id="org33aa2aa"><span class="done DONE">DONE</span> Copy glyphs from hand-edited font</h3>
+<div class="outline-text-3" id="text-org33aa2aa">
 </div>
 </div>
-<div id="outline-container-org1d77ae7" class="outline-2">
-<h2 id="org1d77ae7">Extra stuff</h2>
-<div class="outline-text-2" id="text-org1d77ae7">
+<div id="outline-container-orgf8e32c1" class="outline-3">
+<h3 id="orgf8e32c1"><span class="todo TODO">TODO</span> Alternate glyphs</h3>
 </div>
-<div id="outline-container-org7462bb2" class="outline-3">
-<h3 id="org7462bb2">Figure out what glyphs I want based on my blog headings</h3>
-<div class="outline-text-3" id="text-org7462bb2">
+<div id="outline-container-org12e073a" class="outline-3">
+<h3 id="org12e073a"><span class="todo TODO">TODO</span> Ligatures</h3>
+</div>
+<div id="outline-container-org95baf93" class="outline-3">
+<h3 id="org95baf93"><span class="todo TODO">TODO</span> Accents</h3>
+</div>
+</div>
+<div id="outline-container-org20994a9" class="outline-2">
+<h2 id="org20994a9">Extra stuff</h2>
+<div class="outline-text-2" id="text-org20994a9">
+</div>
+<div id="outline-container-orgc2d2c0c" class="outline-3">
+<h3 id="orgc2d2c0c">Figure out what glyphs I want based on my blog headings</h3>
+<div class="outline-text-3" id="text-orgc2d2c0c">
 <div class="org-src-container">
-<pre class="src src-python" id="orgf68e4b6"><code><span class="org-keyword">from</span> dotenv <span class="org-keyword">import</span> load_dotenv</code>
+<pre class="src src-python" id="org4238156"><code><span class="org-keyword">from</span> dotenv <span class="org-keyword">import</span> load_dotenv</code>
 <code><span class="org-keyword">from</span> sqlalchemy <span class="org-keyword">import</span> create_engine</code>
 <code><span class="org-keyword">import</span> os</code>
 <code><span class="org-keyword">import</span> pandas <span class="org-keyword">as</span> pd</code>
@@ -2272,9 +2310,9 @@ Test string from <a href="http://www.ninastoessinger.com/stringmaker/index.php">
 </div>
 </div>
 
-<div id="outline-container-org607c194" class="outline-3">
-<h3 id="org607c194">Check glyphs</h3>
-<div class="outline-text-3" id="text-org607c194">
+<div id="outline-container-org1334130" class="outline-3">
+<h3 id="org1334130">Check glyphs</h3>
+<div class="outline-text-3" id="text-org1334130">
 <div class="org-src-container">
 <pre class="src src-python"><code><span class="org-keyword">from</span> dotenv <span class="org-keyword">import</span> load_dotenv</code>
 <code><span class="org-keyword">from</span> sqlalchemy <span class="org-keyword">import</span> create_engine</code>
@@ -2520,11 +2558,11 @@ Test string from <a href="http://www.ninastoessinger.com/stringmaker/index.php">
 </div>
 </div>
 
-<div id="outline-container-orgace16e1" class="outline-3">
-<h3 id="orgace16e1">Look up posts with weird glyphs</h3>
-<div class="outline-text-3" id="text-orgace16e1">
+<div id="outline-container-orgd4e4e2b" class="outline-3">
+<h3 id="orgd4e4e2b">Look up posts with weird glyphs</h3>
+<div class="outline-text-3" id="text-orgd4e4e2b">
 <div class="org-src-container">
-<pre class="src src-python" id="org19c96d2"><code><span class="org-keyword">from</span> dotenv <span class="org-keyword">import</span> load_dotenv</code>
+<pre class="src src-python" id="org6241aa6"><code><span class="org-keyword">from</span> dotenv <span class="org-keyword">import</span> load_dotenv</code>
 <code><span class="org-keyword">from</span> sqlalchemy <span class="org-keyword">import</span> create_engine</code>
 <code><span class="org-keyword">import</span> os</code>
 <code><span class="org-keyword">import</span> pandas <span class="org-keyword">as</span> pd</code>
@@ -2547,11 +2585,11 @@ Test string from <a href="http://www.ninastoessinger.com/stringmaker/index.php">
 </div>
 </div>
 
-<div id="outline-container-org623e056" class="outline-3">
-<h3 id="org623e056">Get frequency of pairs of characters</h3>
-<div class="outline-text-3" id="text-org623e056">
+<div id="outline-container-org1dd2cd0" class="outline-3">
+<h3 id="org1dd2cd0">Get frequency of pairs of characters</h3>
+<div class="outline-text-3" id="text-org1dd2cd0">
 <div class="org-src-container">
-<pre class="src src-python" id="org922ef68"><code><span class="org-keyword">from</span> dotenv <span class="org-keyword">import</span> load_dotenv</code>
+<pre class="src src-python" id="org47a2f32"><code><span class="org-keyword">from</span> dotenv <span class="org-keyword">import</span> load_dotenv</code>
 <code><span class="org-keyword">from</span> sqlalchemy <span class="org-keyword">import</span> create_engine</code>
 <code><span class="org-keyword">import</span> os</code>
 <code><span class="org-keyword">import</span> pandas <span class="org-keyword">as</span> pd</code>
@@ -2575,13 +2613,13 @@ Test string from <a href="http://www.ninastoessinger.com/stringmaker/index.php">
 </div>
 </div>
 
-<div id="outline-container-org647c6e3" class="outline-3">
-<h3 id="org647c6e3">Copy metrics from my edited font</h3>
-<div class="outline-text-3" id="text-org647c6e3">
+<div id="outline-container-org9b20b0d" class="outline-3">
+<h3 id="org9b20b0d">Copy metrics from my edited font</h3>
+<div class="outline-text-3" id="text-org9b20b0d">
 </div>
-<div id="outline-container-org99652f0" class="outline-4">
-<h4 id="org99652f0">Get the glyph bearings</h4>
-<div class="outline-text-4" id="text-org99652f0">
+<div id="outline-container-orgfb25d89" class="outline-4">
+<h4 id="orgfb25d89">Get the glyph bearings</h4>
+<div class="outline-text-4" id="text-orgfb25d89">
 <div class="org-src-container">
 <pre class="src src-python"><code><span class="org-keyword">import</span> fontforge</code>
 <code><span class="org-keyword">import</span> numpy <span class="org-keyword">as</span> np</code>
@@ -3176,11 +3214,11 @@ Test string from <a href="http://www.ninastoessinger.com/stringmaker/index.php">
 </div>
 </div>
 
-<div id="outline-container-orgc532db2" class="outline-4">
-<h4 id="orgc532db2">Get the kerning information</h4>
-<div class="outline-text-4" id="text-orgc532db2">
+<div id="outline-container-org584f9ce" class="outline-4">
+<h4 id="org584f9ce">Get the kerning information</h4>
+<div class="outline-text-4" id="text-org584f9ce">
 <div class="org-src-container">
-<pre class="src src-python" id="org1fc7d0a"><code><span class="org-keyword">import</span> numpy <span class="org-keyword">as</span> np</code>
+<pre class="src src-python" id="org70ad92c"><code><span class="org-keyword">import</span> numpy <span class="org-keyword">as</span> np</code>
 <code><span class="org-keyword">import</span> pandas <span class="org-keyword">as</span> pd</code>
 <code><span class="org-keyword">import</span> aglfn</code>
 <code><span class="org-keyword">import</span> fontforge</code>
@@ -3338,9 +3376,9 @@ Test string from <a href="http://www.ninastoessinger.com/stringmaker/index.php">
 </div>
 </div>
 
-<div id="outline-container-orgb3aa3da" class="outline-3">
-<h3 id="orgb3aa3da">Copy it to my website</h3>
-<div class="outline-text-3" id="text-orgb3aa3da">
+<div id="outline-container-org9f5731a" class="outline-3">
+<h3 id="org9f5731a">Copy it to my website</h3>
+<div class="outline-text-3" id="text-org9f5731a">
 <div class="org-src-container">
 <pre class="src src-sh"><code>scp files/sachacHand.woff web:~/sacha-v3/</code>
 </pre>
@@ -3349,9 +3387,9 @@ Test string from <a href="http://www.ninastoessinger.com/stringmaker/index.php">
 </div>
 </div>
 
-<div id="outline-container-orged99740" class="outline-2">
-<h2 id="orged99740">Other resources</h2>
-<div class="outline-text-2" id="text-orged99740">
+<div id="outline-container-org2787699" class="outline-2">
+<h2 id="org2787699">Other resources</h2>
+<div class="outline-text-2" id="text-org2787699">
 <p>
 <a href="http://ctan.localhost.net.ar/fonts/amiri/tools/build.py">http://ctan.localhost.net.ar/fonts/amiri/tools/build.py</a>
 </p>
