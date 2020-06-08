@@ -565,7 +565,6 @@ After importing the glyphs, but before kerning:
 
 #+CALL: sample(font_file="sachacHandRaw.otf", filename="check/unkerned.png") :exports code
 
-#+RESULTS:
 [[./files/check/unkerned.png]]
 
 After tweaking the glyphs to make them more even:
