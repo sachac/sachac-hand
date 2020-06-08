@@ -432,12 +432,34 @@ save_font(font, params)
 
 * Kern the font
 
+** Values
+
+Rows are first characters, columns are second characters.
+
+#+NAME: kerning_matrix
+  |       | None | o,a,c,e,d,g,q,w | f,t,x,v,z | h,b,l,i,k | j | m,n,p,r,u |    s |    T |  F | zero |
+  | None  |    0 |               0 |         0 |         0 | 0 |         0 |    0 |    0 |    |    0 |
+  | f     |    0 |            -100 |       -61 |       -30 | 0 |       -60 |    0 | -170 |    |  -70 |
+  | t     |    0 |             -50 |       -41 |       -25 | 0 |         0 |    0 | -170 |    |  -10 |
+  | i     |      |                 |       -40 |           |   |           |      | -170 |    |      |
+  | r     |    0 |             -32 |       -41 |       -25 | 0 |       -20 |    0 | -170 |    |   29 |
+  | k     |    0 |             -50 |       -81 |       -20 | 0 |       -20 |  -48 | -170 |    |  -79 |
+  | l     |    0 |             -41 |       -50 |         0 | 0 |         0 |    0 | -110 |    |  -20 |
+  | v     |    0 |             -40 |       -35 |       -30 | 0 |         0 |    0 | -170 |    |   30 |
+  | b,o,p |    0 |             -20 |       -80 |         0 | 0 |         0 |    0 | -170 |    |   43 |
+  | n,m   |      |                 |       -50 |           |   |           |      | -170 |    |      |
+  | a     |    0 |             -23 |       -60 |         0 | 0 |         0 |    0 | -170 |    |    7 |
+  | W     |    0 |             -40 |       -30 |       -20 | 0 |         0 |    0 |      | 17 |      |
+  | T     |    0 |            -190 |      -120 |       -60 | 0 |      -130 |    0 |    0 |    | -188 |
+  | F     |    0 |             -90 |       -90 |       -60 | 0 |       -70 | -100 |  -40 |    | -166 |
+  | P     |    0 |            -100 |       -70 |       -60 | 0 |       -70 | -100 |  -20 |    |      |
+
 ** Kern by classes
+
+NOTE: This removes the old kerning table.
 
 #+NAME: def_kern_classes
 #+begin_src python :eval no
-
-# NOTE: This removes the old kerning table
 def kern_classes(font, kerning_matrix):
   try:
     font.removeLookup('kern')
@@ -454,7 +476,19 @@ def kern_classes(font, kerning_matrix):
   print(offset_list)
   font.addKerningClass("kern", "kern-1", classes_left, classes_right, offset_list)
   return font
+#+end_src
 
+** Kern by character
+
+While trying to figure out kerning, I came across this issue that
+described how you sometimes need a [[https://www.dafont.com/forum/read/405813/the-kerning-is-set-in-a-way-that-doesn-t-work-at-dafont-we-use-the-gd-library-of-php][character-pair kern table instead
+of just class-based kerning]]. Since I had figured out character-based
+kerning before I figured out class-based kerning, it was easy to
+restore my Python code that takes the same kerning matrix and
+generates character pairs. Here's what that code looks like.
+
+#+NAME: def_kern_by_char
+#+begin_src python :eval no
 def kern_by_char(font, kerning_matrix):
   # Add kerning by character as backup
   font.addLookupSubtable("kern", "kern-2")
@@ -473,55 +507,6 @@ def kern_by_char(font, kerning_matrix):
   return font
 #+end_src
 
-Rows are first characters, columns are second characters.
-
-#+NAME: kerning_matrix
-  |       | None | o,a,c,e,d,g,q,w | f,t,x,v,z | h,b,l,i,k | j | m,n,p,r,u |    s |    T |  F | zero |
-  | None  |    0 |               0 |         0 |         0 | 0 |         0 |    0 |    0 |    |    0 |
-  | f     |    0 |            -100 |       -61 |       -30 | 0 |       -60 |    0 | -170 |    |  -70 |
-  | t     |    0 |             -50 |       -41 |       -25 | 0 |         0 |    0 | -170 |    |  -10 |
-  | i     |      |                 |       -40 |           |   |           |      | -170 |    |      |
-  | r     |    0 |             -32 |       -41 |       -25 | 0 |       -20 |    0 | -170 |    |   29 |
-  | k     |    0 |             -50 |       -81 |       -20 | 0 |       -20 |  -48 | -170 |    |  -79 |
-  | l     |    0 |             -41 |       -50 |         0 | 0 |         0 |    0 | -170 |    |  -52 |
-  | v     |    0 |             -40 |       -35 |       -30 | 0 |         0 |    0 | -170 |    |   30 |
-  | b,o,p |    0 |             -20 |       -80 |         0 | 0 |         0 |    0 | -170 |    |   43 |
-  | n,m   |      |                 |       -50 |           |   |           |      | -170 |    |      |
-  | a     |    0 |             -23 |       -60 |         0 | 0 |         0 |    0 | -170 |    |    7 |
-  | W     |    0 |             -40 |       -30 |       -20 | 0 |         0 |    0 |      | 17 |      |
-  | T     |    0 |            -190 |      -120 |       -60 | 0 |      -130 |    0 |    0 |    | -188 |
-  | F     |    0 |             -90 |       -90 |       -60 | 0 |       -70 | -100 |  -40 |    | -166 |
-  | P     |    0 |            -100 |       -70 |       -60 | 0 |       -70 | -100 |  -20 |    |      |
-
-
-For testing:
-
-#+NAME: kern_classes
-#+begin_src python :results output :var kerning_matrix=kerning_matrix :eval no
-  <<params>>
-  <<def_kern_classes>>
-  font = load_font({**params, "new_font_file": "SachaHandEdited.sfd"})
-  font = kern_classes(font, kerning_matrix)
-  font = kern_by_char(font, kerning_matrix)
-  save_font(font, {**params, "new_font_file": "SachaHandEdited.sfd"})
-#+end_src
-
-#+RESULTS: kern_classes
-: Old table removed.
-: [None, ['f'], ['t'], ['r'], ['k'], ['l'], ['v'], ['b', 'o', 'p'], ['a'], ['W'], ['T'], ['F'], ['P'], ['two']]
-: [None, ['o', 'a', 'c', 'e', 'd', 'g', 'q', 'w'], ['f', 't', 'x', 'v', 'y', 'z'], ['h', 'b', 'l', 'i', 'k'], ['j'], ['m', 'n', 'p', 'r', 'u'], ['s'], ['T'], ['zero']]
-: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -102, -61, -30, 0, -60, 0, -120, -70, 0, -70, -41, -25, 0, 0, 0, -120, -10, 0, -82, -41, -25, 0, -20, 0, -120, 29, 0, -50, -81, -20, 0, -20, -48, -120, -79, 0, -41, -50, 0, 0, 0, 0, -120, -52, 0, -40, -35, -30, 0, 0, 0, -120, 30, 0, -20, -80, 0, 0, 0, 0, -120, 43, 0, -23, -60, 0, 0, 0, 0, -120, 7, 0, -40, -30, -20, 0, 0, 0, -120, 17, 0, -190, -120, -60, 0, -130, 0, 0, -188, 0, -100, -90, -60, 0, -70, -100, -40, -166, 0, -100, -70, -60, 0, -70, -100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -53]
-: Saved SachaHandEdited.sfd
-
-#+CALL: sample(text="Python+FontForge+Org: I made a font based on my handwriting!")
-
-#+RESULTS:
-[[file:files/check/1388eb67e18a9cce86d591d50e01945a.png]]
-
-
-#+RESULTS:
-[[file:files/check/d64a57420879bd1833e36725d4a9e69c.png]]
-
 * Hand-tweak the glyphs
 
 #+NAME: def_copy_glyphs
@@ -534,7 +519,18 @@ def copy_glyphs(font, edited):
   return font
 #+end_src
 
-* Let's put it all together
+* Generate fonts
+
+I wanted to be able to easily compare different versions of my font:
+my original glyphs versus my tweaked glyphs, simple spacing versus
+kerned. This was a hassle with FontForge, since I had to open
+different font files in different Metrics windows. If I execute a
+little bit of source code in my Org Mode, though, I can use my test
+web page to view all the different versions. By arranging my Emacs
+windows a certain way and adding =:eval no= to the Org Babel blocks
+I'm not currently using, I can easily change the relevant table
+entries and evaluate the whole buffer to regenerate the font versions,
+including exports to OTF and WOFF. Here's the code for that:
 
 #+begin_src python :var bearings=bearings :var kerning_matrix=kerning_matrix
 <<params>>
@@ -554,7 +550,6 @@ font = set_bearings(font, bearings)
 font.removeLookup('kern')
 save_font(font, {**params, "new_otf": "sachacHandEdited.otf"})
 font = kern_classes(font, kerning_matrix)
-save_font(font, {**params, "new_otf": "sachacHandEditedClasses.otf"})
 font = kern_by_char(font, kerning_matrix)
 save_font(font, {**params, "new_otf": "sachacHand.otf"})
 #+end_src
@@ -562,36 +557,10 @@ save_font(font, {**params, "new_otf": "sachacHand.otf"})
 #+RESULTS:
 : None
 
-* Code for displaying sample text
-
-#+NAME: sample
-#+begin_src python :results file :var filename="check" :var text="" :var size=50 :var font_file="" :var bg="white" :var fg="black"
-from PIL import Image, ImageFont, ImageDraw
-import os
-import hashlib
-<<params>>
-if font_file == "":
-  font_file = params['new_otf']
-font = ImageFont.truetype(font_file, size)
-draw_text = text
-if text == "":
-  draw_text = params["text"] 
-font_size = font.getsize(draw_text)
-img = Image.new('LA', (font_size[0] + 20, font_size[1] + 20), bg)
-draw = ImageDraw.Draw(img)
-draw.text((10, 10), draw_text, fg, font)
-if os.path.isdir(filename):
-  filename = os.path.join(filename, hashlib.md5((font_file + draw_text).encode()).hexdigest() + '.png')
-img.save(filename)
-return filename
-#+end_src
-
-#+RESULTS: sample
-[[file:files/check/1388eb67e18a9cce86d591d50e01945a.png]]
-
 * Test the font
 
-[[file:files/test.html]]
+This lets me quickly try text with different versions of my font. I
+can also look at lots of kerning pairs at the same time.
 
 #+NAME: def_test_html
 #+begin_src python :eval no
@@ -602,15 +571,20 @@ def test_css(fonts):
       text("@font-face { font-family: '%s'; src: url('%s'); }" % (f[0], f[1]))
       text(".%s { font-family: '%s'; }" % (f[0], f[0]))
     text("table { font-size: inherit; font-weight: inherit }")
+    text("td { text-align: left }")
+    text(".blog-heading { font-weight: bold; font-size: 32px }")
+    text(".default { color: gray }")
     text("body { font-family: woff, Arial, sans-serif; font-size: 32px; padding: 10px }")
   return doc.getvalue()
-def test_html(s):
+def test_html(strings):
   doc, tag, text, line = Doc().ttl()
-  with doc.tag('table'):
-    for f in fonts:
-      with tag('tr', klass=f[0]):
-        line('td', f[0])
-        line('td', s)
+  with doc.tag('table', style='border-bottom: 1px solid gray; width: 100%; border-collapse: collapse'):
+    for s in strings:
+      for i, f in enumerate(fonts):
+        style = 'border-top: 1px solid gray' if (i == 0) else ""
+        with tag('tr', klass=f[0], style=style):
+          line('td', f[0])
+          line('td', s)
   return doc.getvalue()
 def test_kerning_matrix(kerning_matrix):
   doc, tag, text, line = Doc().ttl()
@@ -623,12 +597,12 @@ def test_kerning_matrix(kerning_matrix):
           for c, column in enumerate(classes_right):
             if column is None: continue
             for second_letter in column:
-              if kerning_matrix[r + 1][c + 1]:
-                line('td', aglfn.to_glyph(first_letter) + aglfn.to_glyph(second_letter))
-              else:
-                line('td', '')
+              klass = "kerned" if kerning_matrix[r + 1][c + 1] else "default"
+              line('td', aglfn.to_glyph(first_letter) + aglfn.to_glyph(second_letter), klass=klass)
   return doc.getvalue()
 #+end_src
+
+This code actually generates the test file.
 
 #+begin_src python :results file :file "test.html" :var kerning_matrix=kerning_matrix
 from yattag import Doc
@@ -639,7 +613,6 @@ doc, tag, text, line = Doc().ttl()
 fonts = [['raw', 'sachacHandRaw.otf'],
          ['raw-kerned', 'sachacHandRawKerned.otf'],
          ['edited', 'sachacHandEdited.otf'],
-         ['edited-classes', 'sachacHandEditedClasses.otf'],
          ['woff', 'sachacHand.woff']]
 strings = ["Python+FontForge+Org: I made a font based on my handwriting!",
            "Monthly review: May 2020",
@@ -652,9 +625,8 @@ with tag('html'):
     doc.asis(test_css(fonts))
   with tag('body'):
     line('h1', 'Test headings')
-    with tag('strong'):
-      for s in strings:
-        doc.asis(test_html(s))
+    with tag('div', klass="blog-heading"):
+      doc.asis(test_html(strings))
     line('h1', 'Kerning matrix')
     doc.asis(test_kerning_matrix(kerning_matrix))
 return doc.getvalue()
@@ -918,7 +890,7 @@ return ''.join([x[0] for x in common])
 ** Copy it to my website
 
 #+begin_src sh :eval no
-scp files/sachacHand.woff web:~/sacha-v3/
+scp sachacHand.woff web:~/sacha-v3/
 #+end_src
 
 #+RESULTS:
