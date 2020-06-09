@@ -1,5 +1,5 @@
 #+OPTIONS: toc:2
-#+PROPERTY: header-args python  :noweb yes :dir "/home/sacha/code/font/files" :exports both 
+#+PROPERTY: header-args python  :noweb eval :dir "/home/sacha/code/font/files" :exports both 
 
 * Summary
 
@@ -205,9 +205,9 @@ params = {'template': 'template-256.png',
   'new_font_file': 'sachacHand.sfd',
   'new_otf': 'sachacHand.otf',
   'new_font_name': 'sachacHand',
-  'new_family_name': 'sachacFonts',
-  'text_color': 'lightgray',
+  'new_family_name': 'sachacHand',
   'new_full_name': 'sachacHand',
+  'text_color': 'lightgray',
   'glyph_dir': 'glyphs/',
   'letters': 'HOnodpagscebhklftijmnruwvxyzCGABRDLEFIJKMNPQSTUVWXYZ0123456789?:;-–—=!\'’"“”@/\\~_#$%&()*+,.<>[]^`{|}q',
   'direction': 'vertical',
