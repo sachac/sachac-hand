@@ -217,6 +217,7 @@ I also needed =(setenv "LD_LIBRARY_PATH" "/usr/local/lib")=. There are probably 
    'x_height': 368,
    'em': 1000, 
    'em_width': 1000, 
+   'row_padding': 0,
    'ascent': 800, 
    'descent': 200, 
    'height': 500, 
@@ -267,26 +268,29 @@ I also needed =(setenv "LD_LIBRARY_PATH" "/usr/local/lib")=. There are probably 
 
  #LETTERS = 'abcd'
  # Baseline is red
- # descent: lightblue
- def draw_letter(origin, letter, params):
+ # Top of glyph is light blue
+ # Bottom of glyph is blue
+ def draw_letter(column, row, letter, params):
    draw = params['draw']
+   origin = (column * params['em_width'], row * (params['em'] + params['row_padding']))
+   draw.line((origin[0], origin[1], origin[0] + params['em_width'], origin[1]), fill='lightblue', width=params['line_width'])
    draw.line((origin[0], origin[1], origin[0], origin[1] + params['em']), fill='lightgray', width=params['line_width'])
    draw.line((origin[0], origin[1] + params['ascent'] - params['x_height'], origin[0] + params['em_width'], origin[1] + params['ascent'] - params['x_height']), fill='lightgray', width=params['line_width'])
    draw.line((origin[0], origin[1] + params['ascent'], origin[0] + params['em_width'], origin[1] + params['ascent']), fill='red', width=params['line_width'])
    draw.line((origin[0], origin[1] + params['ascent'] - params['caps'], origin[0] + params['em_width'], origin[1] + params['ascent'] - params['caps']), fill='lightgreen', width=params['line_width'])
-   draw.line((origin[0], origin[1], origin[0] + params['em_width'], origin[1]), fill='blue', width=params['line_width'])
+   draw.line((origin[0], origin[1] + params['em'], origin[0] + params['em_width'], origin[1] + params['em']), fill='blue', width=params['line_width'])
    width, height = draw.textsize(letter, font=params['font'])
    draw.text((origin[0] + (params['em_width'] - width) / 2, origin[1]), letter, font=params['font'], fill=params['text_color'])
 
  def make_template(params):
-   img = Image.new('RGB', (params['columns'] * params['em'], params['rows'] * params['em_width']), 'white')
+   img = Image.new('RGB', (params['columns'] * params['em_width'], params['rows'] * (params['em'] + params['row_padding'])), 'white')
    params['draw'] = ImageDraw.Draw(img)
    params['font'] = ImageFont.truetype(params['font_name'], params['font_size'])
    matrix = get_letter_matrix(params)
    for r, row in enumerate(matrix):
      for c, ch in enumerate(row):
-       draw_letter((c * params['em_width'], r * params['em']), ch, params)
-   img.thumbnail((params['columns'] * params['height'], params['columns'] * params['width']))
+       draw_letter(c, r, ch, params)
+   img.thumbnail((params['columns'] * params['width'], params['rows'] * (params['height'] + params['row_padding'])))
    img.save(params['template'])
    return params['template']
  #+end_src
@@ -296,18 +300,18 @@ I also needed =(setenv "LD_LIBRARY_PATH" "/usr/local/lib")=. There are probably 
  #+begin_src python :results file :eval yes
    <<params>>
    <<def_make_template>>
-   make_template({**params, 'font_name': '/home/sacha/.fonts/Romochka.otf', 'template': 'template-romochka.png'}) 
-   make_template({**params, 'font_name': '/home/sacha/.fonts/Breip.ttf', 'template': 'template-breip.png'}) 
-   return make_template({**params, 'font_name': '/home/sacha/.fonts/KGPrimaryDots.ttf', 
-     'letters': 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890?:;-–—=!\'’"“”@/\\~_#$%&()*+,.<>[]^`{|}', 'direction': 'horizontal', 'text_color': 'black',
-     'template': 'template-kg.png', 'ascent': 675, 'descent': 375, 'caps': 525, 'x_height': 300}) 
-   make_template({**params, 'font_name': 'sachacHand.otf', 'template': 'template-sachacHand.png'})
+   #make_template({**params, 'font_name': '/home/sacha/.fonts/Romochka.otf', 'template': 'template-romochka.png', 'row_padding': 15}) 
+   #make_template({**params, 'font_name': '/home/sacha/.fonts/Breip.ttf', 'template': 'template-breip.png', 'row_padding': 15}) 
+   #make_template({**params, 'font_name': '/home/sacha/.fonts/KGPrimaryDots.ttf', 
+   #  'letters': 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890?:;-–—=!\'’"“”@/\\~_#$%&()*+,.<>[]^`{|}', 'direction': 'horizontal', 'text_color': 'black',
+   #  'template': 'template-kg.png', 'ascent': 675, 'descent': 375, 'caps': 525, 'x_height': 300, 'row_padding': 15}) 
+   make_template({**params, 'font_name': 'sachacHand.otf', 'template': 'template-sachacHand.png', 'row_padding': 100})
    return make_template({**params, 'font_name': 'sachacHand.otf', 
-   'template': 'template-sample.png', 'direction': 'horizontal', 'rows': 4, 'columns': 4, 'height': 100, 'width': 100 }) 
+   'template': 'template-sample.png', 'direction': 'horizontal', 'rows': 4, 'columns': 4, 'height': 100, 'width': 100, 'row_padding': 100 }) 
  #+end_src
 
  #+RESULTS:
- [[file:files/template-kg.png]]
+ [[file:files/template-sample.png]]
 
 ** Cut into glyphs
 
