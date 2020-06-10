@@ -189,7 +189,7 @@ I also needed =(setenv "LD_LIBRARY_PATH" "/usr/local/lib")=. There are probably 
 - =FileNotFoundError: [Errno 2] No such file or directory: '/home/sacha/.local/lib/python3.8/site-packages/aglfn/agl-aglfn/aglfn.txt'=
   - symlink or copy the one from /usr/share/aglfn to the right place
 
-* Making the regular font
+* Make the regular font
 ** Parameters and common functions
 
  #+NAME: params
@@ -272,7 +272,8 @@ I also needed =(setenv "LD_LIBRARY_PATH" "/usr/local/lib")=. There are probably 
  # Bottom of glyph is blue
  def draw_letter(column, row, letter, params):
    draw = params['draw']
-   origin = (column * params['em_width'], row * (params['em'] + params['row_padding']))
+   sized_padding = int(params['row_padding'] * params['em'] / params['height'])
+   origin = (column * params['em_width'], row * (params['em'] + sized_padding))
    draw.line((origin[0], origin[1], origin[0] + params['em_width'], origin[1]), fill='lightblue', width=params['line_width'])
    draw.line((origin[0], origin[1], origin[0], origin[1] + params['em']), fill='lightgray', width=params['line_width'])
    draw.line((origin[0], origin[1] + params['ascent'] - params['x_height'], origin[0] + params['em_width'], origin[1] + params['ascent'] - params['x_height']), fill='lightgray', width=params['line_width'])
@@ -283,7 +284,8 @@ I also needed =(setenv "LD_LIBRARY_PATH" "/usr/local/lib")=. There are probably 
    draw.text((origin[0] + (params['em_width'] - width) / 2, origin[1]), letter, font=params['font'], fill=params['text_color'])
 
  def make_template(params):
-   img = Image.new('RGB', (params['columns'] * params['em_width'], params['rows'] * (params['em'] + params['row_padding'])), 'white')
+   sized_padding = int(params['row_padding'] * params['em'] / params['height'])
+   img = Image.new('RGB', (params['columns'] * params['em_width'], params['rows'] * (params['em'] + sized_padding)), 'white')
    params['draw'] = ImageDraw.Draw(img)
    params['font'] = ImageFont.truetype(params['font_name'], params['font_size'])
    matrix = get_letter_matrix(params)
@@ -302,10 +304,10 @@ I also needed =(setenv "LD_LIBRARY_PATH" "/usr/local/lib")=. There are probably 
    <<def_make_template>>
    #make_template({**params, 'font_name': '/home/sacha/.fonts/Romochka.otf', 'template': 'template-romochka.png', 'row_padding': 15}) 
    #make_template({**params, 'font_name': '/home/sacha/.fonts/Breip.ttf', 'template': 'template-breip.png', 'row_padding': 15}) 
-   #make_template({**params, 'font_name': '/home/sacha/.fonts/KGPrimaryDots.ttf', 
-   #  'letters': 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890?:;-–—=!\'’"“”@/\\~_#$%&()*+,.<>[]^`{|}', 'direction': 'horizontal', 'text_color': 'black',
-   #  'template': 'template-kg.png', 'ascent': 675, 'descent': 375, 'caps': 525, 'x_height': 300, 'row_padding': 15}) 
-   make_template({**params, 'font_name': 'sachacHand.otf', 'template': 'template-sachacHand.png', 'row_padding': 100})
+   make_template({**params, 'font_name': '/home/sacha/.fonts/KGPrimaryDots.ttf', 
+     'letters': 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890?:;-–—=!\'’"“”@/\\~_#$%&()*+,.<>[]^`{|}', 'direction': 'horizontal', 'text_color': 'black',
+     'template': 'template-kg.png', 'ascent': 800, 'descent': 200, 'caps': 600, 'x_height': 340, 'row_padding': 50}) 
+   make_template({**params, 'font_name': 'sachacHand.otf', 'template': 'template-sachacHand.png', 'row_padding': 50})
    return make_template({**params, 'font_name': 'sachacHand.otf', 
    'template': 'template-sample.png', 'direction': 'horizontal', 'rows': 4, 'columns': 4, 'height': 100, 'width': 100, 'row_padding': 100 }) 
  #+end_src
@@ -328,7 +330,7 @@ I also needed =(setenv "LD_LIBRARY_PATH" "/usr/local/lib")=. There are probably 
      letters = transpose_letters(letters, params['columns'], params['rows'])
    matrix = np.reshape(list(letters), (params['rows'], params['columns']))
    for r, row in enumerate(matrix):
-     top = r * params['height']
+     top = r * (params['height'] + params['row_padding'])
      bottom = top + params['height']
      for c, ch in enumerate(row):
        left = c * params['width']
@@ -360,7 +362,7 @@ I also needed =(setenv "LD_LIBRARY_PATH" "/usr/local/lib")=. There are probably 
    font.encoding = 'UnicodeFull'
    font.fontname = params['new_font_name']
    font.familyname = params['new_family_name']
-   font.fullname = params['new_family_name']
+   font.fullname = params['new_full_name']
    cut_letters = params['letters']
    if params['direction'] == 'vertical':
      cut_letters = transpose_letters(cut_letters, params['columns'], params['rows'])
@@ -577,90 +579,180 @@ I also needed =(setenv "LD_LIBRARY_PATH" "/usr/local/lib")=. There are probably 
  #+RESULTS:
  : None
 
-** Test the font
 
- This lets me quickly try text with different versions of my font. I
- can also look at lots of kerning pairs at the same time.
+* Make the bold font
 
- #+NAME: def_test_html
- #+begin_src python :eval no
- def test_css(fonts):
-   doc, tag, text, line = Doc().ttl()
-   with tag('style'):
-     for f in fonts:
-       text("@font-face { font-family: '%s'; src: url('%s'); }" % (f[0], f[1]))
-       text(".%s { font-family: '%s'; }" % (f[0], f[0]))
-     text("table { font-size: inherit; font-weight: inherit }")
-     text("td { text-align: left }")
-     text(".blog-heading { font-weight: bold; font-size: 32px }")
-     text(".default { color: gray }")
-     text("body { font-family: woff, Arial, sans-serif; font-size: 32px; padding: 10px }")
-   return doc.getvalue()
- def test_html(strings):
-   doc, tag, text, line = Doc().ttl()
-   with doc.tag('table', style='border-bottom: 1px solid gray; width: 100%; border-collapse: collapse'):
-     for s in strings:
-       for i, f in enumerate(fonts):
-         style = 'border-top: 1px solid gray' if (i == 0) else ""
-         with tag('tr', klass=f[0], style=style):
-           line('td', f[0])
-           line('td', s)
-   return doc.getvalue()
- def test_kerning_matrix(kerning_matrix):
-   doc, tag, text, line = Doc().ttl()
-   with tag('table'):
-     for r, row in enumerate(classes_left):
-       if row is None: continue
-       for first_letter in row:
-         with tag('tr'):
-           line('td', first_letter)
-           for c, column in enumerate(classes_right):
-             if column is None: continue
-             for second_letter in column:
-               klass = "kerned" if kerning_matrix[r + 1][c + 1] else "default"
-               line('td', aglfn.to_glyph(first_letter) + aglfn.to_glyph(second_letter), klass=klass)
-   return doc.getvalue()
- #+end_src
+#+begin_src python :var bearings=bearings :var kerning_matrix=kerning_matrix
+<<params>>
+params = {**params, 
+          'row_padding': 50,
+          'sample_file': 'sample-bold.png',
+          'new_font_file': 'sachacHandBold.sfd',
+          'new_otf': 'sachacHandBold.otf',
+          'new_font_name': 'sachacHand-Bold',
+          'new_family_name': 'sachacHand',
+          'new_full_name': 'sachacHand Bold'}
+<<def_cut_glyphs>>
+<<def_import_glyphs>>
+<<def_set_bearings>>
+<<def_kern_classes>>
+<<def_kern_by_char>>
+#cut_glyphs(params)
+#font = fontforge.font()
+#font = import_glyphs(font, params)
+font = load_font('sachacHandBoldEdited.sfd')
+font.fontname = 'sachacHand-Bold'
+font.familyname = 'sachacHand'
+font.fullname = 'sachacHand Bold'
+font = set_bearings(font, bearings)
+font = kern_classes(font, kerning_matrix)
+font = kern_by_char(font, kerning_matrix)
+save_font(font, params)
+#+end_src
 
- This code actually generates the test file.
+#+RESULTS:
+: None
 
- #+begin_src python :results file :file "test.html" :var kerning_matrix=kerning_matrix
- from yattag import Doc
- import numpy as np
- import aglfn
- <<def_test_html>>
- doc, tag, text, line = Doc().ttl()
- fonts = [['raw', 'sachacHandRaw.otf'],
-          ['raw-kerned', 'sachacHandRawKerned.otf'],
-          ['edited', 'sachacHandEdited.otf'],
-          ['woff', 'sachacHand.woff'],
-          ['bold', 'sachacHandBold.woff'],
-          ['bold-kerned', 'sachacHandBoldKerned.woff']]
- strings = ["Python+FontForge+Org: I made a font based on my handwriting!",
-            "Monthly review: May 2020",
-            "Emacs News 2020-06-01"]
- offsets = np.asarray(kerning_matrix)
- classes_left = [None if (x == "" or x == "None") else x.split(',') for x in offsets[1:,0]]
- classes_right = [None if (x == "" or x == "None") else x.split(",") for x in offsets[0,1:]]
- with tag('html'):
-   with tag('head'): 
-     doc.asis(test_css(fonts))
-   with tag('body'):
-     line('div', 'The quick brown fox jumps over the lazy dog.')
-     line('div', 'Jackdaws love my sphinx of quartz.')
-     line('h1', 'Test headings')
-     with tag('div', klass="blog-heading"):
-       doc.asis(test_html(strings))
-     doc.asis(test_html(strings))
-     line('h1', 'Kerning matrix')
-     doc.asis(test_kerning_matrix(kerning_matrix))
- return doc.getvalue()
- #+end_src
+* Test the fonts
+This lets me quickly try text with different versions of my font. I
+can also look at lots of kerning pairs at the same time.
 
- #+RESULTS:
- [[file:files/test.html]]
+#+NAME: def_test_html
+#+begin_src python :results output :session "out"
+def test_css(fonts):
+  s = ""
+  for f in fonts:
+    s += "@font-face { font-family: '%s'; src: url('%s'); }\n" % (f[0], f[1])
+    s += ".%s { font-family: '%s'; }\n" % (f[0], f[0])
+  s += "table { font-size: inherit; font-weight: inherit }"
+  s += "td { text-align: left }"
+  s += ".blog-heading { font-weight: bold; font-size: 32px }"
+  s += ".default { color: gray }"
+  s += "body { font-family: woff, Arial, sans-serif; font-size: 32px; padding: 10px }"
+  return s
 
-* Make a font for A-
+def test_strings(strings):
+  doc, tag, text, line = Doc().ttl()
+  with doc.tag('table', style='border-bottom: 1px solid gray; width: 100%; border-collapse: collapse'):
+    for s in strings:
+      for i, f in enumerate(fonts):
+        style = 'border-top: 1px solid gray' if (i == 0) else ""
+        with tag('tr', klass=f[0], style=style):
+          line('td', f[0])
+          line('td', s)
+  return doc.getvalue()
+def test_kerning_matrix(font):
+  sub = font.getLookupSubtables(font.gpos_lookups[0])
+  doc, tag, text, line = Doc().ttl()
+  for s in sub:
+    if font.isKerningClass(s):
+      (classes_left, classes_right, array) = font.getKerningClass(s)
+      kerning = np.array(array).reshape(len(classes_left), len(classes_right))
+      with tag('table'):
+        for r, row in enumerate(classes_left):
+          if row is None: continue
+          for first_letter in row:
+            if first_letter == None: continue
+            with tag('tr'):
+              line('td', first_letter)
+              for c, column in enumerate(classes_right):
+                if column is None: continue
+                for second_letter in column:
+                  if second_letter is None: continue
+                  klass = "kerned" if kerning[r][c] else "default"
+                  line('td', aglfn.to_glyph(first_letter) + aglfn.to_glyph(second_letter), klass=klass)
+  return doc.getvalue()
+
+from yattag import Doc
+import numpy as np
+import fontforge
+import aglfn
+
+fonts = [['raw', 'sachacHandRaw.otf'],
+         ['raw-kerned', 'sachacHandRawKerned.otf'],
+         ['edited', 'sachacHandEdited.otf'],
+         ['regular', 'sachacHand.woff'],
+         ['bold', 'sachacHandBold.woff']]
+main_fonts = [{'output': 'test-regular.html', 'font_filename': 'sachacHand.woff', 'klass': 'regular'},
+              {'output': 'test-bold.html', 'font_filename': 'sachacHandBold.woff', 'klass': 'bold'}]
+strings = ["hhhhnnnnnnhhhhhnnnnnn", # http://famira.com/article/letterproef
+           "Python+FontForge+Org: I made a font based on my handwriting!",
+           "Monthly review: May 2020",
+           "Emacs News 2020-06-01"]
+
+def test_glyphs(font):
+  return ''.join([(aglfn.to_glyph(g) or "") for g in font if font[g].isWorthOutputting()])
+
+def test_font_html(params):
+  doc, tag, text, line = Doc().ttl()
+  font = fontforge.open(params['font_filename'])
+  with tag('html'):
+    with tag('head'): 
+      doc.asis('<link rel="stylesheet" type="text/css" href="style.css" />')
+    with tag('body', klass=params['klass']):
+      with tag('a', href=params['font_filename'], style='float: right'):
+        text('Download')
+      line('h1', '%s (%s, %s, %s)' % (font.fullname, font.fontname, font.familyname, params['font_filename']))
+      line('h2', 'Glyphs and sizes')
+      with tag('table'):
+        for size in [10, 14, 20, 24, 36]:
+          with tag('tr', style='font-size: %dpt' % size):
+            line('td', size)
+            line('td', test_glyphs(font))
+      line('h2', 'Test strings')
+      for s in strings:
+        line('div', s)
+      line('h2', 'Kerning matrix')
+      doc.asis(test_kerning_matrix(font))
+      # http://famira.com/article/letterproef
+  font.close()
+  return doc.getvalue()
+
+# Write the stylesheet
+with open("style.css", "w") as f:
+  f.write(test_css(fonts))
+
+for p in main_fonts:
+  #print(test_font_html(p))
+  with open(p['output'], 'w') as f:
+    f.write(test_font_html(p))
+
+# Write the main page
+with open('test.html', 'w') as f:
+  doc, tag, text, line = Doc().ttl()
+  for p in main_fonts:
+    p['font'] = fontforge.open(p['font_filename'])
+  with tag('html'):
+    with tag('head'): 
+      doc.asis('<link rel="stylesheet" type="text/css" href="style.css" />')
+    with tag('body'):
+      line('h1', 'Summary')
+      line('h2', 'Glyphs')
+      with tag('table'):
+        for p in main_fonts:
+          with tag('tr', klass=p['klass']):
+            with tag('td'):
+              with tag('a', href=p['output']):
+                text(p['font_filename'])
+            line('td', test_glyphs(p['font']))
+      line('h2', 'Strings')
+      with tag('table', style='border-bottom: 1px solid gray; width: 100%; border-collapse: collapse'):
+        for s in strings:
+          for i, p in enumerate(main_fonts):
+            style = 'border-top: 1px solid gray' if (i == 0) else ""
+            with tag('tr', klass=p['klass'], style=style):
+              with tag('td'):
+                with tag('a', href=p['output']):
+                  text(p['font_filename'])
+              line('td', s)
+  f.write(doc.getvalue())
+#+end_src
+
+#+RESULTS: def_test_html
+
+#+RESULTS:
+
+* TODO Make a font for A-
 
 #+begin_src python
 <<params>>
@@ -715,7 +807,6 @@ Huh. I want the latest version so that I can pass keyword arguments.
 cmake -GNinja .. -DENABLE_FONTFORGE_EXTRAS=ON 
 ninja
 ninja install
-
 #+RESULTS:
 
 https://superuser.com/questions/1337567/how-do-i-convert-a-ttf-into-individual-png-character-images

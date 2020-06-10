@@ -1,0 +1,11 @@
+@font-face { font-family: 'raw'; src: url('sachacHandRaw.otf'); }
+.raw { font-family: 'raw'; }
+@font-face { font-family: 'raw-kerned'; src: url('sachacHandRawKerned.otf'); }
+.raw-kerned { font-family: 'raw-kerned'; }
+@font-face { font-family: 'edited'; src: url('sachacHandEdited.otf'); }
+.edited { font-family: 'edited'; }
+@font-face { font-family: 'regular'; src: url('sachacHand.woff'); }
+.regular { font-family: 'regular'; }
+@font-face { font-family: 'bold'; src: url('sachacHandBold.woff'); }
+.bold { font-family: 'bold'; }
+table { font-size: inherit; font-weight: inherit }td { text-align: left }.blog-heading { font-weight: bold; font-size: 32px }.default { color: gray }body { font-family: woff, Arial, sans-serif; font-size: 32px; padding: 10px }
