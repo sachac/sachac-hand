@@ -178,7 +178,7 @@ handwriting into a font. Whee!
 
 * Things I needed to install 
 
-=sudo apt-get install fontforge python3-fontforge python3-numpy python3-sqlalchemy python3-pandas python3-pymysql python3-nltk woff-tools woff2 python3-yattag=
+=sudo apt-get install fontforge python3-fontforge python3-numpy python3-sqlalchemy python3-pandas python3-pymysql python3-nltk woff-tools woff2 python3-yattag python3-livereload=
 
 I compiled autotrace based on my fork at https://github.com/sachac/autotrace so that it uses Graphicsmagick instead of Imagemagick.
 
@@ -575,90 +575,89 @@ I also needed =(setenv "LD_LIBRARY_PATH" "/usr/local/lib")=. There are probably 
 
 * Make the bold font
 
- | k       |   40 |       |
- | r       |   43 |       |
- | j       |  -90 |    60 |
- | s       |   24 |       |
- | t       |   58 |    58 |
- | h       |   70 |       |
- | i       |   62 |    70 |
- | m       |   50 |    50 |
- | n       |   60 |    60 |
- | l       |   60 |    40 |
- | F       |   80 |       |
- | T       | 60   |       |
- | colon   |   62 |    62 |
- | w       |   60 |    40 |
- | o       |   40 |    40 |
- | exclam  |   55 |    55 |
-
  #+NAME: bold_bearings
  |         | Left | Right |
  |---------+------+-------|
  | Default |   30 |    30 |
- | H       |   50 |    50 |
- | J       |      |    70 |
- | Q       |      |    50 |
- | W       |   50 |    60 |
+ | A       |   30 |   -100 |
+ | B       |    0 |     0 |
+ | C       |   20 |   -30 |
  | b       |      |    40 |
- | v       |      |    40 |
- | U       |   60 |    60 |
- | R       |   60 |       |
- | g       |   60 |    60 |
- | j       |  -30 |    70 |
- | y       |      |    70 |
- | q       |      |    70 |
- | s       |      |    80 |
- | i       |      |    60 |
- | k       |   60 | 50    |
- | e       |      |    50 |
- | F       |   60 |       |
- | P       |   60 |       |
- | E       |   60 |       |
+ | D       |      |    10 |
+ | d       |      |   -10 |
+ | e       |      |    20 |
+ | E       |   50  |    20 |
+ | F       |   50 |    0  |
+ | f       |  -50 |   -10 |
+ | G       |   40 |    30 |
+ | g       |   20 |    40 |
+ | H       |   50 |    50 |
+ | i       |      |    30 |
+ | J       |  -10 |    30 |
+ | j       |  -40 |    50 |
+ | k       |   40 |    20 |
+ | K       |   50 |    0  |
+ | H       |      |    10 |
+ | L       |   60 |    10 |
+ | l       |      |     0 |
  | M       |   60 |       |
- | Y       |   60 |    60 |
- | K       |   70 |       |
+ | m       |   40 |       |
+ | N       |   60 |    10 |
+ | O       |   40 |    10 |
+ | P       |   60 |     0 |
+ | p       |      |    20 |
+ | Q       |   40 |    10 |
+ | q       |   20 |    30 |
+ | R       |   50 |   -10 |
+ | S       |  -10 |   -10 |
+ | s       |   20 |    40 |
+ | T       |      |   -10 |
+ | t       |  -40 |     0 |
+ | U       |   60 |    20 |
+ | u       |   20 |       |
+ | V       |      |   -10 |
+ | v       |   20 |    20 |
+ | W       |   50 |    20 |
+ | X       |      |   -10 |
+ | x       |   10 |    20 |
+ | y       |   20 |    30 |
+ | Y       |   40 |     0 |
+ | Z       |      |   -10 |
+ | z       |   10 |    20 |
  #+NAME: bold_kerning_matrix
-   |               | None | o,a,c,e,d,g,q,w | f,t | x,v,z | h,b,l,i |   j | m,n,p,r,u |   k |   y | s |    T | F | zero |
-   | None          |      |                 |     |       |         |     |           |     |     |   |      |   |      |
-   | f             |      |             -60 |     |       |         |     |   -40     |     |     |   | -100 |   |      |
-   | t             |      |             -30 |     |       |         |     |           |     |     |   | -100 |   |      |
-   | i             |      |             -30 | -30 |       |         | -90 |           |     |     |   | -100 |   |      |
-   | r             |      |             -60 |     |       |         | -90 |           |     |     |   | -100 |   |      |
-   | k             |      |             -30 |     |       |         |     |           |     |     |   | -100 |   |      |
-   | l             |      |                 |     |       |         |     |           |     |     |   | -100 |   |      |
-   | v             |      |                 |     |       |         | -50 |           |     |     |   | -100 |   |      |
-   | b,o,p         |      |                 |     |       |         | -90 |           |     |     |   | -100 |   |      |
-   | n,m           |      |                 |     |       |         | -90 |           |     |     |   | -100 |   |      |
-   | a             |      |                 |     |       |         | -90 |           |     |     |   | -100 |   |      |
-   | W             |      |                 |     |       |         |     |           |     |     |   |      |   |      |
-   | T             |      |            -100 | -90  |   -90  |     -30 | -30 |       -30 | -30 | -30 | -30  |      |   |      |
-   | F             |      |           -50   |     |       |         |     |           |     |     |   |      |   |      |
-   | P             |      |             -70 |     |       |         |     |           |     |     |   |      |   |      |
-   | g             |      |                 |     |       |         |     |           |     |     |   |      |   |      |
-   | q,d,h,y,j     |      |                 |     |       |         |     |           |     |     |   |      |   |      |
-   | c,e,s,u,w,x,z |      |             -20 |     |       |         |     |           |     |     |   |      |   |      |
+   |               | None | o,a,c,e,d,g,q,w | f,t | x,v,z | h,b,l,i |    j | m,n,p,r,u |   k |   y |   s |    T |  F | zero |
+   | None          |      |                 |     |       |         |      |           |  20 |     |     |      |    |      |
+   | f             |      |             -60 |   0 |       |      20 |  -90 |       -10 |  20 |     | -40 | -190 | 20 |      |
+   | t             |      |             -20 |  10 |       |         |  -70 |        20 |  20 |     |     | -100 |    |      |
+   | i             |      |             -30 |  10 |       |         |  -90 |           |     |     |     | -160 |    |      |
+   | r             |      |             -70 |     |       |     -10 |  -90 |           |     |     | -40 | -190 |    |      |
+   | k             |      |             -20 | -10 |       |     -10 |  -90 |       -10 |     |     |     | -100 |    |  -10 |
+   | l             |      |                 |  10 |       |         |      |           | 20  |     |     | -100 |    |      |
+   | v             |      |             -30 |  10 |       |         |  -50 |           |     |     |     | -100 |    |      |
+   | b,o,p         |      |             -20 |  10 |       |         |  -90 |           |     |     |     | -100 |    |      |
+   | n,m           |      |                 |  10 |       |         |  -90 |           |     |     |     | -100 |    |      |
+   | a             |      |                 |     |       |         |  -90 |           |     |     | -10 | -100 |    |      |
+   | W             |      |                 |  20 |       |         |      |           |     |     |     | -100 |    |      |
+   | T             |      |            -100 | -70 |   -90 |     -30 | -120 |       -70 | -30 | -30 | -80 | -100 |    |      |
+   | F             |      |             -50 |     |       |         |  -70 |           |     |     |     | -100 |    |      |
+   | P             |      |             -70 |     |       |         |  -50 |           |     |     |     | -100 |    |      |
+   | g             |      |                 |     |       |         |  -50 |           |     |     |     | -100 |    |      |
+   | q,d,h,y,j     |      |                 |     |       |      10 |  -50 |           |     |     |     | -100 |    |      |
+   | c,e,s,u,w,x,z |      |             -20 |  10 |    10 |         |  -50 |           |     |     |     | -100 |    |      |
+   | V             |      |             -70 |  30 |    30 |         |  -80 |       -20 |     | -40 | -40 |  -10 |    |      |
+   | A             |      |              30 |  60 |    30 |      30 |      |        20 |  40 |  20 |  20 |  -10 | 20 | 20   |
+   | Y             |      |              20 |  60 |    30 |      30 |      |        20 |  20 |  40 |  20 |  -10 |    |      |
+   | M,N,H,I       |      |              20 |  50 |    40 |      30 |      |        10 |  20 |  20 |     |      |    |      |
+   | O,Q,D,U       |      |                 |  50 |    40 |      30 |  -20 |        30 |  20 |  30 |     |  -70 |    |      |
+   | J             |      |                 |  40 |    20 |      20 |  -20 |        10 |  10 |  30 |     |  -30 |    |      |
+   | C             |      |              10 |  40 |    10 |      30 |      |        30 |  30 |  20 |     |  -30 |    |      |
+   | E             |      |             -10 |  50 |       |      10 |  -20 |        10 |     |  20 |     |      |    |      |
+   | L             |      |             -10 | -10 |       |         |  -30 |           |     |  20 |     |  -90 |    |      |
+   | P             |      |             -40 |  30 |    20 |      20 |      |           |  20 |  20 |     |  -30 |    |      |
+   | K,R           |      |              20 |  20 |    20 |      10 |      |        20 |  20 |  20 |     |  -60 |    |      |
+   | G             |      |              20 |  40 |    30 |      30 |      |        20 |  20 |  20 |     | -100 | 10 |      |
+   | B,S,X,Z       |      |              20 |  40 |    30 |      30 |      |        20 |  20 |  20 |  20 |  -20 | 10 |      |
 
-Old
-   |               | None | o,a,c,e,d,g,q,w |  f,t | x,v,z | h,b,l,i |   j | m,n,p,r,u |  k |    y |   s |    T | F | zero |
-   | None          |    0 |               0 |    0 |     0 |       0 |   0 |         0 |    |      |   0 |    0 |   |    0 |
-   | f             |    0 |             -50 |  -61 |   -20 |         |   0 |           |    |      |   0 | -150 |   |  -70 |
-   | t             |    0 |             -50 |  -41 |   -20 |         |   0 |         0 |    |      |   0 | -150 |   |  -10 |
-   | i             |      |                 |  -40 |       |         |     |           |    |      |     | -150 |   |      |
-   | r             |    0 |             -32 |  -40 |       |         |   0 |           |    |      |   0 | -170 |   |   29 |
-   | k             |    0 |             -40 |  -80 |       |         |   0 |           |    |      | -48 | -150 |   |  -79 |
-   | l             |    0 |             -41 |  -50 |       |       0 |   0 |         0 |    |      |   0 | -110 |   |  -20 |
-   | v             |    0 |             -40 |  -35 |   -15 |         |   0 |         0 |    |      |   0 | -170 |   |   30 |
-   | b,o,p         |    0 |                 |  -40 |       |       0 |   0 |         0 |    |      |   0 | -170 |   |   43 |
-   | n,m           |      |                 |  -30 |       |         |     |           |    |      |     | -170 |   |      |
-   | a             |    0 |             -23 |  -30 |       |       0 |   0 |         0 |    |      |   0 | -170 |   |    7 |
-   | W             |    0 |             -40 |  -30 |   -10 |         |   0 |         0 |    |      |   0 |      |   |      |
-   | T             |    0 |            -150 | -120 |  -120 |     -30 | -40 |      -130 |    | -100 | -80 |    0 |   |      |
-   | F             |    0 |             -90 |  -90 |   -70 |     -30 |   0 |       -70 |    |  -50 | -80 |  -40 |   |      |
-   | P             |    0 |            -100 |  -70 |   -50 |         |   0 |       -70 |    |  -30 | -80 |  -20 |   |      |
-   | g             |      |                 |      |       |         |  40 |           |    |      |     | -120 |   |      |
-   | q,d,h,y,j     |      |                 |      |       |      30 |  30 |        30 | 30 |   30 |     | -100 |   |      |
-   | c,e,s,u,w,x,z |      |                 |      |       |         |     |           |    |      |     | -120 |   |      |
 
 #+begin_src python :var bearings=bold_bearings :var kerning_matrix=bold_kerning_matrix
 <<params>>
@@ -686,6 +685,7 @@ font = set_bearings(font, bearings)
 font = kern_classes(font, kerning_matrix)
 font = kern_by_char(font, kerning_matrix)
 save_font(font, params)
+<<def_test_html>>
 #+end_src
 
 #+RESULTS:
@@ -730,19 +730,21 @@ def test_kerning_matrix(font):
     if font.isKerningClass(s):
       (classes_left, classes_right, array) = font.getKerningClass(s)
       kerning = np.array(array).reshape(len(classes_left), len(classes_right))
-      with tag('table'):
+      with tag('table', style='border-collapse: collapse'):
         for r, row in enumerate(classes_left):
           if row is None: continue
-          for first_letter in row:
+          for j, first_letter in enumerate(row):
             if first_letter == None: continue
-            with tag('tr'):
+            style = "border-top: 1px solid gray" if j == 0 else ""
+            with tag('tr', style=style):
               line('td', first_letter)
               for c, column in enumerate(classes_right):
                 if column is None: continue
-                for second_letter in column:
+                for i, second_letter in enumerate(column):
                   if second_letter is None: continue
                   klass = "kerned" if kerning[r][c] else "default"
-                  with tag('td', klass=klass):
+                  style = "border-left: 1px solid gray" if i == 0 else ""
+                  with tag('td', klass=klass, style=style):
                     text(aglfn.to_glyph(first_letter) + aglfn.to_glyph(second_letter))
   return doc.getvalue()
 
@@ -838,7 +840,7 @@ with open('test.html', 'w') as f:
 
 #+RESULTS: def_test_html
 
-#+RESULTS:
+Oh, can I get livereload working? There's a =python3-livereload=... Ah, it's as simple as running =livereload=.
 
 * TODO Make a font for A-
 
@@ -1162,7 +1164,7 @@ return ''.join([x[0] for x in common])
 
 ** Copy it to my website
 
-#+begin_src sh :eval yes
+CPP#+begin_src sh :eval yes
 scp sachacHand.woff web:~/sacha-v3/
 scp sachacHandBold.woff web:~/sacha-v3/
 #+end_src
