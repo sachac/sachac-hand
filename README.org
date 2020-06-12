@@ -226,20 +226,36 @@ I also needed =(setenv "LD_LIBRARY_PATH" "/usr/local/lib")=. There are probably 
    'line_width': 3,
    'text': "Python+FontForge+Org: I made a font based on my handwriting!"
    }
+ fontforge.loadNamelist(params['name_list'])
  params['font_size'] = int(params['em'])
  params['baseline'] = params['em'] - params['descent']
 
  def transpose_letters(letters, width, height):
    return ''.join(np.reshape(list(letters.ljust(width * height)), (height, width)).transpose().reshape(-1))
 
- def get_letter_matrix(params):
-   matrix = np.reshape(list(params['letters'].ljust(params['rows'] * params['columns']))[0:params['rows'] * params['columns']], (params['rows'], params['columns']))
-   if params['direction'] == 'vertical':
-     matrix = matrix.transpose()
+ # Return glyph name of s, or s if none (possibly variant)
+ def glyph_name(s):
+   return aglfn.name(s) or s
+
+ def glyph_matrix(matrix=None, letters=None, rows=0, columns=0, direction='horizontal', **kwargs):
+   if matrix:
+     if isinstance(matrix[0], str):
+       # Split each
+       matrix = [x.split(',') for x in matrix]
+     else:
+       matrix = matrix[:]  # copy the list
+     return [[glyph_name(x) for x in row] for row in matrix]
+   else:
+     matrix = np.reshape(list(params['letters'].ljust(params['rows'] * params['columns']))[0:params['rows'] * params['columns']], (params['rows'], params['columns']))
+     if direction == 'vertical':
+       matrix = matrix.transpose()
    return matrix
 
- def glyph_filename_base(ch):
-   return 'uni%s-%s' % (hex(ord(ch)).replace('0x', '').zfill(4), aglfn.name(ch))
+ def glyph_filename_base(glyph_name):
+   try:
+     return 'uni%s-%s' % (hex(ord(aglfn.to_glyph(glyph_name))).replace('0x', '').zfill(4), glyph_name)
+   except:
+     return glyph_name
 
  def load_font(params):
    if type(params) == str:
@@ -251,7 +267,7 @@ I also needed =(setenv "LD_LIBRARY_PATH" "/usr/local/lib")=. There are probably 
    font.save(params['new_font_file'])
    font.generate(params['new_otf'])
    subprocess.call(['sfnt2woff', params['new_otf']])
-   print("Saved %s" % params['new_font_file'])
+   print("Saved %s and %s" % (params['new_font_file'], params['new_otf']))
 
  import orgbabelhelper as ob
  def out(df, **kwargs):
@@ -288,7 +304,7 @@ I also needed =(setenv "LD_LIBRARY_PATH" "/usr/local/lib")=. There are probably 
    img = Image.new('RGB', (params['columns'] * params['em_width'], params['rows'] * (params['em'] + sized_padding)), 'white')
    params['draw'] = ImageDraw.Draw(img)
    params['font'] = ImageFont.truetype(params['font_name'], params['font_size'])
-   matrix = get_letter_matrix(params)
+   matrix = glyph_matrix(**params)
    for r, row in enumerate(matrix):
      for c, ch in enumerate(row):
        draw_letter(c, r, ch, params)
@@ -319,112 +335,94 @@ I also needed =(setenv "LD_LIBRARY_PATH" "/usr/local/lib")=. There are probably 
 
  #+NAME: def_cut_glyphs
  #+begin_src python :eval no
- import os
- import libxml2
- from PIL import Image, ImageOps
- import subprocess
- def cut_glyphs(params):
-   im = Image.open(params['sample_file']).convert('1')
-   letters = params['letters']
-   if params['direction'] == 'vertical':
-     letters = transpose_letters(letters, params['columns'], params['rows'])
-   matrix = np.reshape(list(letters), (params['rows'], params['columns']))
-   for r, row in enumerate(matrix):
-     top = r * (params['height'] + params['row_padding'])
-     bottom = top + params['height']
-     for c, ch in enumerate(row):
-       left = c * params['width']
-       right = left + params['width']
-       small = im.crop((left, top, right, bottom))
-       filename = os.path.join(params['glyph_dir'], glyph_filename_base(ch) + '.pbm')
-       small.save(filename)
-       svg = filename.replace('.pbm', '.svg')
-       png = filename.replace('.pbm', '.png')
-       small.save(png)
-       subprocess.call(['autotrace', '-output-file', svg, filename])
-       doc = libxml2.parseFile(svg)
-       root = doc.children
-       child = root.children
-       child.next.unlinkNode()
-       doc.saveFile(svg)
+   import os
+   import libxml2
+   from PIL import Image, ImageOps
+   import subprocess
+   def cut_glyphs(sample_file="", letters="", direction="", columns=0, rows=0, height=0, width=0, row_padding=0, glyph_dir='glyphs', matrix=None, **kwargs):
+     im = Image.open(sample_file).convert('1')
+     if not os.path.exists(glyph_dir):
+       os.makedirs(glyph_dir)
+     matrix = glyph_matrix(matrix=matrix, letters=letters, direction=direction, columns=columns, rows=rows)
+     for r, row in enumerate(matrix):
+       top = r * (height + row_padding)
+       bottom = top + height
+       for c, ch in enumerate(row):
+         left = c * width
+         right = left + width
+         small = im.crop((left, top, right, bottom))
+         filename = os.path.join(glyph_dir, glyph_filename_base(ch) + '.pbm')
+         small.save(filename)
+         svg = filename.replace('.pbm', '.svg')
+         png = filename.replace('.pbm', '.png')
+         small.save(png)
+         subprocess.call(['autotrace', '-output-file', svg, filename])
+         doc = libxml2.parseFile(svg)
+         root = doc.children
+         child = root.children
+         child.next.unlinkNode()
+         doc.saveFile(svg)
  #+end_src
 
 ** Import SVG outlines into font
 
  #+NAME: def_import_glyphs
  #+BEGIN_SRC python :results output :eval no
- import fontforge
- import os
- import aglfn
- def import_glyphs(font, params):
-   fontforge.loadNamelist(params['name_list'])
-   font.em = params['height']
-   font.encoding = 'UnicodeFull'
-   font.fontname = params['new_font_name']
-   font.familyname = params['new_family_name']
-   font.fullname = params['new_full_name']
-   cut_letters = params['letters']
-   if params['direction'] == 'vertical':
-     cut_letters = transpose_letters(cut_letters, params['columns'], params['rows'])
-   for i, ch in enumerate(cut_letters):
-     if ch == ' ': continue
-     try:
-       name = aglfn.name(ch)
-       glyph = font.createMappedChar(name)
-       base = 'uni%s-%s' % (hex(ord(ch)).replace('0x', '').zfill(4), name)
-       svg_filename = os.path.join(params['glyph_dir'], base + '.svg')
-       png_filename = os.path.join(params['glyph_dir'], base + '.png')
-       glyph.importOutlines(png_filename)
-       glyph.importOutlines(svg_filename)
-     except:
-       print("Error with ", ch)
-       pass
-   font.em = params['em']
-   font.descent = params['descent']
-   font.ascent = params['ascent']
-   return font
+   import fontforge
+   import os
+   import aglfn
+
+   def set_up_font_info(font, new_family_name="", new_font_name="", new_full_name="", em=1000, descent=200, ascent=800, **kwargs):
+     font.encoding = 'UnicodeFull'
+     font.fontname = new_font_name
+     font.familyname = new_family_name
+     font.fullname = new_full_name
+     font.em = em
+     font.descent = descent
+     font.ascent = ascent
+     return font
+
+   def import_glyphs(font, letters=None, columns=None, rows=None, direction=None, matrix=None, height=0, **kwargs):
+     old_em = font.em
+     font.em = height
+     matrix = glyph_matrix(matrix=matrix, letters=letters, columns=columns, rows=rows, direction=direction)
+     for row in matrix:
+       for name in row:
+         if name is None or name == 'space': continue
+         try:
+           try:
+             glyph = font.createMappedChar(name)
+           except:
+             glyph = font.createChar(-1, name)
+           base = glyph_filename_base(name)
+           svg_filename = os.path.join(params['glyph_dir'], base + '.svg')
+           png_filename = os.path.join(params['glyph_dir'], base + '.png')
+           glyph.importOutlines(png_filename)
+           glyph.importOutlines(svg_filename)
+         except:
+           print("Error with ", name)
+           pass
+     font.em = old_em
+     return font
  #+END_SRC
 
 ** Adjust bearings
 
- #+NAME: bearings
- |         | Left | Right |
- |---------+------+-------|
- | Default |   40 |    40 |
- | k       |   40 |       |
- | r       |   43 |       |
- | j       |  -90 |    60 |
- | s       |   24 |       |
- | t       |   58 |    58 |
- | h       |   70 |       |
- | i       |   62 |    70 |
- | m       |   50 |    50 |
- | n       |   60 |    60 |
- | l       |   60 |    40 |
- | F       |   80 |       |
- | T       | 60   |       |
- | colon   |   62 |    62 |
- | w       |   60 |    40 |
- | o       |   40 |    40 |
- | exclam  |   55 |    55 |
-
  #+NAME: def_set_bearings
  #+begin_src python :eval no
- def set_bearings(font, bearings):
-   space = font.createMappedChar(' ')
-   space.width = int(params['em'] / 5)
+ def set_bearings(font, bearings, **kwargs):
    (default_left, default_right) = next(o for o in bearings if o[0] == 'Default')[1:]
-   for ch in params['letters']:
-     if ch == ' ': continue
-     try:
-       glyph = font.createMappedChar(aglfn.name(ch))
-       glyph.left_side_bearing = default_left
-       glyph.right_side_bearing = default_right
-     except:
-       print("Error with ", ch)
+   for g in font:
+     font[g].left_side_bearing = default_left
+     font[g].right_side_bearing = default_right
+   space = font.createMappedChar('space')
+   space.width = int(font.em / 5)
    for row in bearings:
      if row[0] == 'Default': continue
-     g = font.createMappedChar(row[0])
+     try:
+       g = font.createMappedChar(row[0])
+     except:
+       g = font.createChar(-1, row[0])
      if row[1] != "":
        g.left_side_bearing = row[1]
      if row[2] != "":
@@ -438,36 +436,11 @@ I also needed =(setenv "LD_LIBRARY_PATH" "/usr/local/lib")=. There are probably 
  <<params>>
  <<def_set_bearings>>
  font = load_font(params)
- font = set_bearings(font, bearings)
+ font = set_bearings(font, bearings, **params)
  save_font(font, params)
  #+end_src
 
 ** Kern the font
-
-*** Values
-
- Rows are first characters, columns are second characters.
-
- #+NAME: kerning_matrix
-   |               | None | o,a,c,e,d,g,q,w |  f,t | x,v,z | h,b,l,i |   j | m,n,p,r,u |  k |    y |   s |    T | F | zero |
-   | None          |    0 |               0 |    0 |     0 |       0 |   0 |         0 |    |      |   0 |    0 |   |    0 |
-   | f             |    0 |             -50 |  -61 |   -20 |         |   0 |           |    |      |   0 | -150 |   |  -70 |
-   | t             |    0 |             -50 |  -41 |   -20 |         |   0 |         0 |    |      |   0 | -150 |   |  -10 |
-   | i             |      |                 |  -40 |       |         |     |           |    |      |     | -150 |   |      |
-   | r             |    0 |             -32 |  -40 |       |         |   0 |           |    |      |   0 | -170 |   |   29 |
-   | k             |    0 |             -40 |  -80 |       |         |   0 |           |    |      | -48 | -150 |   |  -79 |
-   | l             |    0 |             -41 |  -50 |       |       0 |   0 |         0 |    |      |   0 | -110 |   |  -20 |
-   | v             |    0 |             -40 |  -35 |   -15 |         |   0 |         0 |    |      |   0 | -170 |   |   30 |
-   | b,o,p         |    0 |                 |  -40 |       |       0 |   0 |         0 |    |      |   0 | -170 |   |   43 |
-   | n,m           |      |                 |  -30 |       |         |     |           |    |      |     | -170 |   |      |
-   | a             |    0 |             -23 |  -30 |       |       0 |   0 |         0 |    |      |   0 | -170 |   |    7 |
-   | W             |    0 |             -40 |  -30 |   -10 |         |   0 |         0 |    |      |   0 |      |   |      |
-   | T             |    0 |            -150 | -120 |  -120 |     -30 | -40 |      -130 |    | -100 | -80 |    0 |   |      |
-   | F             |    0 |             -90 |  -90 |   -70 |     -30 |   0 |       -70 |    |  -50 | -80 |  -40 |   |      |
-   | P             |    0 |            -100 |  -70 |   -50 |         |   0 |       -70 |    |  -30 | -80 |  -20 |   |      |
-   | g             |      |                 |      |       |         |  40 |           |    |      |     | -120 |   |      |
-   | q,d,h,y,j     |      |                 |      |       |      30 |  30 |        30 | 30 |   30 |     | -100 |   |      |
-   | c,e,s,u,w,x,z |      |                 |      |       |         |     |           |    |      |     | -120 |   |      |
 
 *** Kern by classes
 
@@ -545,121 +518,230 @@ I also needed =(setenv "LD_LIBRARY_PATH" "/usr/local/lib")=. There are probably 
  windows a certain way and adding =:eval no= to the Org Babel blocks
  I'm not currently using, I can easily change the relevant table
  entries and evaluate the whole buffer to regenerate the font versions,
- including exports to OTF and WOFF. Here's the code for that:
+ including exports to OTF and WOFF. Here's the code for that.
 
- #+begin_src python :var bearings=bearings :var kerning_matrix=kerning_matrix :eval no
- <<params>>
- <<def_import_glyphs>>
- <<def_set_bearings>>
- <<def_kern_classes>>
- <<def_kern_by_char>>
- font = fontforge.font()
- font = import_glyphs(font, params)
- font = set_bearings(font, bearings)
- save_font(font, {**params, "new_otf": "sachacHandRaw.otf"})
- font = kern_classes(font, kerning_matrix)
- font = kern_by_char(font, kerning_matrix)
- save_font(font, {**params, "new_otf": "sachacHandRawKerned.otf"})
- font = load_font('SachaHandEdited.sfd')
- font = set_bearings(font, bearings)
- font.removeLookup('kern')
- save_font(font, {**params, "new_otf": "sachacHandEdited.otf"})
- font = kern_classes(font, kerning_matrix)
- font = kern_by_char(font, kerning_matrix)
- save_font(font, {**params, "new_otf": "sachacHand.otf"})
- #+end_src
-
- #+RESULTS:
- : None
+ Rows are first characters, columns are second characters.
 
 
-* Make the bold font
-
- #+NAME: bold_bearings
+ #+NAME: bearings
  |         | Left | Right |
  |---------+------+-------|
- | Default |   30 |    30 |
- | A       |   30 |   -100 |
- | B       |    0 |     0 |
- | C       |   20 |   -30 |
+ | Default |   60 |    60 |
+ | A       |   60 |   -50 |
+ | B       |   60 |     0 |
+ | C       |   60 |   -30 |
+ | c       |      |    40 |
  | b       |      |    40 |
  | D       |      |    10 |
- | d       |      |   -10 |
- | e       |      |    20 |
- | E       |   50  |    20 |
- | F       |   50 |    0  |
- | f       |  -50 |   -10 |
- | G       |   40 |    30 |
- | g       |   20 |    40 |
- | H       |   50 |    50 |
+ | d       |   30 |    30 |
+ | e       |   30 |    40 |
+ | E       |   70 |    10 |
+ | F       |   70 |     0 |
+ | f       |    0 |   -20 |
+ | G       |   60 |    30 |
+ | g       |   20 |    60 |
+ | H       |   80 |    80 |
+ | h       |   40 |    40 |
+ | I       |   80 |    50 |
  | i       |      |    30 |
- | J       |  -10 |    30 |
- | j       |  -40 |    50 |
+ | J       |   40 |    30 |
+ | j       |  -70 |    40 |
  | k       |   40 |    20 |
- | K       |   50 |    0  |
+ | K       |   80 |     0 |
  | H       |      |    10 |
- | L       |   60 |    10 |
+ | L       |   80 |    10 |
  | l       |      |     0 |
- | M       |   60 |       |
+ | M       |   60 |    30 |
  | m       |   40 |       |
- | N       |   60 |    10 |
- | O       |   40 |    10 |
- | P       |   60 |     0 |
- | p       |      |    20 |
- | Q       |   40 |    10 |
+ | N       |   70 |    10 |
+ | O       |   70 |    10 |
+ | o       |   40 |    40 |
+ | P       |   70 |     0 |
+ | p       |      |    40 |
+ | Q       |   70 |    10 |
  | q       |   20 |    30 |
- | R       |   50 |   -10 |
- | S       |  -10 |   -10 |
+ | R       |   70 |   -10 |
+ | r       |      |    40 |
+ | S       |   60 |    60 |
  | s       |   20 |    40 |
  | T       |      |   -10 |
- | t       |  -40 |     0 |
- | U       |   60 |    20 |
- | u       |   20 |       |
+ | t       |  -10 |    20 |
+ | U       |   70 |    20 |
+ | u       |   40 |    40 |
  | V       |      |   -10 |
  | v       |   20 |    20 |
- | W       |   50 |    20 |
+ | W       |   70 |    20 |
+ | w       |   40 |    40 |
  | X       |      |   -10 |
  | x       |   10 |    20 |
  | y       |   20 |    30 |
  | Y       |   40 |     0 |
  | Z       |      |   -10 |
  | z       |   10 |    20 |
- #+NAME: bold_kerning_matrix
-   |               | None | o,a,c,e,d,g,q,w | f,t | x,v,z | h,b,l,i |    j | m,n,p,r,u |   k |   y |   s |    T |  F | zero |
-   | None          |      |                 |     |       |         |      |           |  20 |     |     |      |    |      |
-   | f             |      |             -60 |   0 |       |      20 |  -90 |       -10 |  20 |     | -40 | -190 | 20 |      |
-   | t             |      |             -20 |  10 |       |         |  -70 |        20 |  20 |     |     | -100 |    |      |
-   | i             |      |             -30 |  10 |       |         |  -90 |           |     |     |     | -160 |    |      |
-   | r             |      |             -70 |     |       |     -10 |  -90 |           |     |     | -40 | -190 |    |      |
-   | k             |      |             -20 | -10 |       |     -10 |  -90 |       -10 |     |     |     | -100 |    |  -10 |
-   | l             |      |                 |  10 |       |         |      |           | 20  |     |     | -100 |    |      |
-   | v             |      |             -30 |  10 |       |         |  -50 |           |     |     |     | -100 |    |      |
-   | b,o,p         |      |             -20 |  10 |       |         |  -90 |           |     |     |     | -100 |    |      |
-   | n,m           |      |                 |  10 |       |         |  -90 |           |     |     |     | -100 |    |      |
-   | a             |      |                 |     |       |         |  -90 |           |     |     | -10 | -100 |    |      |
-   | W             |      |                 |  20 |       |         |      |           |     |     |     | -100 |    |      |
-   | T             |      |            -100 | -70 |   -90 |     -30 | -120 |       -70 | -30 | -30 | -80 | -100 |    |      |
-   | F             |      |             -50 |     |       |         |  -70 |           |     |     |     | -100 |    |      |
-   | P             |      |             -70 |     |       |         |  -50 |           |     |     |     | -100 |    |      |
-   | g             |      |                 |     |       |         |  -50 |           |     |     |     | -100 |    |      |
-   | q,d,h,y,j     |      |                 |     |       |      10 |  -50 |           |     |     |     | -100 |    |      |
-   | c,e,s,u,w,x,z |      |             -20 |  10 |    10 |         |  -50 |           |     |     |     | -100 |    |      |
-   | V             |      |             -70 |  30 |    30 |         |  -80 |       -20 |     | -40 | -40 |  -10 |    |      |
-   | A             |      |              30 |  60 |    30 |      30 |      |        20 |  40 |  20 |  20 |  -10 | 20 | 20   |
-   | Y             |      |              20 |  60 |    30 |      30 |      |        20 |  20 |  40 |  20 |  -10 |    |      |
-   | M,N,H,I       |      |              20 |  50 |    40 |      30 |      |        10 |  20 |  20 |     |      |    |      |
-   | O,Q,D,U       |      |                 |  50 |    40 |      30 |  -20 |        30 |  20 |  30 |     |  -70 |    |      |
-   | J             |      |                 |  40 |    20 |      20 |  -20 |        10 |  10 |  30 |     |  -30 |    |      |
-   | C             |      |              10 |  40 |    10 |      30 |      |        30 |  30 |  20 |     |  -30 |    |      |
-   | E             |      |             -10 |  50 |       |      10 |  -20 |        10 |     |  20 |     |      |    |      |
-   | L             |      |             -10 | -10 |       |         |  -30 |           |     |  20 |     |  -90 |    |      |
-   | P             |      |             -40 |  30 |    20 |      20 |      |           |  20 |  20 |     |  -30 |    |      |
-   | K,R           |      |              20 |  20 |    20 |      10 |      |        20 |  20 |  20 |     |  -60 |    |      |
-   | G             |      |              20 |  40 |    30 |      30 |      |        20 |  20 |  20 |     | -100 | 10 |      |
-   | B,S,X,Z       |      |              20 |  40 |    30 |      30 |      |        20 |  20 |  20 |  20 |  -20 | 10 |      |
+
+ 
+ #+NAME: kerning_matrix
+  |               | None | o,a,c,e,d,g,q,w |  f,t | x,v,z | h,b,l,i |   j | m,n,p,r,u |  k |    y |   s |    T |  F | zero |
+  | None          |    0 |               0 |    0 |     0 |       0 |   0 |         0 |    |      |   0 |    0 |    |    0 |
+  | f             |    0 |             -30 |  -61 |   -20 |         |   0 |           |    |      |   0 | -150 |    |  -70 |
+  | t             |    0 |             -50 |  -41 |   -20 |         |   0 |         0 |    |      |   0 | -150 |    |  -10 |
+  | i             |      |                 |  -40 |       |         |     |           |    |      |     | -150 |    |      |
+  | r             |    0 |             -32 |  -40 |       |         |   0 |           |    |      |   0 | -170 |    |   29 |
+  | k             |    0 |             -10 |  -50 |       |         |   0 |           |    |      | -48 | -150 |    |  -79 |
+  | l             |    0 |             -10 |  -20 |       |       0 |   0 |         0 |    |      |   0 | -110 |    |  -20 |
+  | v             |    0 |             -40 |  -35 |   -15 |         |   0 |         0 |    |      |   0 | -170 |    |   30 |
+  | b,o,p         |    0 |                 |  -40 |       |       0 |   0 |         0 |    |      |   0 | -170 |    |   43 |
+  | n,m           |      |                 |  -30 |       |         |     |           |    |      |     | -170 |    |      |
+  | a             |    0 |             -23 |  -30 |       |       0 |   0 |         0 |    |      |   0 | -170 |    |    7 |
+  | W             |    0 |             -40 |  -30 |   -10 |         |   0 |         0 |    |      |   0 |      |    |      |
+  | T             |    0 |            -150 | -120 |  -120 |     -30 | -40 |      -130 |    | -100 | -80 |    0 |    |      |
+  | F             |    0 |             -90 |  -90 |   -70 |     -30 |   0 |       -70 |    |  -50 | -80 |  -40 |    |      |
+  | P             |    0 |            -100 |  -70 |   -50 |         |   0 |       -70 |    |  -30 | -80 |  -20 |    |      |
+  | g             |      |                 |      |       |         |  40 |           |    |      |     | -120 |    |      |
+  | q,d,h,y,j     |      |                 |      |       |      30 |  30 |        30 | 30 |   30 |     | -100 |    |      |
+  | c,e,s,u,w,x,z |      |                 |      |       |         |     |           |    |      |     | -120 |    |      |
+  | V             |      |             -70 |   30 |    30 |         | -80 |       -20 |    |  -40 | -40 |  -10 |    |      |
+  | A             |      |              30 |   60 |    30 |      30 |     |        20 | 40 |   20 |  -80 |  -120 | 20 |   20 |
+  | Y             |      |              20 |   60 |    30 |      30 |     |        20 | 20 |   40 |  20 |  -10 |    |      |
+  | M,N,H,I       |      |              20 |   10 |    40 |      30 |     |        10 | 20 |   20 |     |      |    |      |
+  | O,Q,D,U       |      |                 |   50 |    40 |      30 | -20 |        30 | 20 |   30 |     |  -70 |    |      |
+  | J             |      |                 |   40 |    20 |      20 | -20 |        10 | 10 |   30 |     |  -30 |    |      |
+  | C             |      |              10 |   40 |    10 |      30 |     |        30 | 30 |   20 |     |  -30 |    |      |
+  | E             |      |             -10 |   50 |       |      10 | -20 |        10 |    |   20 |     |      |    |      |
+  | L             |      |             -10 |  -10 |       |         | -30 |           |    |   20 |     |  -90 |    |      |
+  | P             |      |             -50 |   30 |    20 |      20 |     |           | 20 |   20 |     |  -30 |    |      |
+  | K,R           |      |              20 |   20 |    20 |      10 |     |        20 | 20 |   20 |     |  -60 |    |      |
+  | G             |      |              20 |   40 |    30 |      30 |     |        20 | 20 |   20 |     | -100 | 10 |      |
+  | B,S,X,Z       |      |              20 |   40 |    30 |      30 |     |        20 | 20 |   20 |  20 |  -20 | 10 |      |
+
+ #+begin_src python :var bearings=bearings :var kerning_matrix=kerning_matrix :eval yes :results output :var test_fonts=test_fonts
+ <<params>>
+ <<def_all>>
+ #font = fontforge.font()
+ #font = import_glyphs(font, params)
+ kern_existing_font('SachaHandEdited.sfd', bearings, kerning_matrix)
+ <<test_html>>
+ #+end_src
+
+ #+RESULTS:
+ : Old table removed.
+ : [None, ['f'], ['t'], ['i'], ['r'], ['k'], ['l'], ['v'], ['b', 'o', 'p'], ['n', 'm'], ['a'], ['W'], ['T'], ['F'], ['P'], ['g'], ['q', 'd', 'h', 'y', 'j'], ['c', 'e', 's', 'u', 'w', 'x', 'z'], ['V'], ['A'], ['Y'], ['M', 'N', 'H', 'I'], ['O', 'Q', 'D', 'U'], ['J'], ['C'], ['E'], ['L'], ['P'], ['K', 'R'], ['G'], ['B', 'S', 'X', 'Z']]
+ : [None, ['o', 'a', 'c', 'e', 'd', 'g', 'q', 'w'], ['f', 't'], ['x', 'v', 'z'], ['h', 'b', 'l', 'i'], ['j'], ['m', 'n', 'p', 'r', 'u'], ['k'], ['y'], ['s'], ['T'], ['F'], ['zero']]
+ : [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -30, -61, -20, 0, 0, 0, 0, 0, 0, -150, 0, -70, 0, -50, -41, -20, 0, 0, 0, 0, 0, 0, -150, 0, -10, 0, 0, -40, 0, 0, 0, 0, 0, 0, 0, -150, 0, 0, 0, -32, -40, 0, 0, 0, 0, 0, 0, 0, -170, 0, 29, 0, -10, -50, 0, 0, 0, 0, 0, 0, -48, -150, 0, -79, 0, -10, -20, 0, 0, 0, 0, 0, 0, 0, -110, 0, -20, 0, -40, -35, -15, 0, 0, 0, 0, 0, 0, -170, 0, 30, 0, 0, -40, 0, 0, 0, 0, 0, 0, 0, -170, 0, 43, 0, 0, -30, 0, 0, 0, 0, 0, 0, 0, -170, 0, 0, 0, -23, -30, 0, 0, 0, 0, 0, 0, 0, -170, 0, 7, 0, -40, -30, -10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -150, -120, -120, -30, -40, -130, 0, -100, -80, 0, 0, 0, 0, -90, -90, -70, -30, 0, -70, 0, -50, -80, -40, 0, 0, 0, -100, -70, -50, 0, 0, -70, 0, -30, -80, -20, 0, 0, 0, 0, 0, 0, 0, 40, 0, 0, 0, 0, -120, 0, 0, 0, 0, 0, 0, 30, 30, 30, 30, 30, 0, -100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -120, 0, 0, 0, -70, 30, 30, 0, -80, -20, 0, -40, -40, -10, 0, 0, 0, 30, 60, 30, 30, 0, 20, 40, 20, -80, -120, 20, 20, 0, 20, 60, 30, 30, 0, 20, 20, 40, 20, -10, 0, 0, 0, 20, 10, 40, 30, 0, 10, 20, 20, 0, 0, 0, 0, 0, 0, 50, 40, 30, -20, 30, 20, 30, 0, -70, 0, 0, 0, 0, 40, 20, 20, -20, 10, 10, 30, 0, -30, 0, 0, 0, 10, 40, 10, 30, 0, 30, 30, 20, 0, -30, 0, 0, 0, -10, 50, 0, 10, -20, 10, 0, 20, 0, 0, 0, 0, 0, -10, -10, 0, 0, -30, 0, 0, 20, 0, -90, 0, 0, 0, -50, 30, 20, 20, 0, 0, 20, 20, 0, -30, 0, 0, 0, 20, 20, 20, 10, 0, 20, 20, 20, 0, -60, 0, 0, 0, 20, 40, 30, 30, 0, 20, 20, 20, 0, -100, 10, 0, 0, 20, 40, 30, 30, 0, 20, 20, 20, 20, -20, 10, 0]
+ : Saved sachacHand.sfd and sachacHand.otf
 
 
-#+begin_src python :var bearings=bold_bearings :var kerning_matrix=bold_kerning_matrix
+* Make related fonts
+
+#+NAME: def_all
+#+begin_src python :eval no
+   <<def_cut_glyphs>>
+   <<def_import_glyphs>>
+   <<def_set_bearings>>
+   <<def_kern_classes>>
+   <<def_kern_by_char>>
+   <<def_kern_existing_font>>
+#+end_src
+
+** Make the bold font
+
+  #+NAME: bold_bearings
+  |         | Left | Right |
+  |---------+------+-------|
+  | Default |   30 |    30 |
+  | A       |   30 |   -100 |
+  | B       |    0 |     0 |
+  | C       |   20 |   -30 |
+  | b       |      |    40 |
+  | D       |      |    10 |
+  | d       |      |   -10 |
+  | e       |      |    20 |
+  | E       |   50  |    20 |
+  | F       |   50 |    0  |
+  | f       |  -50 |   -10 |
+  | G       |   40 |    30 |
+  | g       |   20 |    40 |
+  | H       |   50 |    50 |
+  | i       |      |    30 |
+  | J       |  -10 |    30 |
+  | j       |  -40 |    50 |
+  | k       |   40 |    20 |
+  | K       |   50 |    0  |
+  | H       |      |    10 |
+  | L       |   60 |    10 |
+  | l       |      |     0 |
+  | M       |   60 |       |
+  | m       |   40 |       |
+  | N       |   60 |    10 |
+  | O       |   40 |    10 |
+  | P       |   60 |     0 |
+  | p       |      |    20 |
+  | Q       |   40 |    10 |
+  | q       |   20 |    30 |
+  | R       |   50 |   -10 |
+  | S       |  -10 |   -10 |
+  | s       |   20 |    40 |
+  | T       |      |   -10 |
+  | t       |  -40 |     0 |
+  | U       |   60 |    20 |
+  | u       |   20 |       |
+  | V       |      |   -10 |
+  | v       |   20 |    20 |
+  | W       |   50 |    20 |
+  | X       |      |   -10 |
+  | x       |   10 |    20 |
+  | y       |   20 |    30 |
+  | Y       |   40 |     0 |
+  | Z       |      |   -10 |
+  | z       |   10 |    20 |
+  #+NAME: bold_kerning_matrix
+    |               | None | o,a,c,e,d,g,q,w | f,t | x,v,z | h,b,l,i |    j | m,n,p,r,u |   k |   y |   s |    T |  F | zero |
+    | None          |      |                 |     |       |         |      |           |  20 |     |     |      |    |      |
+    | f             |      |             -60 |   0 |       |      20 |  -90 |       -10 |  20 |     | -40 | -190 | 20 |      |
+    | t             |      |             -20 |  10 |       |         |  -70 |        20 |  20 |     |     | -100 |    |      |
+    | i             |      |             -30 |  10 |       |         |  -90 |           |     |     |     | -160 |    |      |
+    | r             |      |             -70 |     |       |     -10 |  -90 |           |     |     | -40 | -190 |    |      |
+    | k             |      |             -20 | -10 |       |     -10 |  -90 |       -10 |     |     |     | -100 |    |  -10 |
+    | l             |      |                 |  10 |       |         |      |           | 20  |     |     | -100 |    |      |
+    | v             |      |             -30 |  10 |       |         |  -50 |           |     |     |     | -100 |    |      |
+    | b,o,p         |      |             -20 |  10 |       |         |  -90 |           |     |     |     | -100 |    |      |
+    | n,m           |      |                 |  10 |       |         |  -90 |           |     |     |     | -100 |    |      |
+    | a             |      |                 |     |       |         |  -90 |           |     |     | -10 | -100 |    |      |
+    | W             |      |                 |  20 |       |         |      |           |     |     |     | -100 |    |      |
+    | T             |      |            -100 | -70 |   -90 |     -30 | -120 |       -70 | -30 | -30 | -80 | -100 |    |      |
+    | F             |      |             -50 |     |       |         |  -70 |           |     |     |     | -100 |    |      |
+    | g             |      |                 |  10 |       |         |  -50 |           |     |     |     | -100 |    |      |
+    | q,d,h,y,j     |      |                 | 20  |  10   |      10 |  -50 | 10        | 10  |  10 |     | -100 |    |   10 |
+    | c,e,s,u,w,x,z |      |             -20 |  10 |    10 |         |  -50 |           |     |     |     | -100 |    |      |
+    | V             |      |             -70 |  30 |    30 |         |  -80 |       -20 |     | -40 | -40 |  -10 |    |      |
+    | A             |      |              30 |  60 |    30 |      30 |      |        20 |  40 |  20 |  20 |  -10 | 20 | 20   |
+    | Y             |      |              20 |  60 |    30 |      30 |      |        20 |  20 |  40 |  20 |  -10 |    |      |
+    | M,N,H,I       |      |              20 |  50 |    40 |      30 |      |        10 |  20 |  20 |     |      |    |      |
+    | O,Q,D,U       |      |                 |  50 |    40 |      30 |  -20 |        30 |  20 |  30 |     |  -70 |    |      |
+    | J             |      |                 |  40 |    20 |      20 |  -20 |        10 |  10 |  30 |     |  -30 |    |      |
+    | C             |      |              10 |  40 |    10 |      30 |      |        30 |  30 |  20 |     |  -30 |    |      |
+    | E             |      |             -10 |  50 |       |      10 |  -20 |        10 |     |  20 |     |      |    |      |
+    | L             |      |             -10 | -10 |       |         |  -30 |           |     |  20 |     |  -90 |    |      |
+    | P             |      |             -50 |  30 |    20 |      20 |      |           |  20 |  20 |     |  -30 |    |      |
+    | K,R           |      |              20 |  20 |    20 |      10 |      |        20 |  20 |  20 |     |  -60 |    |      |
+    | G             |      |              20 |  40 |    30 |      30 |      |        20 |  20 |  20 |     | -100 | 10 |      |
+    | B,S,X,Z       |      |              20 |  40 |    30 |      30 |      |        20 |  20 |  20 |  20 |  -20 | 10 |      |
+
+
+
+#+NAME: def_kern_existing_font
+#+begin_src python :var filename="test"  :var bearings="" :var kerning_matrix="" :var filename="" :eval no :results output
+def kern_existing_font(filename="", bearings=None, kerning_matrix=None, **kwargs):
+  font = load_font(filename)
+  set_up_font_info(font, **params)
+  font = set_bearings(font, bearings)
+  font = kern_classes(font, kerning_matrix)
+  font = kern_by_char(font, kerning_matrix)
+  save_font(font, params)
+  return font
+#+end_src
+
+#+begin_src python :var bearings=bold_bearings :var kerning_matrix=bold_kerning_matrix :session "out" :results output :noweb yes
 <<params>>
 params = {**params, 
           'row_padding': 50,
@@ -669,27 +751,148 @@ params = {**params,
           'new_font_name': 'sachacHand-Bold',
           'new_family_name': 'sachacHand',
           'new_full_name': 'sachacHand Bold'}
-<<def_cut_glyphs>>
-<<def_import_glyphs>>
-<<def_set_bearings>>
-<<def_kern_classes>>
-<<def_kern_by_char>>
-#cut_glyphs(params)
-#font = fontforge.font()
-#font = import_glyphs(font, params)
-font = load_font('sachacHandBoldEdited.sfd')
-font.fontname = 'sachacHand-Bold'
-font.familyname = 'sachacHand'
-font.fullname = 'sachacHand Bold'
-font = set_bearings(font, bearings)
-font = kern_classes(font, kerning_matrix)
-font = kern_by_char(font, kerning_matrix)
-save_font(font, params)
-<<def_test_html>>
+<<def_all>>
+kern_existing_font(filename="sachacHandBoldEdited.sfd",bearings=bearings, kerning_matrix=kerning_matrix)
 #+end_src
 
-#+RESULTS:
-: None
+
+ #+RESULTS:
+ : Bad name when parsing aglfn for unicode 41
+ : Old table removed.
+ : [None, ['f'], ['t'], ['i'], ['r'], ['k'], ['l'], ['v'], ['b', 'o', 'p'], ['n', 'm'], ['a'], ['W'], ['T'], ['F'], ['g'], ['q', 'd', 'h', 'y', 'j'], ['c', 'e', 's', 'u', 'w', 'x', 'z'], ['V'], ['A'], ['Y'], ['M', 'N', 'H', 'I'], ['O', 'Q', 'D', 'U'], ['J'], ['C'], ['E'], ['L'], ['P'], ['K', 'R'], ['G'], ['B', 'S', 'X', 'Z']]
+ : [None, ['o', 'a', 'c', 'e', 'd', 'g', 'q', 'w'], ['f', 't'], ['x', 'v', 'z'], ['h', 'b', 'l', 'i'], ['j'], ['m', 'n', 'p', 'r', 'u'], ['k'], ['y'], ['s'], ['T'], ['F'], ['zero']]
+ : [0, 0, 0, 0, 0, 0, 0, 20, 0, 0, 0, 0, 0, 0, -60, 0, 0, 20, -90, -10, 20, 0, -40, -190, 20, 0, 0, -20, 10, 0, 0, -70, 20, 20, 0, 0, -100, 0, 0, 0, -30, 10, 0, 0, -90, 0, 0, 0, 0, -160, 0, 0, 0, -70, 0, 0, -10, -90, 0, 0, 0, -40, -190, 0, 0, 0, -20, -10, 0, -10, -90, -10, 0, 0, 0, -100, 0, -10, 0, 0, 10, 0, 0, 0, 0, 20, 0, 0, -100, 0, 0, 0, -30, 10, 0, 0, -50, 0, 0, 0, 0, -100, 0, 0, 0, -20, 10, 0, 0, -90, 0, 0, 0, 0, -100, 0, 0, 0, 0, 10, 0, 0, -90, 0, 0, 0, 0, -100, 0, 0, 0, 0, 0, 0, 0, -90, 0, 0, 0, -10, -100, 0, 0, 0, 0, 20, 0, 0, 0, 0, 0, 0, 0, -100, 0, 0, 0, -100, -70, -90, -30, -120, -70, -30, -30, -80, -100, 0, 0, 0, -50, 0, 0, 0, -70, 0, 0, 0, 0, -100, 0, 0, 0, 0, 10, 0, 0, -50, 0, 0, 0, 0, -100, 0, 0, 0, 0, 20, 10, 10, -50, 10, 10, 10, 0, -100, 0, 10, 0, -20, 10, 10, 0, -50, 0, 0, 0, 0, -100, 0, 0, 0, -70, 30, 30, 0, -80, -20, 0, -40, -40, -10, 0, 0, 0, 30, 60, 30, 30, 0, 20, 40, 20, 20, -10, 20, 20, 0, 20, 60, 30, 30, 0, 20, 20, 40, 20, -10, 0, 0, 0, 20, 50, 40, 30, 0, 10, 20, 20, 0, 0, 0, 0, 0, 0, 50, 40, 30, -20, 30, 20, 30, 0, -70, 0, 0, 0, 0, 40, 20, 20, -20, 10, 10, 30, 0, -30, 0, 0, 0, 10, 40, 10, 30, 0, 30, 30, 20, 0, -30, 0, 0, 0, -10, 50, 0, 10, -20, 10, 0, 20, 0, 0, 0, 0, 0, -10, -10, 0, 0, -30, 0, 0, 20, 0, -90, 0, 0, 0, -50, 30, 20, 20, 0, 0, 20, 20, 0, -30, 0, 0, 0, 20, 20, 20, 10, 0, 20, 20, 20, 0, -60, 0, 0, 0, 20, 40, 30, 30, 0, 20, 20, 20, 0, -100, 10, 0, 0, 20, 40, 30, 30, 0, 20, 20, 20, 20, -20, 10, 0]
+ : Saved sachacHandBold.sfd and sachacHandBold.otf
+
+ 
+** Make the black font
+
+#+NAME: black_bearings
+|         | Left | Right |
+|---------+------+-------|
+| Default |   30 |    30 |
+| A       |   30 |   -50 |
+| B       |   60 |     0 |
+| C       |   20 |   -30 |
+| b       |      |    40 |
+| D       |   40 |    10 |
+| d       |      |   -50 |
+| e       |      |    20 |
+| E       |   50 |    20 |
+| F       |   50 |     0 |
+| f       |  -50 |   -80 |
+| G       |   40 |    30 |
+| g       |   20 |    40 |
+| H       |   50 |    50 |
+| I       |   60 | 50    |
+| i       |      |    30 |
+| J       |  -10 |    30 |
+| j       |  -20 |    30 |
+| k       |   40 |    20 |
+| K       |   70 |     0 |
+| H       |      |    10 |
+| L       |   60 |    10 |
+| l       |      |     0 |
+| M       |   60 |       |
+| m       |   40 |       |
+| N       |   60 |    10 |
+| O       |   40 |    10 |
+| P       |   60 |     0 |
+| p       |      |    20 |
+| Q       |   40 |    10 |
+| q       |   20 |    30 |
+| R       |   50 |   -10 |
+| S       |   30 |    30 |
+| s       |   20 |    40 |
+| T       |      |   -10 |
+| t       |  -40 |     0 |
+| U       |   60 |    20 |
+| u       |   20 |       |
+| V       |      |   -10 |
+| v       |   20 |    20 |
+| W       |   50 |    20 |
+| X       |      |   -10 |
+| x       |   10 |    20 |
+| y       |   20 |    30 |
+| Y       |   40 |     0 |
+| Z       |      |   -10 |
+| z       |   10 |    20 |
+
+#+NAME: black_kerning_matrix
+|               | None | o,a,c,e,d,g,q,w | f,t | x,v,z | h,b,l,i |    j | m,n,p,r,u |   k |   y |   s |    T |  F | V | zero |
+| None          |      |                 |     |       |         |      |           |  20 |     |     |      |    |   |      |
+| n,m           |      |                 |  20 |       |         |  -90 |           |     |     |     | -100 |    | -100 |      |
+| f             |      |             -10 |   0 |       |      20 |  -90 |        10 |  20 |     | -40 | -190 | 20 |   |      |
+| t             |      |             -20 |  10 |       |         |  -70 |        20 |  20 |     |     | -100 |    |   |      |
+| i             |      |             -30 |  10 |       |         |  -90 |           |     |     |     | -160 |    |   |      |
+| r             |      |             -70 |     |       |     -10 |  -90 |           |     |     | -40 | -190 |    |   |      |
+| k             |      |             -20 | -10 |       |     -10 |  -90 |       -10 |     |     |     | -100 |    |   |  -10 |
+| l             |      |                 |  10 |       |         |      |           |  20 |     |     | -100 |    |   |      |
+| v             |      |             -30 |  10 |       |         |  -50 |           |     |     |     | -100 |    |   |      |
+| b,o,p         |      |             -20 |  10 |       |         |  -90 |           |     |     |     | -100 |    |   |      |
+| a             |      |                 |     |       |         |  -90 |           |     |     | -10 | -100 |    |   |      |
+| W             |      |                 |  20 |       |         |      |           |     |     |     | -100 |    |   |      |
+| T             |      |            -120 | -70 |   -90 |     -30 | -120 |       -70 | -30 | -30 | -80 | -100 |    |   |      |
+| F             |      |             -90 |     |       |         |  -70 |           |     |     |     | -100 |    |   |      |
+| g             |      |                 |  10 |       |         |  -50 |           |     |     |     | -100 |    |   |      |
+| q,d,h,y,j     |      |                 |  20 |    10 |      10 |  -50 |        10 |  10 |  10 |     | -100 |    |   |   10 |
+| c,e,s,u,w,x,z |      |             -20 |  10 |    10 |         |  -50 |           |     |     |     | -100 |    |   |      |
+| V             |      |             -70 |  30 |    30 |         |  -80 |       -20 |     | -40 | -40 |  -10 |    |   |      |
+| A             |      |              30 |  60 |    30 |      30 |      |        20 |  40 |  20 |  20 |  -10 | 20 |   |   20 |
+| Y             |      |              20 |  60 |    30 |      30 |      |        20 |  20 |  40 |  20 |  -10 |    |   |      |
+| M,N,H,I       |      |              20 |  50 |    40 |      30 |      |        10 |  20 |  20 |     |      |    |   |      |
+| O,Q,D,U       |      |                 |  50 |    40 |      30 |  -20 |        30 |  20 |  30 |     |  -70 |    |   |      |
+| J             |      |                 |  40 |    20 |      20 |  -20 |        10 |  10 |  30 |     |  -30 |    |   |      |
+| C             |      |              10 |  40 |    10 |      30 |      |        30 |  30 |  20 |     |  -30 |    |   |      |
+| E             |      |             -10 |  50 |       |      10 |  -20 |        10 |     |  20 |     |      |    |   |      |
+| L             |      |             -10 | -10 |       |         |  -30 |           |     |  20 |     |  -90 |    |   |      |
+| P             |      |             -50 |  30 |    20 |      20 |      |           |  20 |  20 |     |  -30 |    |   |      |
+| K,R           |      |              20 |  20 |    20 |      10 |      |        20 |  20 |  20 |     |  -60 |    |   |      |
+| G             |      |              20 |  40 |    30 |      30 |      |        20 |  20 |  20 |     | -100 | 10 |   |      |
+| B,S,X,Z       |      |              20 |  40 |    30 |      30 |      |        20 |  20 |  20 |  20 |  -20 | 10 |   |      |
+
+  #+begin_src python :var bearings=black_bearings :var kerning_matrix=black_kerning_matrix :session "out" :results output :var test_fonts=test_fonts
+    <<params>>
+    params = {**params, 
+              'row_padding': 50,
+              'sample_file': 'sample-sachacHand-black.png',
+              'new_font_file': 'sachacHandBlack.sfd',
+              'new_otf': 'sachacHandBlack.otf',
+              'new_font_name': 'sachacHand-Black',
+              'new_family_name': 'sachacHand',
+              'new_full_name': 'sachacHand Black',
+              'letters': None,
+              'matrix':
+                ['H,e,q,A,M,Y,8,\',#,<',
+                 'O,b,r,B,N,Z,9,quoteright,$,>',
+                 'n,h,u,R,P,0,?,",[',
+                 'o,k,w,D,Q,1,:,quotedblleft,&,]',
+                 'd,l,v,L,S,2,;,quotedblright,(,^',
+                 'p,f,x,E,T,3,-,@,),`',
+                 'a,t,y,F,U,4,endash,/,*,{',
+                 'g,i,z,I,V,5,emdash,\\,+,|',
+                 's,j,C,J,W,6,=,~,comma,}',
+                 'c,m,G,K,X,7,!,_,.,I.alt1']}
+    <<def_all>>
+    #cut_glyphs(**params)
+    #font = fontforge.font()
+    #font = import_glyphs(font, **params)
+    kern_existing_font(filename="sachacHandBlackEdited.sfd",bearings=bearings, kerning_matrix=kerning_matrix)
+  #+end_src
+
+  #+RESULTS:
+  : Bad name when parsing aglfn for unicode 41
+  : Starting from scratch
+  : [None, ['n', 'm'], ['f'], ['t'], ['i'], ['r'], ['k'], ['l'], ['v'], ['b', 'o', 'p'], ['a'], ['W'], ['T'], ['F'], ['g'], ['q', 'd', 'h', 'y', 'j'], ['c', 'e', 's', 'u', 'w', 'x', 'z'], ['V'], ['A'], ['Y'], ['M', 'N', 'H', 'I'], ['O', 'Q', 'D', 'U'], ['J'], ['C'], ['E'], ['L'], ['P'], ['K', 'R'], ['G'], ['B', 'S', 'X', 'Z']]
+  : [None, ['o', 'a', 'c', 'e', 'd', 'g', 'q', 'w'], ['f', 't'], ['x', 'v', 'z'], ['h', 'b', 'l', 'i'], ['j'], ['m', 'n', 'p', 'r', 'u'], ['k'], ['y'], ['s'], ['T'], ['F'], ['V'], ['zero']]
+  : [0, 0, 0, 0, 0, 0, 0, 20, 0, 0, 0, 0, 0, 0, 0, 0, 20, 0, 0, -90, 0, 0, 0, 0, -100, 0, -100, 0, 0, -10, 0, 0, 20, -90, 10, 20, 0, -40, -190, 20, 0, 0, 0, -20, 10, 0, 0, -70, 20, 20, 0, 0, -100, 0, 0, 0, 0, -30, 10, 0, 0, -90, 0, 0, 0, 0, -160, 0, 0, 0, 0, -70, 0, 0, -10, -90, 0, 0, 0, -40, -190, 0, 0, 0, 0, -20, -10, 0, -10, -90, -10, 0, 0, 0, -100, 0, 0, -10, 0, 0, 10, 0, 0, 0, 0, 20, 0, 0, -100, 0, 0, 0, 0, -30, 10, 0, 0, -50, 0, 0, 0, 0, -100, 0, 0, 0, 0, -20, 10, 0, 0, -90, 0, 0, 0, 0, -100, 0, 0, 0, 0, 0, 0, 0, 0, -90, 0, 0, 0, -10, -100, 0, 0, 0, 0, 0, 20, 0, 0, 0, 0, 0, 0, 0, -100, 0, 0, 0, 0, -120, -70, -90, -30, -120, -70, -30, -30, -80, -100, 0, 0, 0, 0, -90, 0, 0, 0, -70, 0, 0, 0, 0, -100, 0, 0, 0, 0, 0, 10, 0, 0, -50, 0, 0, 0, 0, -100, 0, 0, 0, 0, 0, 20, 10, 10, -50, 10, 10, 10, 0, -100, 0, 0, 10, 0, -20, 10, 10, 0, -50, 0, 0, 0, 0, -100, 0, 0, 0, 0, -70, 30, 30, 0, -80, -20, 0, -40, -40, -10, 0, 0, 0, 0, 30, 60, 30, 30, 0, 20, 40, 20, 20, -10, 20, 0, 20, 0, 20, 60, 30, 30, 0, 20, 20, 40, 20, -10, 0, 0, 0, 0, 20, 50, 40, 30, 0, 10, 20, 20, 0, 0, 0, 0, 0, 0, 0, 50, 40, 30, -20, 30, 20, 30, 0, -70, 0, 0, 0, 0, 0, 40, 20, 20, -20, 10, 10, 30, 0, -30, 0, 0, 0, 0, 10, 40, 10, 30, 0, 30, 30, 20, 0, -30, 0, 0, 0, 0, -10, 50, 0, 10, -20, 10, 0, 20, 0, 0, 0, 0, 0, 0, -10, -10, 0, 0, -30, 0, 0, 20, 0, -90, 0, 0, 0, 0, -50, 30, 20, 20, 0, 0, 20, 20, 0, -30, 0, 0, 0, 0, 20, 20, 20, 10, 0, 20, 20, 20, 0, -60, 0, 0, 0, 0, 20, 40, 30, 30, 0, 20, 20, 20, 0, -100, 10, 0, 0, 0, 20, 40, 30, 30, 0, 20, 20, 20, 20, -20, 10, 0, 0]
+  : Saved sachacHandBlack.sfd and sachacHandBlack.otf
+
+* Variants
+https://www.youtube.com/watch?v=WqSQU7nuTsc
+https://www.tug.org/TUGboat/tb24-3/williams.pdf
+https://typedrawers.com/discussion/1357/how-can-i-randomize-letters-in-a-typeface
+http://learn.scannerlicker.net/2015/06/12/making-a-font-maximal-part-iii/
 
 * Test the fonts
 This lets me quickly try text with different versions of my font. I
@@ -699,18 +902,30 @@ Resources:
 - http://famira.com/article/letterproef
 - http://ninastoessinger.com/stringmaker/index.php
 
-#+NAME: def_test_html
-#+begin_src python :results output :session "out" :eval yes
+#+NAME: test_fonts
+| Output            | Font filename        | Class   |
+|-------------------+----------------------+---------|
+| test-regular.html | sachacHand.woff      | regular |
+| test-bold.html    | sachacHandBold.woff  | bold    |
+| test-black.html   | sachacHandBlack.woff | black   |
+
+#+RESULTS:
+: [['test-regular.html', 'sachacHand.woff', 'regular'], ['test-bold.html', 'sachacHandBold.woff', 'bold'], ['test-black.html', 'sachacHandBlack.woff', 'black']]
+: [{'output': 'test-regular.html', 'font_filename': 'sachacHand.woff', 'klass': 'regular'}, {'output': 'test-bold.html', 'font_filename': 'sachacHandBold.woff', 'klass': 'bold'}, {'output': 'test-black.html', 'font_filename': 'sachacHandBlack.woff', 'klass': 'black'}]
+
+#+NAME: test_html
+#+begin_src python :results output :session "out" :eval yes :var test_fonts=test_fonts
 def test_css(fonts):
   s = ""
   for f in fonts:
-    s += "@font-face { font-family: '%s'; src: url('%s'); }\n" % (f[0], f[1])
-    s += ".%s { font-family: '%s'; }\n" % (f[0], f[0])
+    s += "@font-face { font-family: '%s'; src: url('%s'); }\n" % (f['klass'], f['font_filename'])
+    s += ".%s { font-family: '%s'; }\n" % (f['klass'], f['klass'])
   s += "table { font-size: inherit; font-weight: inherit }"
   s += "td { text-align: left }"
   s += ".blog-heading { font-weight: bold; font-size: 32px }"
   s += ".default { color: gray }"
   s += "body { font-family: woff, Arial, sans-serif; font-size: 32px; padding: 10px }"
+  s += "h1, h2, h3, h4, h5, h6 { font-weight: normal }"
   return s
 
 def test_strings(strings):
@@ -745,7 +960,7 @@ def test_kerning_matrix(font):
                   klass = "kerned" if kerning[r][c] else "default"
                   style = "border-left: 1px solid gray" if i == 0 else ""
                   with tag('td', klass=klass, style=style):
-                    text(aglfn.to_glyph(first_letter) + aglfn.to_glyph(second_letter))
+                    text('n%s%sn' % (aglfn.to_glyph(first_letter), aglfn.to_glyph(second_letter)))
   return doc.getvalue()
 
 from yattag import Doc
@@ -753,18 +968,16 @@ import numpy as np
 import fontforge
 import aglfn
 
-fonts = [['raw', 'sachacHandRaw.otf'],
-         ['raw-kerned', 'sachacHandRawKerned.otf'],
-         ['edited', 'sachacHandEdited.otf'],
-         ['regular', 'sachacHand.woff'],
-         ['bold', 'sachacHandBold.woff']]
-main_fonts = [{'output': 'test-regular.html', 'font_filename': 'sachacHand.woff', 'klass': 'regular'},
-              {'output': 'test-bold.html', 'font_filename': 'sachacHandBold.woff', 'klass': 'bold'}]
+main_fonts = [{'output': x[0], 'font_filename': x[1], 'klass': x[2]} for x in test_fonts]
 strings = ["hhhhnnnnnnhhhhhnnnnnn", 
            "ooonoonnonnn",
-           "nnannnnbnnnncnnnndnnnnennnnfnnnngnnnnhnnnninnnnjnn\nnnknnnnlnnnnmnnnnnnnnnonnnnpnnnnqnnnnrnnnnsnnnntnn\nnnunnnnvnnnnwnnnnxnnnnynnnnznn",
+           "nnannnnbnnnncnnnndnnnnennnnfnnnngnnnnhnnnninnnnjnn",
+           "nnknnnnlnnnnmnnnnnnnnnonnnnpnnnnqnnnnrnnnnsnnnntnn",
+           "nnunnnnvnnnnwnnnnxnnnnynnnnznn",
            "HHHOHHOOHOOO",
-           "HHAHHHHBHHHHCHHHHDHHHHEHHHHFHHHHGHHHHHHHHHIHHHHJHH\nHHKHHHHLHHHHMHHHHNHHHHOHHHHPHHHHQHHHHRHHHHSHHHHTHH\nHHUHHHHVHHHHWHHHHXHHHHYHHHHZHH",
+           "HHAHHHHBHHHHCHHHHDHHHHEHHHHFHHHHGHHHHHHHHHIHHHHJHH",
+           "HHKHHHHLHHHHMHHHHNHHHHOHHHHPHHHHQHHHHRHHHHSHHHHTHH",
+           "HHUHHHHVHHHHWHHHHXHHHHYHHHHZHH",
            "Having fun kerning using Org Mode and FontForge",
            "Python+FontForge+Org: I made a font based on my handwriting!",
            "Monthly review: May 2020",
@@ -800,7 +1013,7 @@ def test_font_html(params):
 
 # Write the stylesheet
 with open("style.css", "w") as f:
-  f.write(test_css(fonts))
+  f.write(test_css(main_fonts))
 
 for p in main_fonts:
   #print(test_font_html(p))
@@ -837,8 +1050,6 @@ with open('test.html', 'w') as f:
               line('td', s)
   f.write(doc.getvalue())
 #+end_src
-
-#+RESULTS: def_test_html
 
 Oh, can I get livereload working? There's a =python3-livereload=... Ah, it's as simple as running =livereload=.
 
@@ -920,6 +1131,12 @@ import inkex
 ** TODO Ligatures
 ** TODO Accents
 * Extra stuff
+* Get information from my blog database
+
+#+begin_src sh :eval no
+cd ~/code/docker/blog
+docker-compose up mysql
+#+end_src
 
 ** Figure out what glyphs I want based on my blog headings
 
@@ -938,26 +1155,27 @@ import inkex
 
 ** Make test page with blog headings
 
-#+begin_src python :eval yes :results output
+#+begin_src python :eval no
 <<connect-to-db>>
-from yattag import Doc
+from yattag import Doc, indent
 doc, tag, text, line = Doc().ttl()
 with tag('html'):
   with tag('head'):
     doc.asis('<link rel="stylesheet" type="text/css" href="style.css" />')
     doc.asis('<style type="text/css">h2 a { text-decoration: none; font-size: 32px; font-weight: normal; font-family: bold; color: rgb(153, 0, 0) } h2 { margin-block-start: 0; margin-block-end: 0 }</style>')
   with tag('body'):
-    result = dbConnection.execute("select id, post_title from wp_posts WHERE post_type='post' AND post_status='publish' order by id desc")
+    result = dbConnection.execute("select id, post_title from wp_posts WHERE post_type='post' AND post_status='publish' AND post_password='' order by id desc")
     for row in result:
       with tag('h2'):
         with tag('a', href="https://sachachua.com/blog/p/%s" % row['id']):
           text(row['post_title'])
 dbConnection.close()
 with open('test-blog.html', 'w') as f:
-  f.write(doc.getvalue())
+  f.write(indent(doc.getvalue(), indent_text=True))
 #+end_src
 
 #+RESULTS:
+: None
 
 ** Check glyphs
 
@@ -1034,6 +1252,7 @@ print(df)
 : 2  22038  Work on the business from the outside, not in ...
 
 ** Get frequency of pairs of characters
+
 
 #+NAME: digrams
 #+begin_src python :results value scalar :cache yes :eval no
