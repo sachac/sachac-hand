@@ -9,12 +9,9 @@ tablet PC or my phone.
 
 Quick links:
 
-| [[https://pages.sachachua.com/sachac-hand/README.html]] | This README as HTML   |
-| https://github.com/sachac/sachac-hand               | Github repo           |
-| [[file:files/sample.png][My handwriting sample]]                               |                       |
-| [[file:files/SachaHandEdited.sfd]]                      | Edited FontForge file |
-| [[file:files/sachacHand.otf]]                           | OpenType font         |
-| [[file:files/sachacHand.woff]]                          | Web font              |
+| [[https://pages.sachachua.com/sachac-hand/README.html]] | This README as HTML |
+| https://github.com/sachac/sachac-hand               | Github repo         |
+| [[./files/test.html]]                                   | Test pages          |
 
 * License
 
