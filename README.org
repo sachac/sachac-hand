@@ -139,18 +139,30 @@ I also needed =(setenv "LD_LIBRARY_PATH" "/usr/local/lib")=. There are probably 
  def glyph_name(s):
    return aglfn.name(s) or s
 
- def glyph_matrix(matrix=None, letters=None, rows=0, columns=0, direction='horizontal', **kwargs):
+ def get_glyph(font, g):
+   pos = font.findEncodingSlot(g)
+   if pos == -1:
+     return font.createChar(pos, g)
+   else:
+     return font[pos]
+
+ def glyph_matrix(font=None, matrix=None, letters=None, rows=0, columns=0, direction='horizontal', **kwargs):
    if matrix:
      if isinstance(matrix[0], str):
        # Split each
        matrix = [x.split(',') for x in matrix]
      else:
        matrix = matrix[:]  # copy the list
-     return [[glyph_name(x) for x in row] for row in matrix]
    else:
-     matrix = np.reshape(list(params['letters'].ljust(params['rows'] * params['columns']))[0:params['rows'] * params['columns']], (params['rows'], params['columns']))
+     matrix = np.reshape(list(letters.ljust(rows * columns))[0:rows * columns], (rows, columns))
      if direction == 'vertical':
        matrix = matrix.transpose()
+   matrix = [[glyph_name(x) if x != 'None' else None for x in row] for row in matrix]
+   if font:
+     for r, row in enumerate(matrix):
+       for c, col in enumerate(row):
+         if col is None: continue
+         matrix[r][c] = get_glyph(font, col)
    return matrix
 
  def glyph_filename_base(glyph_name):
@@ -242,7 +254,7 @@ I also needed =(setenv "LD_LIBRARY_PATH" "/usr/local/lib")=. There are probably 
    import libxml2
    from PIL import Image, ImageOps
    import subprocess
-   def cut_glyphs(sample_file="", letters="", direction="", columns=0, rows=0, height=0, width=0, row_padding=0, glyph_dir='glyphs', matrix=None, **kwargs):
+   def cut_glyphs(sample_file="", letters="", direction="", columns=0, rows=0, height=0, width=0, row_padding=0, glyph_dir='glyphs', matrix=None, force=False, **kwargs):
      im = Image.open(sample_file).convert('1')
      if not os.path.exists(glyph_dir):
        os.makedirs(glyph_dir)
@@ -251,10 +263,12 @@ I also needed =(setenv "LD_LIBRARY_PATH" "/usr/local/lib")=. There are probably 
        top = r * (height + row_padding)
        bottom = top + height
        for c, ch in enumerate(row):
+         if ch is None: continue
+         filename = os.path.join(glyph_dir, glyph_filename_base(ch) + '.pbm')
+         if os.path.exists(filename) and not force: continue
          left = c * width
          right = left + width
          small = im.crop((left, top, right, bottom))
-         filename = os.path.join(glyph_dir, glyph_filename_base(ch) + '.pbm')
          small.save(filename)
          svg = filename.replace('.pbm', '.svg')
          png = filename.replace('.pbm', '.png')
@@ -285,26 +299,21 @@ I also needed =(setenv "LD_LIBRARY_PATH" "/usr/local/lib")=. There are probably 
      font.ascent = ascent
      return font
 
-   def import_glyphs(font, letters=None, columns=None, rows=None, direction=None, matrix=None, height=0, **kwargs):
+   def import_glyphs(font, glyph_dir='glyphs', letters=None, columns=None, rows=None, direction=None, matrix=None, height=0, **kwargs):
      old_em = font.em
      font.em = height
-     matrix = glyph_matrix(matrix=matrix, letters=letters, columns=columns, rows=rows, direction=direction)
+     matrix = glyph_matrix(font=font, matrix=matrix, letters=letters, columns=columns, rows=rows, direction=direction)
      for row in matrix:
-       for name in row:
-         if name is None or name == 'space': continue
+       for g in row:
+         if g is None: continue
          try:
-           try:
-             glyph = font.createMappedChar(name)
-           except:
-             glyph = font.createChar(-1, name)
-           base = glyph_filename_base(name)
-           svg_filename = os.path.join(params['glyph_dir'], base + '.svg')
-           png_filename = os.path.join(params['glyph_dir'], base + '.png')
-           glyph.importOutlines(png_filename)
-           glyph.importOutlines(svg_filename)
-         except:
-           print("Error with ", name)
-           pass
+           base = glyph_filename_base(g.glyphname)
+           svg_filename = os.path.join(glyph_dir, base + '.svg')
+           png_filename = os.path.join(glyph_dir, base + '.png')
+           g.importOutlines(png_filename)
+           g.importOutlines(svg_filename)
+         except Exception as e:
+           print("Error with ", g, e)
      font.em = old_em
      return font
  #+END_SRC
@@ -313,23 +322,35 @@ I also needed =(setenv "LD_LIBRARY_PATH" "/usr/local/lib")=. There are probably 
 
  #+NAME: def_set_bearings
  #+begin_src python :eval no
+ import re
+ # Return glyph name without .suffix
+ def glyph_base_name(x):
+   m = re.match(r"([^.]+)\..+", x)
+   return m.group(1) if m else x
+
  def set_bearings(font, bearings, **kwargs):
-   (default_left, default_right) = next(o for o in bearings[1:] if o[0] == 'Default')[1:]
-   for g in font:
-     font[g].left_side_bearing = default_left
-     font[g].right_side_bearing = default_right
-   space = font.createMappedChar('space')
-   space.width = int(font.em / 5)
+   bearing_dict = {}
    for row in bearings[1:]:
-     if row[0] == 'Default': continue
-     try:
-       g = font.createMappedChar(row[0])
-     except:
-       g = font.createChar(-1, row[0])
-     if row[1] != "":
-       g.left_side_bearing = row[1]
-     if row[2] != "":
-       g.right_side_bearing = row[2]
+     bearing_dict[row[0]] = row
+   for g in font:
+     key = font[g].glyphname
+     m = glyph_base_name(key)
+     if not key in bearing_dict:
+       if m and m in bearing_dict:
+         key = m
+       else:
+         key = 'Default'
+     if bearing_dict[key][1] != '':
+       font[g].left_side_bearing = bearing_dict[key][1]
+     else:
+       font[g].left_side_bearing = bearing_dict['Default'][1]
+     if bearing_dict[key][2] != '':
+       font[g].right_side_bearing = bearing_dict[key][2]
+     else:
+       font[g].right_side_bearing = bearing_dict['Default'][2]
+   if 'space' not in bearing_dict:
+     space = font.createMappedChar('space')
+     space.width = int(font.em / 5)
    return font
  #+end_src
 
@@ -808,6 +829,82 @@ https://www.tug.org/TUGboat/tb24-3/williams.pdf
 https://typedrawers.com/discussion/1357/how-can-i-randomize-letters-in-a-typeface
 http://learn.scannerlicker.net/2015/06/12/making-a-font-maximal-part-iii/
 
+** Import the glyphs for variant1 and variant2
+
+#+begin_src python :eval yes :results output :session "out" :bearings=regular_bearings
+  <<def_all>>
+  font = fontforge.open('sachacHandRegularEdited.sfd')
+  params = {**params, 
+            'row_padding': 50,
+            'sample_file': 'sample-sachacHand-regular-variant1.png',
+            'new_font_file': 'sachacHandRegular-Variants.sfd',
+            'new_otf': 'sachacHandRegular-Variants.otf',
+            'letters': None,
+            'matrix':
+              ['H.ss01,e.ss01,q.ss01,A.ss01,M.ss01,Y.ss01,eight.ss01,quotesingle.ss01,numbersign.ss01,less.ss01',
+               'O.ss01,b.ss01,r.ss01,B.ss01,N.ss01,Z.ss01,nine.ss01,quoteright.ss01,dollar.ss01,greater.ss01',
+               'n.ss01,h.ss01,u.ss01,R.ss01,P.ss01,zero.ss01,?.ss01,quotedbl.ss01,bracketleft.ss01',
+               'o.ss01,k.ss01,w.ss01,D.ss01,Q.ss01,one.ss01,colon.ss01,quotedblleft.ss01,ampersand,bracketright.ss01',
+               'd.ss01,l.ss01,v.ss01,L.ss01,S.ss01,two.ss01,semicolon.ss01,quotedblright.ss01,parenleft.ss01,asciicircum.ss01',
+               'p.ss01,f.ss01,x.ss01,E.ss01,T.ss01,three.ss01,hyphen.ss01,at.ss01,parenright.ss01,grave.ss01',
+               'a.ss01,t.ss01,y.ss01,F.ss01,U.ss01,four.ss01,endash.ss01,slash.ss01,asterisk.ss01,braceleft.ss01',
+               'g.ss01,i.ss01,z.ss01,I.ss01,V.ss01,five.ss01,emdash.ss01,backslash.ss01,plus.ss01,bar.ss01',
+               's.ss01,j.ss01,C.ss01,J.ss01,W.ss01,six.ss01,equal.ss01,asciitilde.ss01,comma.ss01,braceright.ss01',
+               'c.ss01,m.ss01,G.ss01,K.ss01,X.ss01,seven.ss01,exclam.ss01,underscore.ss01,period.ss01,None']}
+  cut_glyphs(**params)
+  matrix = glyph_matrix(font=font, matrix=params['matrix'])
+  import_glyphs(font, **params)
+  params = {**params, 
+            'sample_file': 'sample-sachacHand-regular-variant2.png',
+            'matrix':
+              ['H.ss02,e.ss02,q.ss02,A.ss02,M.ss02,Y.ss02,eight.ss02,quotesingle.ss02,numbersign.ss02,less.ss02',
+               'O.ss02,b.ss02,r.ss02,B.ss02,N.ss02,Z.ss02,nine.ss02,quoteright.ss02,dollar.ss02,greater.ss02',
+               'n.ss02,h.ss02,u.ss02,R.ss02,P.ss02,zero.ss02,?.ss02,quotedbl.ss02,bracketleft.ss02',
+               'o.ss02,k.ss02,w.ss02,D.ss02,Q.ss02,one.ss02,colon.ss02,quotedblleft.ss02,ampersand,bracketright.ss02',
+               'd.ss02,l.ss02,v.ss02,L.ss02,S.ss02,two.ss02,semicolon.ss02,quotedblright.ss02,parenleft.ss02,asciicircum.ss02',
+               'p.ss02,f.ss02,x.ss02,E.ss02,T.ss02,three.ss02,hyphen.ss02,at.ss02,parenright.ss02,grave.ss02',
+               'a.ss02,t.ss02,y.ss02,F.ss02,U.ss02,four.ss02,endash.ss02,slash.ss02,asterisk.ss02,braceleft.ss02',
+               'g.ss02,i.ss02,z.ss02,I.ss02,V.ss02,five.ss02,emdash.ss02,backslash.ss02,plus.ss02,bar.ss02',
+               's.ss02,j.ss02,C.ss02,J.ss02,W.ss02,six.ss02,equal.ss02,asciitilde.ss02,comma.ss02,braceright.ss02',
+               'c.ss02,m.ss02,G.ss02,K.ss02,X.ss02,seven.ss02,exclam.ss02,underscore.ss02,period.ss02,None']}
+  cut_glyphs(**params)
+  import_glyphs(font, **params)
+  set_bearings(font, bearings)
+  for sub in ['calt', 'ss01', 'ss02']:
+    if sub in font.gsub_lookups: font.removeLookup(sub)
+
+  def get_stylistic_set(font, suffix):
+    return [g for g in font if suffix in g]
+  ss01 = get_stylistic_set(font, 'ss01')
+  ss02 = get_stylistic_set(font, 'ss02')
+  default = [glyph_base_name(g) for g in ss01]
+  font.addLookup('calt', 'gsub_contextchain', 0, [['calt', [['latn', ['dflt']]]]])
+  for sub in ['ss01', 'ss02']:
+    font.addLookup(sub, 'gsub_single', 0, [])
+    font.addLookupSubtable(sub, sub + '-1')
+  for g in ss01: get_glyph(font, glyph_base_name(g)).addPosSub('ss01-1', g)
+  for g in ss02: get_glyph(font, glyph_base_name(g)).addPosSub('ss02-1', g)
+  # font.addContextualSubtable('calt', 'calt-1', 'glyph', '''
+  # a | a @<gsub>
+  # b | b @<gsub>
+  # ''')
+  font.addContextualSubtable('calt', 'calt-1', 'class', '1 | 1 @<ss01>', bclasses=(None, default), mclasses=(None, default))
+  font.addContextualSubtable('calt', 'calt-2', 'class', '2 | 1 @<ss02>', bclasses=(None, default, ss01), mclasses=(None, default, ss01))
+  font.familyname = 'sachacHand'
+  font.fullname = 'sachacHand Regular Variants'
+  font.os2_weight = 400
+  font.os2_family_class = 10 * 256 + 8
+  font.os2_vendor = 'SC83'
+  font.fontname = 'sachacHand-Regular-V'
+  save_font(font)
+  with open("test-%s.html" % font.fontname, 'w') as f:
+    f.write(test_font_html(font.fontname + '.woff'))
+#+end_src
+
+#+RESULTS:
+: Bad name when parsing aglfn for unicode 41
+
+
 * Test the fonts
 This lets me quickly try text with different versions of my font. I
 can also look at lots of kerning pairs at the same time.
@@ -829,120 +926,119 @@ Resources:
 
 #+NAME: def_test_font_html
 #+begin_src python :eval no
-strings = ["hhhhnnnnnnhhhhhnnnnnn", 
-           "ooonoonnonnn",
-           "nnannnnbnnnncnnnndnnnnennnnfnnnngnnnnhnnnninnnnjnn",
-           "nnknnnnlnnnnmnnnnnnnnnonnnnpnnnnqnnnnrnnnnsnnnntnn",
-           "nnunnnnvnnnnwnnnnxnnnnynnnnznn",
-           "HHHOHHOOHOOO",
-           "HHAHHHHBHHHHCHHHHDHHHHEHHHHFHHHHGHHHHHHHHHIHHHHJHH",
-           "HHKHHHHLHHHHMHHHHNHHHHOHHHHPHHHHQHHHHRHHHHSHHHHTHH",
-           "HHUHHHHVHHHHWHHHHXHHHHYHHHHZHH",
-           "Having fun kerning using Org Mode and FontForge",
-           "Python+FontForge+Org: I made a font based on my handwriting!",
-           "Monthly review: May 2020",
-           "Emacs News 2020-06-01"]
-def test_strings(strings):
-  doc, tag, text, line = Doc().ttl()
-  with doc.tag('table', style='border-bottom: 1px solid gray; width: 100%; border-collapse: collapse'):
-    for s in strings:
-      for i, f in enumerate(fonts):
-        style = 'border-top: 1px solid gray' if (i == 0) else ""
-        with tag('tr', klass=f[0], style=style):
-          line('td', f[0])
-          line('td', s)
-  return doc.getvalue()
-def test_kerning_matrix(font):
-  sub = font.getLookupSubtables(font.gpos_lookups[0])
-  doc, tag, text, line = Doc().ttl()
-  for s in sub:
-    if font.isKerningClass(s):
-      (classes_left, classes_right, array) = font.getKerningClass(s)
-      kerning = np.array(array).reshape(len(classes_left), len(classes_right))
-      with tag('table', style='border-collapse: collapse'):
-        for r, row in enumerate(classes_left):
-          if row is None: continue
-          for j, first_letter in enumerate(row):
-            if first_letter == None: continue
-            style = "border-top: 1px solid gray" if j == 0 else ""
-            with tag('tr', style=style):
-              line('td', first_letter)
-              for c, column in enumerate(classes_right):
-                if column is None: continue
-                for i, second_letter in enumerate(column):
-                  if second_letter is None: continue
-                  klass = "kerned" if kerning[r][c] else "default"
-                  style = "border-left: 1px solid gray" if i == 0 else ""
-                  with tag('td', klass=klass, style=style):
-                    text('n%s%sn' % (aglfn.to_glyph(first_letter), aglfn.to_glyph(second_letter)))
-  return doc.getvalue()
-from yattag import Doc
-import numpy as np
-import fontforge
-import aglfn
-
-strings = ["hhhhnnnnnnhhhhhnnnnnn", 
-           "ooonoonnonnn",
-           "nnannnnbnnnncnnnndnnnnennnnfnnnngnnnnhnnnninnnnjnn",
-           "nnknnnnlnnnnmnnnnnnnnnonnnnpnnnnqnnnnrnnnnsnnnntnn",
-           "nnunnnnvnnnnwnnnnxnnnnynnnnznn",
-           "HHHOHHOOHOOO",
-           "HHAHHHHBHHHHCHHHHDHHHHEHHHHFHHHHGHHHHHHHHHIHHHHJHH",
-           "HHKHHHHLHHHHMHHHHNHHHHOHHHHPHHHHQHHHHRHHHHSHHHHTHH",
-           "HHUHHHHVHHHHWHHHHXHHHHYHHHHZHH",
-           "Having fun kerning using Org Mode and FontForge",
-           "Python+FontForge+Org: I made a font based on my handwriting!",
-           "Monthly review: May 2020",
-           "Emacs News 2020-06-01"]
-
-def test_glyphs(font):
-  return ''.join([(aglfn.to_glyph(g) or "") for g in font if font[g].isWorthOutputting()])
-
-def test_font_html(font_filename=None):
-  doc, tag, text, line = Doc().ttl()
-  font = fontforge.open(font_filename)
-  name = font.fontname
-  with tag('html'):
-    with tag('head'): 
-      doc.asis('<link rel="stylesheet" type="text/css" href="style.css" />')
-      with tag('style'):
-        doc.asis("@font-face { font-family: '%s'; src: url('%s'); }\n" % (name, font_filename))
-        doc.asis("body { font-family: '%s'; }\n" % name)
-        doc.asis(".bold { font-weight: bold } .italic { font-style: italic } .oblique { font-style: oblique }")
-        doc.asis(".small-caps { font-variant: small-caps }")
-    with tag('body'):
-      with tag('a', href='index.html'):
-        text('Back to index')
-      with tag('div', style='float: right'):
-        with tag('a', href=font.fullname + '.woff'):
-          text('WOFF')
-        text(' | ')
-        with tag('a', href=font.fullname + '.otf'):
-          text('OTF')
-      line('h1', font.fullname)
-      line('h2', 'Glyphs and sizes')
-      with tag('table'):
-        for size in [10, 14, 20, 24, 36, 72]:
-          with tag('tr', style='font-size: %dpt' % size):
-            line('td', size)
-            line('td', test_glyphs(font))
-      line('h2', 'Transformations')
-      with tag('table'):
-        for t in ['normal', 'bold', 'italic', 'oblique', 'bold italic', 'bold oblique', 'small-caps', 'bold small-caps']:
-          with tag('tr', klass=t):
-            line('td', t)
-            line('td', test_glyphs(font))
-      line('h2', 'Test strings')
+  strings = ["hhhhnnnnnnhhhhhnnnnnn", 
+             "ooonoonnonnn",
+             "nnannnnbnnnncnnnndnnnnennnnfnnnngnnnnhnnnninnnnjnn",
+             "nnknnnnlnnnnmnnnnnnnnnonnnnpnnnnqnnnnrnnnnsnnnntnn",
+             "nnunnnnvnnnnwnnnnxnnnnynnnnznn",
+             "HHHOHHOOHOOO",
+             "HHAHHHHBHHHHCHHHHDHHHHEHHHHFHHHHGHHHHHHHHHIHHHHJHH",
+             "HHKHHHHLHHHHMHHHHNHHHHOHHHHPHHHHQHHHHRHHHHSHHHHTHH",
+             "HHUHHHHVHHHHWHHHHXHHHHYHHHHZHH",
+             "Having fun kerning using Org Mode and FontForge",
+             "Python+FontForge+Org: I made a font based on my handwriting!",
+             "Monthly review: May 2020",
+             "Emacs News 2020-06-01"]
+  def test_strings(strings):
+    doc, tag, text, line = Doc().ttl()
+    with doc.tag('table', style='border-bottom: 1px solid gray; width: 100%; border-collapse: collapse'):
       for s in strings:
-        line('div', s)
-      line('h2', 'Kerning matrix')
-      doc.asis(test_kerning_matrix(font))
-      line('h2', 'License')
-      with tag('pre', klass='license'):
-        text(font.copyright)
-      # http://famira.com/article/letterproef
-  font.close()
-  return doc.getvalue()
+        for i, f in enumerate(fonts):
+          style = 'border-top: 1px solid gray' if (i == 0) else ""
+          with tag('tr', klass=f[0], style=style):
+            line('td', f[0])
+            line('td', s)
+    return doc.getvalue()
+  def test_kerning_matrix(font):
+    sub = font.getLookupSubtables(font.gpos_lookups[0])
+    doc, tag, text, line = Doc().ttl()
+    for s in sub:
+      if font.isKerningClass(s):
+        (classes_left, classes_right, array) = font.getKerningClass(s)
+        kerning = np.array(array).reshape(len(classes_left), len(classes_right))
+        with tag('table', style='border-collapse: collapse'):
+          for r, row in enumerate(classes_left):
+            if row is None: continue
+            for j, first_letter in enumerate(row):
+              if first_letter == None: continue
+              style = "border-top: 1px solid gray" if j == 0 else ""
+              with tag('tr', style=style):
+                line('td', first_letter)
+                for c, column in enumerate(classes_right):
+                  if column is None: continue
+                  for i, second_letter in enumerate(column):
+                    if second_letter is None: continue
+                    klass = "kerned" if kerning[r][c] else "default"
+                    style = "border-left: 1px solid gray" if i == 0 else ""
+                    with tag('td', klass=klass, style=style):
+                      text('n%s%sn' % (aglfn.to_glyph(first_letter), aglfn.to_glyph(second_letter)))
+    return doc.getvalue()
+  from yattag import Doc
+  import numpy as np
+  import fontforge
+  import aglfn
+
+  def test_glyphs(font, count=1):
+    return ''.join([(aglfn.to_glyph(g) or "") * count for g in font if font[g].isWorthOutputting()])
+
+  def test_font_html(font_filename=None):
+    doc, tag, text, line = Doc().ttl()
+    font = fontforge.open(font_filename)
+    name = font.fontname
+    with tag('html'):
+      with tag('head'): 
+        doc.asis('<link rel="stylesheet" type="text/css" href="style.css" />')
+        with tag('style'):
+          doc.asis("@font-face { font-family: '%s'; src: url('%s'); }\n" % (name, font_filename))
+          doc.asis("body { font-family: '%s'; }\n" % name)
+          doc.asis(".bold { font-weight: bold } .italic { font-style: italic } .oblique { font-style: oblique }")
+          doc.asis(".small-caps { font-variant: small-caps }")
+      with tag('body'):
+        with tag('a', href='index.html'):
+          text('Back to index')
+        with tag('div', style='float: right'):
+          with tag('a', href=font.fullname + '.woff'):
+            text('WOFF')
+          text(' | ')
+          with tag('a', href=font.fullname + '.otf'):
+            text('OTF')
+        line('h1', font.fullname)
+        line('h2', 'Glyphs and sizes')
+        with tag('table'):
+          for size in [10, 14, 20, 24, 36, 72]:
+            with tag('tr', style='font-size: %dpt' % size):
+              line('td', size)
+              line('td', test_glyphs(font))
+        line('h2', 'Variants')
+        line('td', test_glyphs(font, 4))
+              
+  #       line('h2', 'Accents')
+  #       line('div', '''
+  # ¡ ¢ £ ¤ ¥ ¦ § ¨ © ª « ¬ ­ ® ¯ ° ± ² ³ ´ µ ¶ · ¸ ¹ º » ¼ ½ ¾ ¿ À Á Â Ã'
+  # Ä Å Æ Ç È É Ê Ë Ì Í Î Ï Ð Ñ Ò Ó Ô Õ Ö × Ø Ù Ú Û Ü Ý Þ ß à á â ã ä å æ
+  # ç è é ê ë ì í î ï ð ñ ò ó ô õ ö ÷ ø ù ú û ü ý þ ÿ Ā ā Ă ă Ą ą Ć ć Ĉ ĉ
+  # Ċ ċ Č č Ď ď Đ đ Ē ē Ĕ ĕ Ė ė Ę ę Ě ě Ĝ ĝ Ğ ğ Ġ ġ Ģ ģ Ĥ ĥ Ħ ħ Ĩ
+  # ĩ Ī ī Ĭ ĭ Į į İ ı Ĳ ĳ Ĵ ĵ Ķ ķ ĸ Ĺ ĺ Ļ ļ Ľ ľ Ŀ ŀ Ł ł Ń ń Ņ ņ Ň ň ŉ Ŋ ŋ
+  # Ō ō Ŏ ŏ Ő ő Œ œ Ŕ ŕ Ŗ ŗ Ř ř Ś ś Ŝ ŝ Ş ş Š š Ţ ţ Ť ť Ŧ ŧ Ũ ũ Ū ū Ŭ ŭ Ů
+  # ů Ű ű Ų ų Ŵ ŵ Ŷ ŷ Ÿ Ź ź Ż ż Ž ž ſ Ǎ ǎ Ǐ ǐ Ǒ ǒ Ǔ ǔ Ǖ ǖ Ǘ ǘ Ǚ ǚ Ǜ ǜ
+  # Ə ƒ Ơ ơ Ư Ư Ǻ ǻ Ǽ ǽ Ǿ ǿ''')
+        line('h2', 'Transformations')
+        with tag('table'):
+          for t in ['normal', 'bold', 'italic', 'oblique', 'bold italic', 'bold oblique', 'small-caps', 'bold small-caps']:
+            with tag('tr', klass=t):
+              line('td', t)
+              line('td', test_glyphs(font))
+        line('h2', 'Test strings')
+        for s in strings:
+          line('div', s)
+        line('h2', 'Kerning matrix')
+        doc.asis(test_kerning_matrix(font))
+        line('h2', 'License')
+        with tag('pre', klass='license'):
+          text(font.copyright)
+        # http://famira.com/article/letterproef
+    font.close()
+    return doc.getvalue()
 #+end_src
 
 #+NAME: test_html
