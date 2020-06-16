@@ -833,6 +833,30 @@ http://learn.scannerlicker.net/2015/06/12/making-a-font-maximal-part-iii/
 
 #+begin_src python :eval yes :results output :session "out" :bearings=regular_bearings
   <<def_all>>
+  def get_stylistic_set(font, suffix):
+    return [g for g in font if suffix in g]
+  def add_character_variants(font, sets):
+    if not 'calt' in font.gsub_lookups:
+      font.addLookup('calt', 'gsub_contextchain', 0, [['calt', [['latn', ['dflt']]]]])
+    prev_tag = ''
+    for i, sub in enumerate(sets):
+      if not sub in font.gsub_lookups: 
+        font.addLookup(sub, 'gsub_single', 0, [])
+        font.addLookupSubtable(sub, sub + '-1')
+      alt_set = get_stylistic_set(font, sub)
+      for g in alt_set:
+        get_glyph(font, glyph_base_name(g)).addPosSub(sub + '-1', g)
+      default = [glyph_base_name(g) for g in alt_set]
+      prev_set = [glyph_base_name(g) + prev_tag for g in alt_set]
+      if i == 0:
+        font.addContextualSubtable('calt', 'calt-%d' % (i + 1), 'class', '%d | %d @<ss%02d>' % (i + 1, 1, i + 1),
+                                   bclasses=(None, default), mclasses=(None, default))
+      else:
+        font.addContextualSubtable('calt', 'calt-%d' % (i + 1), 'class', '%d | %d @<ss%02d>' % (i + 1, 1, i + 1),
+                                   bclasses=(None, default, prev_set), mclasses=(None, default, prev_set))
+      prev_tag = '.' + sub    
+    return font
+
   font = fontforge.open('sachacHandRegularEdited.sfd')
   params = {**params, 
             'row_padding': 50,
@@ -870,26 +894,7 @@ http://learn.scannerlicker.net/2015/06/12/making-a-font-maximal-part-iii/
   cut_glyphs(**params)
   import_glyphs(font, **params)
   set_bearings(font, bearings)
-  for sub in ['calt', 'ss01', 'ss02']:
-    if sub in font.gsub_lookups: font.removeLookup(sub)
-
-  def get_stylistic_set(font, suffix):
-    return [g for g in font if suffix in g]
-  ss01 = get_stylistic_set(font, 'ss01')
-  ss02 = get_stylistic_set(font, 'ss02')
-  default = [glyph_base_name(g) for g in ss01]
-  font.addLookup('calt', 'gsub_contextchain', 0, [['calt', [['latn', ['dflt']]]]])
-  for sub in ['ss01', 'ss02']:
-    font.addLookup(sub, 'gsub_single', 0, [])
-    font.addLookupSubtable(sub, sub + '-1')
-  for g in ss01: get_glyph(font, glyph_base_name(g)).addPosSub('ss01-1', g)
-  for g in ss02: get_glyph(font, glyph_base_name(g)).addPosSub('ss02-1', g)
-  # font.addContextualSubtable('calt', 'calt-1', 'glyph', '''
-  # a | a @<gsub>
-  # b | b @<gsub>
-  # ''')
-  font.addContextualSubtable('calt', 'calt-1', 'class', '1 | 1 @<ss01>', bclasses=(None, default), mclasses=(None, default))
-  font.addContextualSubtable('calt', 'calt-2', 'class', '2 | 1 @<ss02>', bclasses=(None, default, ss01), mclasses=(None, default, ss01))
+  add_character_variants(font, ['ss01', 'ss02'])
   font.familyname = 'sachacHand'
   font.fullname = 'sachacHand Regular Variants'
   font.os2_weight = 400
