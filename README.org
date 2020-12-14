@@ -14,7 +14,12 @@ tablet.
 
 * License
 
-SIL OPEN FONT LICENSE
+Feel free to use the font under the SIL Open Font License. That means
+you can freely create and distribute things that use the font.
+
+Feel free to use the code under the GNU GPL v3+ license.
+
+See [[LICENSE]] for more details.
 
 * Blog post
   :PROPERTIES:
