@@ -5,7 +5,7 @@
 
 I wanted to make my own handwriting font. I also wanted to be able to
 generate fonts quickly from the handwriting samples I can draw on my
-ta   [ State ]: EDITED, shown value does not take effect until you set or save it.
+tablet.
 
 
 | [[https://pages.sachachua.com/sachac-hand/README.html]] | This README as HTML |
@@ -13,6 +13,8 @@ ta   [ State ]: EDITED, shown value does not take effect until you set or save i
 | [[./files/test.html]]                                   | Test pages          |
 
 * License
+
+SIL OPEN FONT LICENSE
 
 * Blog post
   :PROPERTIES:
@@ -310,6 +312,7 @@ I also needed =(setenv "LD_LIBRARY_PATH" "/usr/local/lib")=. There are probably 
            base = glyph_filename_base(g.glyphname)
            svg_filename = os.path.join(glyph_dir, base + '.svg')
            png_filename = os.path.join(glyph_dir, base + '.png')
+           g.clear()
            g.importOutlines(png_filename)
            g.importOutlines(svg_filename)
          except Exception as e:
@@ -327,6 +330,9 @@ I also needed =(setenv "LD_LIBRARY_PATH" "/usr/local/lib")=. There are probably 
  def glyph_base_name(x):
    m = re.match(r"([^.]+)\..+", x)
    return m.group(1) if m else x
+ def glyph_suffix(x):
+   m = re.match(r"([^.]+)\.(.+)", x)
+   return m.group(2) if m else ''
 
  def set_bearings(font, bearings, **kwargs):
    bearing_dict = {}
@@ -362,6 +368,17 @@ I also needed =(setenv "LD_LIBRARY_PATH" "/usr/local/lib")=. There are probably 
 
  #+NAME: def_kern_classes
  #+begin_src python :eval no
+ def get_classes(row):
+   result = []
+   for x in row:
+     if x == "" or x == "None" or x is None:
+       result.append(None)
+     elif isinstance(x, str):
+       result.append(x.split(','))
+     else:
+       result.append(x)
+   return result
+
  def kern_classes(font, kerning_matrix):
    try:
      font.removeLookup('kern')
@@ -373,9 +390,9 @@ I also needed =(setenv "LD_LIBRARY_PATH" "/usr/local/lib")=. There are probably 
    classes_right = [None if (x == "" or x == "None") else x.split(",") for x in offsets[0,1:]]
    classes_left = [None if (x == "" or x == "None") else x.split(',') for x in offsets[1:,0]]
    offset_list = [0 if x == "" else int(x) for x in offsets[1:,1:].reshape(-1)]
-   print(classes_left)
-   print(classes_right)
-   print(offset_list)
+   #print('left', len(classes_left), classes_left)
+   #print('right', len(classes_right), classes_right)
+   #print('offset', len(offset_list), offset_list)
    font.addKerningClass("kern", "kern-1", classes_left, classes_right, offset_list)
    return font
  #+end_src
@@ -636,7 +653,7 @@ kern_existing_font(font=font, bearings=bearings, kerning_matrix=kerning_matrix)
 | f             |      |     -10 |        20 |               -60 |   0 |       |  -90 |     | -40 | -190 |  -80 |                      20 |     |                 |     |     |     |     |      |
 | t             |      |      20 |           |               -20 |  10 |       |  -70 |     |     | -100 |   10 |                         |     |                 |     |     |     |     |      |
 | i             |      |         |           |               -30 |  10 |       |  -90 |     |     | -160 |  -20 |                         |     |                 | -20 |     |     |     |      |
-| r             |      |         |       -10 |               -70 |     |       |  -90 |     | -40 | -190 | -100 |                         | -10 |                 | -50 | -50 | -10 | -50 |      |
+| r             |      |         |       -10 |               -80 |     |       |  -90 |     | -40 | -190 | -100 |                         | -10 |                 | -50 | -50 | -10 | -50 |      |
 | k             |      |     -10 |       -10 |               -20 | -10 |       |  -90 |     |     | -100 |   10 |                         |     |                 | -30 |     | -30 |     |  -10 |
 | l             |      |     -20 |           |                   |  10 |       |  -50 | -20 |     | -100 |   10 |                         | -20 |                 | -30 |     | -30 |     |      |
 | v             |      |         |           |               -30 |  10 |       |  -50 |     |     | -100 |   10 |                         |     |                 | -30 | -30 | -20 |     |      |
@@ -664,7 +681,7 @@ kern_existing_font(font=font, bearings=bearings, kerning_matrix=kerning_matrix)
 | G             |      |      20 |        30 |                20 |  40 |    30 |      |  20 |     | -100 |   10 |                      10 |     |                 |     |     |     |     |      |
 | B,S,X,Z       |      |      20 |        30 |                20 |  40 |    30 |      |  20 |  20 |  -20 |   90 |                      10 |     |                 |     |     |     |     |      |
 
-
+#+NAME: make_regular
 #+begin_src python :var bearings=regular_bearings :session out :var kerning_matrix=regular_kerning_matrix :results output
 <<def_all>>
 font = fontforge.open('sachacHandRegularEdited.sfd')
@@ -678,13 +695,6 @@ with open('../LICENSE', 'r') as file:
     font.copyright = file.read()
 kern_existing_font(filename="sachacHandRegularEdited.sfd",bearings=bearings, kerning_matrix=kerning_matrix)
 #+end_src
-
- #+RESULTS:
- : Bad name when parsing aglfn for unicode 41
- : Old table removed.
- : [None, ['f'], ['t'], ['i'], ['r'], ['k'], ['l'], ['v'], ['b', 'o', 'p'], ['n', 'm'], ['a'], ['W'], ['T'], ['F'], ['g'], ['d'], ['h', 'q', 'y', 'j'], ['c', 'e', 's', 'u', 'w', 'x', 'z'], ['V'], ['A'], ['Y'], ['M', 'N', 'H', 'I'], ['O', 'Q', 'D', 'U'], ['J'], ['C'], ['E'], ['L'], ['P'], ['K', 'R'], ['G'], ['B', 'S', 'X', 'Z']]
- : [None, ['m', 'n', 'p', 'r'], ['h', 'b', 'l', 'i', 'k'], ['o', 'a', 'c', 'e', 'd', 'g', 'q', 'w', 'u'], ['f', 't'], ['x', 'v', 'z'], ['j'], ['y'], ['s'], ['T'], ['J'], ['F', 'B', 'D', 'E', 'H', 'I', 'K', 'L', 'M', 'N', 'P', 'R'], ['V'], ['A', 'C', 'G', 'K', 'O', 'Q', 'S', 'W'], ['U'], ['X'], ['Y'], ['Z'], ['zero']]
- : [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 110, 0, 0, 0, 0, 0, 0, 0, 0, 0, -10, 20, -60, 0, 0, -90, 0, -40, -190, -80, 20, 0, 0, 0, 0, 0, 0, 0, 0, 20, 0, -20, 10, 0, -70, 0, 0, -100, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -30, 10, 0, -90, 0, 0, -160, -20, 0, 0, 0, -20, 0, 0, 0, 0, 0, 0, -10, -70, 0, 0, -90, 0, -40, -190, -100, 0, -10, 0, -50, -50, -10, -50, 0, 0, -10, -10, -20, -10, 0, -90, 0, 0, -100, 10, 0, 0, 0, -30, 0, -30, 0, -10, 0, -20, 0, 0, 10, 0, -50, -20, 0, -100, 10, 0, -20, 0, -30, 0, -30, 0, 0, 0, 0, 0, -30, 10, 0, -50, 0, 0, -100, 10, 0, 0, 0, -30, -30, -20, 0, 0, 0, 0, 0, -20, 10, 0, -90, 0, 0, -100, 10, 0, -10, 0, -30, -30, -30, -10, 0, 0, 0, 0, 0, 10, 0, -90, 0, 0, -100, 10, 0, -10, 0, -20, 0, -30, -10, 0, 0, 0, 0, -30, 0, -20, -90, 0, -10, -140, -30, 0, -60, 0, -40, -20, -40, 0, 0, 0, 0, 0, 0, 20, 0, 0, 0, 0, -100, 10, 0, 0, 0, -20, 0, 0, 0, 0, 0, -70, -30, -100, -70, -90, -120, -30, -80, -100, -50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -50, 0, 0, -70, 0, 0, -100, -50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -10, 10, 0, -50, 0, 0, -140, 10, 0, 0, 0, -20, 0, 0, 0, 0, 0, 10, 10, 0, 20, 10, -50, 10, 0, -100, 10, 0, 0, 0, 0, 0, 0, 0, 10, 0, 10, 0, 0, 20, 10, -50, 10, 0, -130, 10, 0, 0, 0, -20, 0, 0, 0, 10, 0, 0, 0, -20, 10, 10, -50, 0, 0, -130, 10, 0, 0, 0, -40, -40, -20, 0, 0, 0, -20, 0, -70, 30, 30, -80, -40, -40, -30, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 20, 30, 30, 60, 50, 0, 20, 20, -10, 60, 20, 20, 20, 0, 0, 0, 0, 20, 0, 20, 30, 20, 60, 30, -50, 40, 20, -10, 40, 0, 30, 0, 0, 0, 0, 0, 0, 0, 20, 20, 0, 50, 30, -50, 20, 0, 0, 40, 0, 30, 0, 0, 0, 0, 0, 0, 0, 30, 40, 0, 50, 40, -20, 30, 0, -70, 40, 0, 20, 0, 0, 0, 0, 0, 0, 0, 10, 20, 0, 40, 20, -20, 30, 0, -30, 80, 0, 20, 0, 0, 0, 0, 0, 0, 0, 30, 30, 10, 40, 10, 0, 20, 0, -30, 80, 0, 20, 0, 0, 0, 0, 0, 0, 0, 10, 10, -10, 50, 0, -20, 20, 0, 0, 110, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -10, -10, 0, -30, 20, 0, -90, 20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 20, -50, 30, 20, 0, 20, 0, -30, 80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 20, 10, 20, 20, 20, 0, 20, 0, -60, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 20, 30, 20, 40, 30, 0, 20, 0, -100, 10, 10, 0, 0, 0, 0, 0, 0, 0, 0, 20, 30, 20, 40, 30, 0, 20, 20, -20, 90, 10, 0, 0, 0, 0, 0, 0, 0]
 
  
 ** Generate sachacHand Bold
@@ -800,6 +810,7 @@ Kerning:
 | G             |      |              20 |  40 |    30 |      30 |      |        20 |  20 |  20 |     | -100 | 10 |      |      |
 | B,S,X,Z       |      |              20 |  40 |    30 |      30 |      |        20 |  20 |  20 |  20 |  -20 | 10 |      |      |
 
+  #+NAME: make_bold
   #+begin_src python :var bearings=bold_bearings :var kerning_matrix=bold_kerning_matrix :results output 
     <<def_all>>
     #font = fontforge.font()
@@ -816,14 +827,9 @@ Kerning:
     kern_existing_font(font=font, bearings=bearings, kerning_matrix=kerning_matrix)
   #+end_src
 
-  #+RESULTS:
+  #+RESULTS: make_bold
   : Starting from scratch
-  : [None, ['n', 'm'], ['f'], ['t'], ['i'], ['r'], ['k'], ['l'], ['v'], ['b', 'o', 'p'], ['a'], ['W'], ['T'], ['F'], ['g'], ['q', 'd', 'h', 'y', 'j'], ['c', 'e', 's', 'u', 'w', 'x', 'z'], ['V'], ['A'], ['Y'], ['M', 'N', 'H', 'I'], ['O', 'Q', 'D', 'U'], ['J'], ['C'], ['E'], ['L'], ['P'], ['K', 'R'], ['G'], ['B', 'S', 'X', 'Z']]
-  : [None, ['o', 'a', 'c', 'e', 'd', 'g', 'q', 'w'], ['f', 't'], ['x', 'v', 'z'], ['h', 'b', 'l', 'i'], ['j'], ['m', 'n', 'p', 'r', 'u'], ['k'], ['y'], ['s'], ['T'], ['F'], ['V'], ['zero']]
-  : [0, 0, 0, 0, 0, 0, 0, 20, 0, 0, 0, 0, 0, 0, 0, 0, 20, 0, 0, -90, 0, 0, 0, 0, -100, 0, -100, 0, 0, -10, 0, 0, 20, -90, 10, 20, 0, -40, -190, 20, 0, 0, 0, -20, 10, 0, 0, -70, 20, 20, 0, 0, -100, 0, 0, 0, 0, -30, 10, 0, 0, -90, 0, 0, 0, 0, -160, 0, 0, 0, 0, -70, 0, 0, -10, -90, 0, 0, 0, -40, -190, 0, 0, 0, 0, -20, -10, 0, -10, -90, -10, 0, 0, 0, -100, 0, 0, -10, 0, 0, 10, 0, 0, 0, 0, 20, 0, 0, -100, 0, 0, 0, 0, -30, 10, 0, 0, -50, 0, 0, 0, 0, -100, 0, 0, 0, 0, -20, 10, 0, 0, -90, 0, 0, 0, 0, -100, 0, 0, 0, 0, 0, 0, 0, 0, -90, 0, 0, 0, -10, -100, 0, 0, 0, 0, 0, 20, 0, 0, 0, 0, 0, 0, 0, -100, 0, 0, 0, 0, -120, -70, -90, -30, -120, -70, -30, -30, -80, -100, 0, 0, 0, 0, -90, 0, 0, 0, -70, 0, 0, 0, 0, -100, 0, 0, 0, 0, 0, 10, 0, 0, -50, 0, 0, 0, 0, -100, 0, 0, 0, 0, 0, 20, 10, 10, -50, 10, 10, 10, 0, -100, 0, 0, 10, 0, -20, 10, 10, 0, -50, 0, 0, 0, 0, -100, 0, 0, 0, 0, -70, 30, 30, 0, -80, -20, 0, -40, -40, -10, 0, 0, 0, 0, 30, 60, 30, 30, 0, 20, 40, 20, 20, -10, 20, 0, 20, 0, 20, 60, 30, 30, 0, 20, 20, 40, 20, -10, 0, 0, 0, 0, 20, 50, 40, 30, 0, 10, 20, 20, 0, 0, 0, 0, 0, 0, 0, 50, 40, 30, -20, 30, 20, 30, 0, -70, 0, 0, 0, 0, 0, 40, 20, 20, -20, 10, 10, 30, 0, -30, 0, 0, 0, 0, 10, 40, 10, 30, 0, 30, 30, 20, 0, -30, 0, 0, 0, 0, -10, 50, 0, 10, -20, 10, 0, 20, 0, 0, 0, 0, 0, 0, -10, -10, 0, 0, -30, 0, 0, 20, 0, -90, 0, 0, 0, 0, -50, 30, 20, 20, 0, 0, 20, 20, 0, -30, 0, 0, 0, 0, 20, 20, 20, 10, 0, 20, 20, 20, 0, -60, 0, 0, 0, 0, 20, 40, 30, 30, 0, 20, 20, 20, 0, -100, 10, 0, 0, 0, 20, 40, 30, 30, 0, 20, 20, 20, 20, -20, 10, 0, 0]
 
-
-* Variants
 https://www.youtube.com/watch?v=WqSQU7nuTsc
 https://www.tug.org/TUGboat/tb24-3/williams.pdf
 https://typedrawers.com/discussion/1357/how-can-i-randomize-letters-in-a-typeface
@@ -831,7 +837,13 @@ http://learn.scannerlicker.net/2015/06/12/making-a-font-maximal-part-iii/
 
 ** Import the glyphs for variant1 and variant2
 
-#+begin_src python :eval yes :results output :session "out" :bearings=regular_bearings
+Expanding the kerning matrix:
+
+- Specify list of variant glyphs to add to existing classes if not specified
+- Specify suffixes, try each glyph to see if it exists
+- Check the font to see what other glyphs are specified, add to those classes
+
+#+begin_src python :eval yes :results output :session "out" :var bearings=regular_bearings :var kerning_matrix=regular_kerning_matrix
   <<def_all>>
   def get_stylistic_set(font, suffix):
     return [g for g in font if suffix in g]
@@ -848,6 +860,12 @@ http://learn.scannerlicker.net/2015/06/12/making-a-font-maximal-part-iii/
         get_glyph(font, glyph_base_name(g)).addPosSub(sub + '-1', g)
       default = [glyph_base_name(g) for g in alt_set]
       prev_set = [glyph_base_name(g) + prev_tag for g in alt_set]
+      print('%d | %d @<ss%02d>' % (i + 1, 1, i + 1))
+      print(default)
+      default = default + ['0']
+      try: font.removeLookupSubtable('calt-%d' % (i + 1))
+      except Exception: pass
+      print(prev_set)
       if i == 0:
         font.addContextualSubtable('calt', 'calt-%d' % (i + 1), 'class', '%d | %d @<ss%02d>' % (i + 1, 1, i + 1),
                                    bclasses=(None, default), mclasses=(None, default))
@@ -857,7 +875,7 @@ http://learn.scannerlicker.net/2015/06/12/making-a-font-maximal-part-iii/
       prev_tag = '.' + sub    
     return font
 
-  font = fontforge.open('sachacHandRegularEdited.sfd')
+  font = fontforge.open('sachacHand-Regular-V.sfd')
   params = {**params, 
             'row_padding': 50,
             'sample_file': 'sample-sachacHand-regular-variant1.png',
@@ -867,23 +885,23 @@ http://learn.scannerlicker.net/2015/06/12/making-a-font-maximal-part-iii/
             'matrix':
               ['H.ss01,e.ss01,q.ss01,A.ss01,M.ss01,Y.ss01,eight.ss01,quotesingle.ss01,numbersign.ss01,less.ss01',
                'O.ss01,b.ss01,r.ss01,B.ss01,N.ss01,Z.ss01,nine.ss01,quoteright.ss01,dollar.ss01,greater.ss01',
-               'n.ss01,h.ss01,u.ss01,R.ss01,P.ss01,zero.ss01,?.ss01,quotedbl.ss01,bracketleft.ss01',
+               'n.ss01,h.ss01,u.ss01,R.ss01,P.ss01,zero.crossed,question.ss01,quotedbl.ss01,bracketleft.ss01',
                'o.ss01,k.ss01,w.ss01,D.ss01,Q.ss01,one.ss01,colon.ss01,quotedblleft.ss01,ampersand,bracketright.ss01',
                'd.ss01,l.ss01,v.ss01,L.ss01,S.ss01,two.ss01,semicolon.ss01,quotedblright.ss01,parenleft.ss01,asciicircum.ss01',
                'p.ss01,f.ss01,x.ss01,E.ss01,T.ss01,three.ss01,hyphen.ss01,at.ss01,parenright.ss01,grave.ss01',
                'a.ss01,t.ss01,y.ss01,F.ss01,U.ss01,four.ss01,endash.ss01,slash.ss01,asterisk.ss01,braceleft.ss01',
                'g.ss01,i.ss01,z.ss01,I.ss01,V.ss01,five.ss01,emdash.ss01,backslash.ss01,plus.ss01,bar.ss01',
                's.ss01,j.ss01,C.ss01,J.ss01,W.ss01,six.ss01,equal.ss01,asciitilde.ss01,comma.ss01,braceright.ss01',
-               'c.ss01,m.ss01,G.ss01,K.ss01,X.ss01,seven.ss01,exclam.ss01,underscore.ss01,period.ss01,None']}
+               'c.ss01,m.ss01,G.ss01,K.ss01,X.ss01,seven.ss01,exclam.ss01,underscore.ss01,period.ss01,zero.ss01']}
   cut_glyphs(**params)
   matrix = glyph_matrix(font=font, matrix=params['matrix'])
   import_glyphs(font, **params)
   params = {**params, 
-            'sample_file': 'sample-sachacHand-regular-variant2.png',
+            'sample_file': 'sample-sachacHand-bold.png',
             'matrix':
               ['H.ss02,e.ss02,q.ss02,A.ss02,M.ss02,Y.ss02,eight.ss02,quotesingle.ss02,numbersign.ss02,less.ss02',
                'O.ss02,b.ss02,r.ss02,B.ss02,N.ss02,Z.ss02,nine.ss02,quoteright.ss02,dollar.ss02,greater.ss02',
-               'n.ss02,h.ss02,u.ss02,R.ss02,P.ss02,zero.ss02,?.ss02,quotedbl.ss02,bracketleft.ss02',
+               'n.ss02,h.ss02,u.ss02,R.ss02,P.ss02,zero.ss02,question.ss02,quotedbl.ss02,bracketleft.ss02',
                'o.ss02,k.ss02,w.ss02,D.ss02,Q.ss02,one.ss02,colon.ss02,quotedblleft.ss02,ampersand,bracketright.ss02',
                'd.ss02,l.ss02,v.ss02,L.ss02,S.ss02,two.ss02,semicolon.ss02,quotedblright.ss02,parenleft.ss02,asciicircum.ss02',
                'p.ss02,f.ss02,x.ss02,E.ss02,T.ss02,three.ss02,hyphen.ss02,at.ss02,parenright.ss02,grave.ss02',
@@ -894,21 +912,87 @@ http://learn.scannerlicker.net/2015/06/12/making-a-font-maximal-part-iii/
   cut_glyphs(**params)
   import_glyphs(font, **params)
   set_bearings(font, bearings)
-  add_character_variants(font, ['ss01', 'ss02'])
+  variants = ['ss01', 'ss02']
+
+  def expand_classes(array, new_glyphs):
+    not_found = []
+    for g in new_glyphs:
+      found_exact = None
+      found_base = None
+      base = glyph_base_name(g)
+      for i, class_glyphs in enumerate(array):
+        if class_glyphs is None: continue
+        if isinstance(class_glyphs, str):
+          class_glyphs = class_glyphs.split(',')
+          array[i] = class_glyphs
+        for glyph in class_glyphs:
+          if glyph == g:
+            found_exact = i
+            break
+          if glyph == base:
+            found_base = i
+            break
+      if found_exact: continue
+      elif found_base: array[found_base].append(g)
+      else: not_found.append(g)
+    return ([','.join(x) for x in array], not_found)
+
+  # def expand_kerning_matrix(font=font, kerning_matrix=kerning_matrix, new_glyphs=[]):
+  #   classes_right = [None if (x == "" or x == "None") else x.split(",") for x in offsets[0,1:]]
+  #   classes_left = [None if (x == "" or x == "None") else x.split(',') for x in offsets[1:,0]]
+  #   right_glyphs = np.asarray(offsets[0,1:]).reshape(-1)
+  #   # Expand all the right glyphs
+  #   for i, c in enumerate(kerning_matrix[0]):
+  #     if c is None: continue
+  #     glyphs = c.split(',')
+  #     for g in glyphs:
+
+  alt_set = get_stylistic_set(font, 'ss02')
+  (classes_right, not_found) = expand_classes(list(kerning_matrix[0]), alt_set)
+  (classes_left, not_found) = expand_classes([x[0] for x in kerning_matrix], alt_set)
+  kerning_matrix[0] = classes_right
+  for i, c in enumerate(classes_left):
+    kerning_matrix[i][0] = c
+  font = kern_classes(font, kerning_matrix)
+  font = kern_by_char(font, kerning_matrix)
+  add_character_variants(font, variants)
+  #font.mergeFeature('sachacHand-Regular-V.fea')
   font.familyname = 'sachacHand'
   font.fullname = 'sachacHand Regular Variants'
   font.os2_weight = 400
   font.os2_family_class = 10 * 256 + 8
   font.os2_vendor = 'SC83'
   font.fontname = 'sachacHand-Regular-V'
+  font.buildOrReplaceAALTFeatures()
+  # TODO Just plop them into different fonts, darn it.
   save_font(font)
   with open("test-%s.html" % font.fontname, 'w') as f:
-    f.write(test_font_html(font.fontname + '.woff'))
+    f.write(test_font_html(font.fontname + '.woff', variants=variants))
 #+end_src
 
 #+RESULTS:
 : Bad name when parsing aglfn for unicode 41
+: Old table removed.
+: 1 | 1 @<ss01>
+: ['H', 'e', 'q', 'A', 'M', 'Y', 'eight', 'quotesingle', 'numbersign', 'less', 'O', 'b', 'r', 'B', 'N', 'Z', 'nine', 'quoteright', 'dollar', 'greater', 'n', 'h', 'u', 'R', 'P', 'question', 'quotedbl', 'bracketleft', 'o', 'k', 'w', 'D', 'Q', 'one', 'colon', 'quotedblleft', 'bracketright', 'd', 'l', 'v', 'L', 'S', 'two', 'semicolon', 'quotedblright', 'parenleft', 'asciicircum', 'p', 'f', 'x', 'E', 'T', 'three', 'hyphen', 'at', 'parenright', 'grave', 'a', 't', 'y', 'F', 'U', 'four', 'endash', 'slash', 'asterisk', 'braceleft', 'g', 'i', 'z', 'I', 'V', 'five', 'emdash', 'backslash', 'plus', 'bar', 's', 'j', 'C', 'J', 'W', 'six', 'equal', 'asciitilde', 'comma', 'braceright', 'c', 'm', 'G', 'K', 'X', 'seven', 'exclam', 'underscore', 'period', 'zero']
+: ['H', 'e', 'q', 'A', 'M', 'Y', 'eight', 'quotesingle', 'numbersign', 'less', 'O', 'b', 'r', 'B', 'N', 'Z', 'nine', 'quoteright', 'dollar', 'greater', 'n', 'h', 'u', 'R', 'P', 'question', 'quotedbl', 'bracketleft', 'o', 'k', 'w', 'D', 'Q', 'one', 'colon', 'quotedblleft', 'bracketright', 'd', 'l', 'v', 'L', 'S', 'two', 'semicolon', 'quotedblright', 'parenleft', 'asciicircum', 'p', 'f', 'x', 'E', 'T', 'three', 'hyphen', 'at', 'parenright', 'grave', 'a', 't', 'y', 'F', 'U', 'four', 'endash', 'slash', 'asterisk', 'braceleft', 'g', 'i', 'z', 'I', 'V', 'five', 'emdash', 'backslash', 'plus', 'bar', 's', 'j', 'C', 'J', 'W', 'six', 'equal', 'asciitilde', 'comma', 'braceright', 'c', 'm', 'G', 'K', 'X', 'seven', 'exclam', 'underscore', 'period', 'zero']
+: 2 | 1 @<ss02>
+: ['H', 'e', 'q', 'A', 'M', 'Y', 'eight', 'quotesingle', 'numbersign', 'less', 'O', 'b', 'r', 'B', 'N', 'Z', 'nine', 'quoteright', 'dollar', 'greater', 'n', 'h', 'u', 'R', 'P', 'zero', 'question', 'quotedbl', 'bracketleft', 'o', 'k', 'w', 'D', 'Q', 'one', 'colon', 'quotedblleft', 'bracketright', 'd', 'l', 'v', 'L', 'S', 'two', 'semicolon', 'quotedblright', 'parenleft', 'asciicircum', 'p', 'f', 'x', 'E', 'T', 'three', 'hyphen', 'at', 'parenright', 'grave', 'a', 't', 'y', 'F', 'U', 'four', 'endash', 'slash', 'asterisk', 'braceleft', 'g', 'i', 'z', 'I', 'V', 'five', 'emdash', 'backslash', 'plus', 'bar', 's', 'j', 'C', 'J', 'W', 'six', 'equal', 'asciitilde', 'comma', 'braceright', 'c', 'm', 'G', 'K', 'X', 'seven', 'exclam', 'underscore', 'period']
+: ['H.ss01', 'e.ss01', 'q.ss01', 'A.ss01', 'M.ss01', 'Y.ss01', 'eight.ss01', 'quotesingle.ss01', 'numbersign.ss01', 'less.ss01', 'O.ss01', 'b.ss01', 'r.ss01', 'B.ss01', 'N.ss01', 'Z.ss01', 'nine.ss01', 'quoteright.ss01', 'dollar.ss01', 'greater.ss01', 'n.ss01', 'h.ss01', 'u.ss01', 'R.ss01', 'P.ss01', 'zero.ss01', 'question.ss01', 'quotedbl.ss01', 'bracketleft.ss01', 'o.ss01', 'k.ss01', 'w.ss01', 'D.ss01', 'Q.ss01', 'one.ss01', 'colon.ss01', 'quotedblleft.ss01', 'bracketright.ss01', 'd.ss01', 'l.ss01', 'v.ss01', 'L.ss01', 'S.ss01', 'two.ss01', 'semicolon.ss01', 'quotedblright.ss01', 'parenleft.ss01', 'asciicircum.ss01', 'p.ss01', 'f.ss01', 'x.ss01', 'E.ss01', 'T.ss01', 'three.ss01', 'hyphen.ss01', 'at.ss01', 'parenright.ss01', 'grave.ss01', 'a.ss01', 't.ss01', 'y.ss01', 'F.ss01', 'U.ss01', 'four.ss01', 'endash.ss01', 'slash.ss01', 'asterisk.ss01', 'braceleft.ss01', 'g.ss01', 'i.ss01', 'z.ss01', 'I.ss01', 'V.ss01', 'five.ss01', 'emdash.ss01', 'backslash.ss01', 'plus.ss01', 'bar.ss01', 's.ss01', 'j.ss01', 'C.ss01', 'J.ss01', 'W.ss01', 'six.ss01', 'equal.ss01', 'asciitilde.ss01', 'comma.ss01', 'braceright.ss01', 'c.ss01', 'm.ss01', 'G.ss01', 'K.ss01', 'X.ss01', 'seven.ss01', 'exclam.ss01', 'underscore.ss01', 'period.ss01']
 
+Okay, why isn't it triggering when we start off with 0?
+
+#+RESULTS:
+: Bad name when parsing aglfn for unicode 41
+: 1 | 1 @<ss01>
+: ['H', 'e', 'q', 'A', 'M', 'Y', 'eight', 'quotesingle', 'numbersign', 'less', 'O', 'b', 'r', 'B', 'N', 'Z', 'nine', 'quoteright', 'dollar', 'greater', 'n', 'h', 'u', 'R', 'P', 'question', 'quotedbl', 'bracketleft', 'o', 'k', 'w', 'D', 'Q', 'one', 'colon', 'quotedblleft', 'bracketright', 'd', 'l', 'v', 'L', 'S', 'two', 'semicolon', 'quotedblright', 'parenleft', 'asciicircum', 'p', 'f', 'x', 'E', 'T', 'three', 'hyphen', 'at', 'parenright', 'grave', 'a', 't', 'y', 'F', 'U', 'four', 'endash', 'slash', 'asterisk', 'braceleft', 'g', 'i', 'z', 'I', 'V', 'five', 'emdash', 'backslash', 'plus', 'bar', 's', 'j', 'C', 'J', 'W', 'six', 'equal', 'asciitilde', 'comma', 'braceright', 'c', 'm', 'G', 'K', 'X', 'seven', 'exclam', 'underscore', 'period', 'zero']
+: ['H', 'e', 'q', 'A', 'M', 'Y', 'eight', 'quotesingle', 'numbersign', 'less', 'O', 'b', 'r', 'B', 'N', 'Z', 'nine', 'quoteright', 'dollar', 'greater', 'n', 'h', 'u', 'R', 'P', 'question', 'quotedbl', 'bracketleft', 'o', 'k', 'w', 'D', 'Q', 'one', 'colon', 'quotedblleft', 'bracketright', 'd', 'l', 'v', 'L', 'S', 'two', 'semicolon', 'quotedblright', 'parenleft', 'asciicircum', 'p', 'f', 'x', 'E', 'T', 'three', 'hyphen', 'at', 'parenright', 'grave', 'a', 't', 'y', 'F', 'U', 'four', 'endash', 'slash', 'asterisk', 'braceleft', 'g', 'i', 'z', 'I', 'V', 'five', 'emdash', 'backslash', 'plus', 'bar', 's', 'j', 'C', 'J', 'W', 'six', 'equal', 'asciitilde', 'comma', 'braceright', 'c', 'm', 'G', 'K', 'X', 'seven', 'exclam', 'underscore', 'period', 'zero']
+: 2 | 1 @<ss02>
+: ['H', 'e', 'q', 'A', 'M', 'Y', 'eight', 'quotesingle', 'numbersign', 'less', 'O', 'b', 'r', 'B', 'N', 'Z', 'nine', 'quoteright', 'dollar', 'greater', 'n', 'h', 'u', 'R', 'P', 'zero', 'question', 'quotedbl', 'bracketleft', 'o', 'k', 'w', 'D', 'Q', 'one', 'colon', 'quotedblleft', 'bracketright', 'd', 'l', 'v', 'L', 'S', 'two', 'semicolon', 'quotedblright', 'parenleft', 'asciicircum', 'p', 'f', 'x', 'E', 'T', 'three', 'hyphen', 'at', 'parenright', 'grave', 'a', 't', 'y', 'F', 'U', 'four', 'endash', 'slash', 'asterisk', 'braceleft', 'g', 'i', 'z', 'I', 'V', 'five', 'emdash', 'backslash', 'plus', 'bar', 's', 'j', 'C', 'J', 'W', 'six', 'equal', 'asciitilde', 'comma', 'braceright', 'c', 'm', 'G', 'K', 'X', 'seven', 'exclam', 'underscore', 'period']
+: ['H.ss01', 'e.ss01', 'q.ss01', 'A.ss01', 'M.ss01', 'Y.ss01', 'eight.ss01', 'quotesingle.ss01', 'numbersign.ss01', 'less.ss01', 'O.ss01', 'b.ss01', 'r.ss01', 'B.ss01', 'N.ss01', 'Z.ss01', 'nine.ss01', 'quoteright.ss01', 'dollar.ss01', 'greater.ss01', 'n.ss01', 'h.ss01', 'u.ss01', 'R.ss01', 'P.ss01', 'zero.ss01', 'question.ss01', 'quotedbl.ss01', 'bracketleft.ss01', 'o.ss01', 'k.ss01', 'w.ss01', 'D.ss01', 'Q.ss01', 'one.ss01', 'colon.ss01', 'quotedblleft.ss01', 'bracketright.ss01', 'd.ss01', 'l.ss01', 'v.ss01', 'L.ss01', 'S.ss01', 'two.ss01', 'semicolon.ss01', 'quotedblright.ss01', 'parenleft.ss01', 'asciicircum.ss01', 'p.ss01', 'f.ss01', 'x.ss01', 'E.ss01', 'T.ss01', 'three.ss01', 'hyphen.ss01', 'at.ss01', 'parenright.ss01', 'grave.ss01', 'a.ss01', 't.ss01', 'y.ss01', 'F.ss01', 'U.ss01', 'four.ss01', 'endash.ss01', 'slash.ss01', 'asterisk.ss01', 'braceleft.ss01', 'g.ss01', 'i.ss01', 'z.ss01', 'I.ss01', 'V.ss01', 'five.ss01', 'emdash.ss01', 'backslash.ss01', 'plus.ss01', 'bar.ss01', 's.ss01', 'j.ss01', 'C.ss01', 'J.ss01', 'W.ss01', 'six.ss01', 'equal.ss01', 'asciitilde.ss01', 'comma.ss01', 'braceright.ss01', 'c.ss01', 'm.ss01', 'G.ss01', 'K.ss01', 'X.ss01', 'seven.ss01', 'exclam.ss01', 'underscore.ss01', 'period.ss01']
+
+** Okay, how do I space and kern the variants more efficiently?
+font-feature-settings: "calt" 0; turns off variants. Works in Chrome, too.
 
 * Test the fonts
 This lets me quickly try text with different versions of my font. I
@@ -943,17 +1027,31 @@ Resources:
              "Having fun kerning using Org Mode and FontForge",
              "Python+FontForge+Org: I made a font based on my handwriting!",
              "Monthly review: May 2020",
-             "Emacs News 2020-06-01"]
-  def test_strings(strings):
+             "Emacs News 2020-06-01",
+             "Projects"]
+
+  def test_strings(strings, font, variants=None):
     doc, tag, text, line = Doc().ttl()
-    with doc.tag('table', style='border-bottom: 1px solid gray; width: 100%; border-collapse: collapse'):
+    line('h2', 'Test strings')
+    if variants:
       for s in strings:
-        for i, f in enumerate(fonts):
-          style = 'border-top: 1px solid gray' if (i == 0) else ""
-          with tag('tr', klass=f[0], style=style):
-            line('td', f[0])
-            line('td', s)
+        with tag('table'):
+          with tag('tr'):
+            with tag('td', 'nocalt'):
+              text(s)
+          for v in variants:
+            with tag('tr'):
+              line('td', v)
+              with tag('td', klass=v + ' nocalt'):
+                text(s)
+    else:
+      with tag('table'):
+        for s in strings:
+          with tag('tr'):
+            with tag('td'):
+              text(s)
     return doc.getvalue()
+
   def test_kerning_matrix(font):
     sub = font.getLookupSubtables(font.gpos_lookups[0])
     doc, tag, text, line = Doc().ttl()
@@ -967,37 +1065,46 @@ Resources:
             for j, first_letter in enumerate(row):
               if first_letter == None: continue
               style = "border-top: 1px solid gray" if j == 0 else ""
+              g1 = aglfn.to_glyph(glyph_base_name(first_letter))
+              c1 = glyph_suffix(first_letter)
               with tag('tr', style=style):
                 line('td', first_letter)
                 for c, column in enumerate(classes_right):
                   if column is None: continue
                   for i, second_letter in enumerate(column):
                     if second_letter is None: continue
+                    g2 = aglfn.to_glyph(glyph_base_name(second_letter))
+                    c2 = glyph_suffix(second_letter)
                     klass = "kerned" if kerning[r][c] else "default"
                     style = "border-left: 1px solid gray" if i == 0 else ""
                     with tag('td', klass=klass, style=style):
-                      text('n%s%sn' % (aglfn.to_glyph(first_letter), aglfn.to_glyph(second_letter)))
+                      doc.asis('<span class="base">n</span><span class="%s" title="%s">%s</span><span class="%s" title="%s">%s</span><span class="base">n</span>' % (c1, first_letter, g1, c2, second_letter, g2))
     return doc.getvalue()
+
   from yattag import Doc
   import numpy as np
   import fontforge
   import aglfn
 
   def test_glyphs(font, count=1):
-    return ''.join([(aglfn.to_glyph(g) or "") * count for g in font if font[g].isWorthOutputting()])
+    return ''.join([(aglfn.to_glyph(g) or "") * count for g in font if (font[g].isWorthOutputting() and font[g].unicode > -1)])
 
-  def test_font_html(font_filename=None):
+  def test_font_html(font_filename=None, variants=None):
     doc, tag, text, line = Doc().ttl()
     font = fontforge.open(font_filename)
     name = font.fontname
     with tag('html'):
       with tag('head'): 
         doc.asis('<link rel="stylesheet" type="text/css" href="style.css" />')
+        doc.asis('<meta charset="UTF-8">')
         with tag('style'):
           doc.asis("@font-face { font-family: '%s'; src: url('%s'); }\n" % (name, font_filename))
           doc.asis("body { font-family: '%s'; }\n" % name)
           doc.asis(".bold { font-weight: bold } .italic { font-style: italic } .oblique { font-style: oblique }")
           doc.asis(".small-caps { font-variant: small-caps }")
+          if variants:
+            for v in variants:
+              doc.asis('.%s { font-feature-settings: "calt" off, "%s" on; }' % (v, v))
       with tag('body'):
         with tag('a', href='index.html'):
           text('Back to index')
@@ -1014,9 +1121,16 @@ Resources:
             with tag('tr', style='font-size: %dpt' % size):
               line('td', size)
               line('td', test_glyphs(font))
-        line('h2', 'Variants')
-        line('td', test_glyphs(font, 4))
-              
+        if variants:
+          line('h2', 'Variants')
+          line('div', test_glyphs(font, 4))
+          with tag('table', klass='nocalt'):
+            for v in variants:
+              with tag('tr'):
+                line('td', v)
+                with tag('td', klass=v):
+                  text(test_glyphs(font))
+
   #       line('h2', 'Accents')
   #       line('div', '''
   # ¡ ¢ £ ¤ ¥ ¦ § ¨ © ª « ¬ ­ ® ¯ ° ± ² ³ ´ µ ¶ · ¸ ¹ º » ¼ ½ ¾ ¿ À Á Â Ã'
@@ -1033,11 +1147,10 @@ Resources:
             with tag('tr', klass=t):
               line('td', t)
               line('td', test_glyphs(font))
-        line('h2', 'Test strings')
-        for s in strings:
-          line('div', s)
+        doc.asis(test_strings(strings, font, variants))
         line('h2', 'Kerning matrix')
-        doc.asis(test_kerning_matrix(font))
+        with tag('div', klass='nocalt'):
+          doc.asis(test_kerning_matrix(font))
         line('h2', 'License')
         with tag('pre', klass='license'):
           text(font.copyright)

@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2020-06-15 Mon 00:39 -->
+<!-- 2020-06-19 Fri 00:41 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>&lrm;</title>
@@ -276,68 +276,69 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org0ae3563">Summary</a></li>
-<li><a href="#org13b4b7b">License</a></li>
-<li><a href="#orgb11a0d1">Blog post</a></li>
-<li><a href="#orgbd8815b">Things I needed to install</a>
+<li><a href="#org0603a3a">Summary</a></li>
+<li><a href="#orgd6ad45a">License</a></li>
+<li><a href="#orga3b5e3b">Blog post</a></li>
+<li><a href="#org54699ad">Things I needed to install</a>
 <ul>
-<li><a href="#org5c998a2">Errors fixed along the way</a></li>
+<li><a href="#orgb73ca5f">Errors fixed along the way</a></li>
 </ul>
 </li>
-<li><a href="#org2ef0c19">General font code</a>
+<li><a href="#org9e3aca6">General font code</a>
 <ul>
-<li><a href="#org10bb4a1">Parameters and common functions</a></li>
-<li><a href="#org9895478">Generate guidelines</a></li>
-<li><a href="#org700fce3">Cut into glyphs</a></li>
-<li><a href="#org1fc5f2a">Import SVG outlines into font</a></li>
-<li><a href="#org5998a8c">Adjust bearings</a></li>
-<li><a href="#org1df7329">Kern the font</a></li>
-<li><a href="#org8248442">Hand-tweak the glyphs</a></li>
+<li><a href="#org3793a89">Parameters and common functions</a></li>
+<li><a href="#org3548ede">Generate guidelines</a></li>
+<li><a href="#org9c91af5">Cut into glyphs</a></li>
+<li><a href="#org6d154b7">Import SVG outlines into font</a></li>
+<li><a href="#orgdcfabfa">Adjust bearings</a></li>
+<li><a href="#org1738e5e">Kern the font</a></li>
+<li><a href="#org352b731">Hand-tweak the glyphs</a></li>
 </ul>
 </li>
-<li><a href="#org0d0b815">Generate fonts</a>
+<li><a href="#org726a11d">Generate fonts</a>
 <ul>
-<li><a href="#orgbbe7803">Generate sachacHand Light</a></li>
-<li><a href="#org05af9ed">Generate sachacHand Regular</a></li>
-<li><a href="#org6c69b09">Generate sachacHand Bold</a></li>
+<li><a href="#orgda27c7c">Generate sachacHand Light</a></li>
+<li><a href="#orgf6ab4bc">Generate sachacHand Regular</a></li>
+<li><a href="#org1d4c18b">Generate sachacHand Bold</a></li>
 </ul>
 </li>
-<li><a href="#org18d27f2">Variants</a>
+<li><a href="#org0a25f47">Variants</a>
 <ul>
-<li><a href="#org04bf330">Import the glyphs for variant1 and variant2</a></li>
+<li><a href="#org4a74eee">Import the glyphs for variant1 and variant2</a></li>
+<li><a href="#org98dd64b">Okay, how do I space and kern the variants more efficiently?</a></li>
 </ul>
 </li>
-<li><a href="#orgf7e8748">Test the fonts</a></li>
-<li><a href="#orgb4ae19a">Ideas</a>
+<li><a href="#org842eb3a">Test the fonts</a></li>
+<li><a href="#orgf144230">Ideas</a>
 <ul>
-<li><a href="#org598d2af"><span class="done DONE">DONE</span> Copy glyphs from hand-edited font</a></li>
-<li><a href="#org4063c92"><span class="todo TODO">TODO</span> Alternate glyphs</a></li>
-<li><a href="#org7741a40"><span class="todo TODO">TODO</span> Ligatures</a></li>
-<li><a href="#org48e9289"><span class="todo TODO">TODO</span> Accents</a></li>
-<li><a href="#orgd26899b">Generating a zero-width version?</a></li>
-<li><a href="#org4131f7b"><span class="todo TODO">TODO</span> Make a font for A-</a></li>
+<li><a href="#orgd23f781"><span class="done DONE">DONE</span> Copy glyphs from hand-edited font</a></li>
+<li><a href="#org0fc5067"><span class="todo TODO">TODO</span> Alternate glyphs</a></li>
+<li><a href="#org1700929"><span class="todo TODO">TODO</span> Ligatures</a></li>
+<li><a href="#org498ae82"><span class="todo TODO">TODO</span> Accents</a></li>
+<li><a href="#org1b0e294">Generating a zero-width version?</a></li>
+<li><a href="#org6e90cc6"><span class="todo TODO">TODO</span> Make a font for A-</a></li>
 </ul>
 </li>
-<li><a href="#org7ca5d9c">Extra stuff</a></li>
-<li><a href="#orgec33c8b">Get information from my blog database</a>
+<li><a href="#org3dee60b">Extra stuff</a></li>
+<li><a href="#orgf8f5f3c">Get information from my blog database</a>
 <ul>
-<li><a href="#org6e5a729">Figure out what glyphs I want based on my blog headings</a></li>
-<li><a href="#org61075b3">Make test page with blog headings</a></li>
-<li><a href="#org8c99dc7">Check glyphs</a></li>
-<li><a href="#orgc0e88b6">Look up posts with weird glyphs</a></li>
-<li><a href="#org003223c">Get frequency of pairs of characters</a></li>
-<li><a href="#org798164f">Copy metrics from my edited font</a></li>
-<li><a href="#orgbd0bd5e">Copy it to my website</a></li>
+<li><a href="#orgdeb02c8">Figure out what glyphs I want based on my blog headings</a></li>
+<li><a href="#org99c4320">Make test page with blog headings</a></li>
+<li><a href="#orgb2da442">Check glyphs</a></li>
+<li><a href="#org828e444">Look up posts with weird glyphs</a></li>
+<li><a href="#org1776af3">Get frequency of pairs of characters</a></li>
+<li><a href="#orgadab5a0">Copy metrics from my edited font</a></li>
+<li><a href="#org4fe0a4e">Copy it to my website</a></li>
 </ul>
 </li>
-<li><a href="#org524a14b">Other resources</a></li>
+<li><a href="#org0e74ef5">Other resources</a></li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-org0ae3563" class="outline-2">
-<h2 id="org0ae3563">Summary</h2>
-<div class="outline-text-2" id="text-org0ae3563">
+<div id="outline-container-org0603a3a" class="outline-2">
+<h2 id="org0603a3a">Summary</h2>
+<div class="outline-text-2" id="text-org0603a3a">
 <p>
 I wanted to make my own handwriting font. I also wanted to be able to
 generate fonts quickly from the handwriting samples I can draw on my
@@ -373,13 +374,13 @@ ta   [ State ]: EDITED, shown value does not take effect until you set or save i
 </div>
 </div>
 
-<div id="outline-container-org13b4b7b" class="outline-2">
-<h2 id="org13b4b7b">License</h2>
+<div id="outline-container-orgd6ad45a" class="outline-2">
+<h2 id="orgd6ad45a">License</h2>
 </div>
 
-<div id="outline-container-orgb11a0d1" class="outline-2">
-<h2 id="orgb11a0d1">Blog post</h2>
-<div class="outline-text-2" id="text-orgb11a0d1">
+<div id="outline-container-orga3b5e3b" class="outline-2">
+<h2 id="orga3b5e3b">Blog post</h2>
+<div class="outline-text-2" id="text-orga3b5e3b">
 <p>
 I wanted to make a font based on my handwriting using only free
 software. It turns out that FontForge can be scripted with Python. I
@@ -646,9 +647,9 @@ handwriting into a font. Whee!
 </div>
 </div>
 
-<div id="outline-container-orgbd8815b" class="outline-2">
-<h2 id="orgbd8815b">Things I needed to install</h2>
-<div class="outline-text-2" id="text-orgbd8815b">
+<div id="outline-container-org54699ad" class="outline-2">
+<h2 id="org54699ad">Things I needed to install</h2>
+<div class="outline-text-2" id="text-org54699ad">
 <p>
 <code>sudo apt-get install fontforge python3-fontforge python3-numpy python3-sqlalchemy python3-pandas python3-pymysql python3-nltk woff-tools woff2 python3-yattag python3-livereload</code>
 </p>
@@ -662,9 +663,9 @@ I also needed <code>(setenv "LD_LIBRARY_PATH" "/usr/local/lib")</code>. There ar
 </p>
 </div>
 
-<div id="outline-container-org5c998a2" class="outline-3">
-<h3 id="org5c998a2">Errors fixed along the way</h3>
-<div class="outline-text-3" id="text-org5c998a2">
+<div id="outline-container-orgb73ca5f" class="outline-3">
+<h3 id="orgb73ca5f">Errors fixed along the way</h3>
+<div class="outline-text-3" id="text-orgb73ca5f">
 <ul class="org-ul">
 <li><code>FileNotFoundError: [Errno 2] No such file or directory: '/home/sacha/.local/lib/python3.8/site-packages/aglfn/agl-aglfn/aglfn.txt'</code>
 <ul class="org-ul">
@@ -675,15 +676,15 @@ I also needed <code>(setenv "LD_LIBRARY_PATH" "/usr/local/lib")</code>. There ar
 </div>
 </div>
 
-<div id="outline-container-org2ef0c19" class="outline-2">
-<h2 id="org2ef0c19">General font code</h2>
-<div class="outline-text-2" id="text-org2ef0c19">
+<div id="outline-container-org9e3aca6" class="outline-2">
+<h2 id="org9e3aca6">General font code</h2>
+<div class="outline-text-2" id="text-org9e3aca6">
 </div>
-<div id="outline-container-org10bb4a1" class="outline-3">
-<h3 id="org10bb4a1">Parameters and common functions</h3>
-<div class="outline-text-3" id="text-org10bb4a1">
+<div id="outline-container-org3793a89" class="outline-3">
+<h3 id="org3793a89">Parameters and common functions</h3>
+<div class="outline-text-3" id="text-org3793a89">
 <div class="org-src-container">
-<pre class="src src-python" id="org02ccfd3"><code><span class="org-keyword">import</span> numpy <span class="org-keyword">as</span> np</code>
+<pre class="src src-python" id="org8e4bb43"><code><span class="org-keyword">import</span> numpy <span class="org-keyword">as</span> np</code>
 <code><span class="org-keyword">import</span> pandas <span class="org-keyword">as</span> pd</code>
 <code><span class="org-keyword">import</span> aglfn</code>
 <code><span class="org-keyword">import</span> fontforge</code>
@@ -780,15 +781,15 @@ I also needed <code>(setenv "LD_LIBRARY_PATH" "/usr/local/lib")</code>. There ar
 </div>
 </div>
 
-<div id="outline-container-org9895478" class="outline-3">
-<h3 id="org9895478">Generate guidelines</h3>
-<div class="outline-text-3" id="text-org9895478">
+<div id="outline-container-org3548ede" class="outline-3">
+<h3 id="org3548ede">Generate guidelines</h3>
+<div class="outline-text-3" id="text-org3548ede">
 </div>
-<div id="outline-container-org9965438" class="outline-4">
-<h4 id="org9965438">Code to make the template</h4>
-<div class="outline-text-4" id="text-org9965438">
+<div id="outline-container-org687835d" class="outline-4">
+<h4 id="org687835d">Code to make the template</h4>
+<div class="outline-text-4" id="text-org687835d">
 <div class="org-src-container">
-<pre class="src src-python" id="org33b42f8"><code><span class="org-keyword">from</span> PIL <span class="org-keyword">import</span> Image, ImageFont, ImageDraw</code>
+<pre class="src src-python" id="org5cd62a8"><code><span class="org-keyword">from</span> PIL <span class="org-keyword">import</span> Image, ImageFont, ImageDraw</code>
 <code></code>
 <code><span class="org-comment-delimiter">#</span><span class="org-comment">LETTERS = 'abcd'</span></code>
 <code><span class="org-comment-delimiter"># </span><span class="org-comment">Baseline is red</span></code>
@@ -824,9 +825,9 @@ I also needed <code>(setenv "LD_LIBRARY_PATH" "/usr/local/lib")</code>. There ar
 </div>
 </div>
 
-<div id="outline-container-orgd3e50e0" class="outline-4">
-<h4 id="orgd3e50e0">Actually make the templates</h4>
-<div class="outline-text-4" id="text-orgd3e50e0">
+<div id="outline-container-orgc8dd90f" class="outline-4">
+<h4 id="orgc8dd90f">Actually make the templates</h4>
+<div class="outline-text-4" id="text-orgc8dd90f">
 <div class="org-src-container">
 <pre class="src src-python"><code>&lt;&lt;params&gt;&gt;</code>
 <code>&lt;&lt;def_make_template&gt;&gt;</code>
@@ -850,11 +851,11 @@ I also needed <code>(setenv "LD_LIBRARY_PATH" "/usr/local/lib")</code>. There ar
 </div>
 </div>
 
-<div id="outline-container-org700fce3" class="outline-3">
-<h3 id="org700fce3">Cut into glyphs</h3>
-<div class="outline-text-3" id="text-org700fce3">
+<div id="outline-container-org9c91af5" class="outline-3">
+<h3 id="org9c91af5">Cut into glyphs</h3>
+<div class="outline-text-3" id="text-org9c91af5">
 <div class="org-src-container">
-<pre class="src src-python" id="org6db17d7"><code><span class="org-keyword">import</span> os</code>
+<pre class="src src-python" id="org85f9070"><code><span class="org-keyword">import</span> os</code>
 <code><span class="org-keyword">import</span> libxml2</code>
 <code><span class="org-keyword">from</span> PIL <span class="org-keyword">import</span> Image, ImageOps</code>
 <code><span class="org-keyword">import</span> subprocess</code>
@@ -888,11 +889,11 @@ I also needed <code>(setenv "LD_LIBRARY_PATH" "/usr/local/lib")</code>. There ar
 </div>
 </div>
 
-<div id="outline-container-org1fc5f2a" class="outline-3">
-<h3 id="org1fc5f2a">Import SVG outlines into font</h3>
-<div class="outline-text-3" id="text-org1fc5f2a">
+<div id="outline-container-org6d154b7" class="outline-3">
+<h3 id="org6d154b7">Import SVG outlines into font</h3>
+<div class="outline-text-3" id="text-org6d154b7">
 <div class="org-src-container">
-<pre class="src src-python" id="orgc4ab68a"><code><span class="org-keyword">import</span> fontforge</code>
+<pre class="src src-python" id="org9766a16"><code><span class="org-keyword">import</span> fontforge</code>
 <code><span class="org-keyword">import</span> os</code>
 <code><span class="org-keyword">import</span> aglfn</code>
 <code></code>
@@ -917,6 +918,7 @@ I also needed <code>(setenv "LD_LIBRARY_PATH" "/usr/local/lib")</code>. There ar
 <code>        <span class="org-variable-name">base</span> = glyph_filename_base(g.glyphname)</code>
 <code>        <span class="org-variable-name">svg_filename</span> = os.path.join(glyph_dir, base + <span class="org-string">'.svg'</span>)</code>
 <code>        <span class="org-variable-name">png_filename</span> = os.path.join(glyph_dir, base + <span class="org-string">'.png'</span>)</code>
+<code>        g.clear()</code>
 <code>        g.importOutlines(png_filename)</code>
 <code>        g.importOutlines(svg_filename)</code>
 <code>      <span class="org-keyword">except</span> <span class="org-type">Exception</span> <span class="org-keyword">as</span> e:</code>
@@ -928,15 +930,18 @@ I also needed <code>(setenv "LD_LIBRARY_PATH" "/usr/local/lib")</code>. There ar
 </div>
 </div>
 
-<div id="outline-container-org5998a8c" class="outline-3">
-<h3 id="org5998a8c">Adjust bearings</h3>
-<div class="outline-text-3" id="text-org5998a8c">
+<div id="outline-container-orgdcfabfa" class="outline-3">
+<h3 id="orgdcfabfa">Adjust bearings</h3>
+<div class="outline-text-3" id="text-orgdcfabfa">
 <div class="org-src-container">
-<pre class="src src-python" id="org50b51d2"><code><span class="org-keyword">import</span> re</code>
+<pre class="src src-python" id="org78e85b6"><code><span class="org-keyword">import</span> re</code>
 <code><span class="org-comment-delimiter"># </span><span class="org-comment">Return glyph name without .suffix</span></code>
 <code><span class="org-keyword">def</span> <span class="org-function-name">glyph_base_name</span>(x):</code>
 <code>  <span class="org-variable-name">m</span> = re.match(r<span class="org-string">"([^.]+)\..+"</span>, x)</code>
 <code>  <span class="org-keyword">return</span> m.group(1) <span class="org-keyword">if</span> m <span class="org-keyword">else</span> x</code>
+<code><span class="org-keyword">def</span> <span class="org-function-name">glyph_suffix</span>(x):</code>
+<code>  <span class="org-variable-name">m</span> = re.match(r<span class="org-string">"([^.]+)\.(.+)"</span>, x)</code>
+<code>  <span class="org-keyword">return</span> m.group(2) <span class="org-keyword">if</span> m <span class="org-keyword">else</span> <span class="org-string">''</span></code>
 <code></code>
 <code><span class="org-keyword">def</span> <span class="org-function-name">set_bearings</span>(font, bearings, **kwargs):</code>
 <code>  <span class="org-variable-name">bearing_dict</span> = {}</code>
@@ -967,19 +972,30 @@ I also needed <code>(setenv "LD_LIBRARY_PATH" "/usr/local/lib")</code>. There ar
 </div>
 </div>
 
-<div id="outline-container-org1df7329" class="outline-3">
-<h3 id="org1df7329">Kern the font</h3>
-<div class="outline-text-3" id="text-org1df7329">
+<div id="outline-container-org1738e5e" class="outline-3">
+<h3 id="org1738e5e">Kern the font</h3>
+<div class="outline-text-3" id="text-org1738e5e">
 </div>
-<div id="outline-container-org3fa5dca" class="outline-4">
-<h4 id="org3fa5dca">Kern by classes</h4>
-<div class="outline-text-4" id="text-org3fa5dca">
+<div id="outline-container-org06893d2" class="outline-4">
+<h4 id="org06893d2">Kern by classes</h4>
+<div class="outline-text-4" id="text-org06893d2">
 <p>
 NOTE: This removes the old kerning table.
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python" id="orgccf6bb9"><code><span class="org-keyword">def</span> <span class="org-function-name">kern_classes</span>(font, kerning_matrix):</code>
+<pre class="src src-python" id="org43b6171"><code><span class="org-keyword">def</span> <span class="org-function-name">get_classes</span>(row):</code>
+<code>  <span class="org-variable-name">result</span> = []</code>
+<code>  <span class="org-keyword">for</span> x <span class="org-keyword">in</span> row:</code>
+<code>    <span class="org-keyword">if</span> x == <span class="org-string">""</span> <span class="org-keyword">or</span> x == <span class="org-string">"None"</span> <span class="org-keyword">or</span> x <span class="org-keyword">is</span> <span class="org-constant">None</span>:</code>
+<code>      result.append(<span class="org-constant">None</span>)</code>
+<code>    <span class="org-keyword">elif</span> <span class="org-builtin">isinstance</span>(x, <span class="org-builtin">str</span>):</code>
+<code>      result.append(x.split(<span class="org-string">','</span>))</code>
+<code>    <span class="org-keyword">else</span>:</code>
+<code>      result.append(x)</code>
+<code>  <span class="org-keyword">return</span> result</code>
+<code></code>
+<code><span class="org-keyword">def</span> <span class="org-function-name">kern_classes</span>(font, kerning_matrix):</code>
 <code>  <span class="org-keyword">try</span>:</code>
 <code>    font.removeLookup(<span class="org-string">'kern'</span>)</code>
 <code>    <span class="org-keyword">print</span>(<span class="org-string">"Old table removed."</span>)</code>
@@ -990,9 +1006,9 @@ NOTE: This removes the old kerning table.
 <code>  <span class="org-variable-name">classes_right</span> = [<span class="org-constant">None</span> <span class="org-keyword">if</span> (x == <span class="org-string">""</span> <span class="org-keyword">or</span> x == <span class="org-string">"None"</span>) <span class="org-keyword">else</span> x.split(<span class="org-string">","</span>) <span class="org-keyword">for</span> x <span class="org-keyword">in</span> offsets[0,1:]]</code>
 <code>  <span class="org-variable-name">classes_left</span> = [<span class="org-constant">None</span> <span class="org-keyword">if</span> (x == <span class="org-string">""</span> <span class="org-keyword">or</span> x == <span class="org-string">"None"</span>) <span class="org-keyword">else</span> x.split(<span class="org-string">','</span>) <span class="org-keyword">for</span> x <span class="org-keyword">in</span> offsets[1:,0]]</code>
 <code>  <span class="org-variable-name">offset_list</span> = [0 <span class="org-keyword">if</span> x == <span class="org-string">""</span> <span class="org-keyword">else</span> <span class="org-builtin">int</span>(x) <span class="org-keyword">for</span> x <span class="org-keyword">in</span> offsets[1:,1:].reshape(-1)]</code>
-<code>  <span class="org-keyword">print</span>(classes_left)</code>
-<code>  <span class="org-keyword">print</span>(classes_right)</code>
-<code>  <span class="org-keyword">print</span>(offset_list)</code>
+<code>  <span class="org-comment-delimiter">#</span><span class="org-comment">print('left', len(classes_left), classes_left)</span></code>
+<code>  <span class="org-comment-delimiter">#</span><span class="org-comment">print('right', len(classes_right), classes_right)</span></code>
+<code>  <span class="org-comment-delimiter">#</span><span class="org-comment">print('offset', len(offset_list), offset_list)</span></code>
 <code>  font.addKerningClass(<span class="org-string">"kern"</span>, <span class="org-string">"kern-1"</span>, classes_left, classes_right, offset_list)</code>
 <code>  <span class="org-keyword">return</span> font</code>
 </pre>
@@ -1000,9 +1016,9 @@ NOTE: This removes the old kerning table.
 </div>
 </div>
 
-<div id="outline-container-org8d23bcf" class="outline-4">
-<h4 id="org8d23bcf">Kern by character</h4>
-<div class="outline-text-4" id="text-org8d23bcf">
+<div id="outline-container-orgbe07b9a" class="outline-4">
+<h4 id="orgbe07b9a">Kern by character</h4>
+<div class="outline-text-4" id="text-orgbe07b9a">
 <p>
 While trying to figure out kerning, I came across this issue that
 described how you sometimes need a <a href="https://www.dafont.com/forum/read/405813/the-kerning-is-set-in-a-way-that-doesn-t-work-at-dafont-we-use-the-gd-library-of-php">character-pair kern table instead
@@ -1013,7 +1029,7 @@ generates character pairs. Here's what that code looks like.
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python" id="orgced025c"><code><span class="org-keyword">def</span> <span class="org-function-name">kern_by_char</span>(font, kerning_matrix):</code>
+<pre class="src src-python" id="org2a330f1"><code><span class="org-keyword">def</span> <span class="org-function-name">kern_by_char</span>(font, kerning_matrix):</code>
 <code>  <span class="org-comment-delimiter"># </span><span class="org-comment">Add kerning by character as backup</span></code>
 <code>  font.addLookupSubtable(<span class="org-string">"kern"</span>, <span class="org-string">"kern-2"</span>)</code>
 <code>  <span class="org-variable-name">offsets</span> = np.asarray(kerning_matrix)</code>
@@ -1035,11 +1051,11 @@ generates character pairs. Here's what that code looks like.
 </div>
 </div>
 
-<div id="outline-container-org8248442" class="outline-3">
-<h3 id="org8248442">Hand-tweak the glyphs</h3>
-<div class="outline-text-3" id="text-org8248442">
+<div id="outline-container-org352b731" class="outline-3">
+<h3 id="org352b731">Hand-tweak the glyphs</h3>
+<div class="outline-text-3" id="text-org352b731">
 <div class="org-src-container">
-<pre class="src src-python" id="org8696b9e"><code><span class="org-keyword">def</span> <span class="org-function-name">copy_glyphs</span>(font, edited):</code>
+<pre class="src src-python" id="org5a74dcd"><code><span class="org-keyword">def</span> <span class="org-function-name">copy_glyphs</span>(font, edited):</code>
 <code>  edited.selection.<span class="org-builtin">all</span>()</code>
 <code>  edited.copy()</code>
 <code>  font.selection.<span class="org-builtin">all</span>()</code>
@@ -1052,9 +1068,9 @@ generates character pairs. Here's what that code looks like.
 </div>
 
 
-<div id="outline-container-org0d0b815" class="outline-2">
-<h2 id="org0d0b815">Generate fonts</h2>
-<div class="outline-text-2" id="text-org0d0b815">
+<div id="outline-container-org726a11d" class="outline-2">
+<h2 id="org726a11d">Generate fonts</h2>
+<div class="outline-text-2" id="text-org726a11d">
 <p>
 I wanted to be able to easily compare different versions of my font:
 my original glyphs versus my tweaked glyphs, simple spacing versus
@@ -1072,7 +1088,7 @@ including exports to OTF and WOFF.
 This code helps me update my hand-edited fonts.
 </p>
 <div class="org-src-container">
-<pre class="src src-python" id="orgbc0aa5e"><code><span class="org-keyword">def</span> <span class="org-function-name">kern_existing_font</span>(filename=<span class="org-constant">None</span>, font=<span class="org-constant">None</span>, bearings=<span class="org-constant">None</span>, kerning_matrix=<span class="org-constant">None</span>, **kwargs):</code>
+<pre class="src src-python" id="org81bf608"><code><span class="org-keyword">def</span> <span class="org-function-name">kern_existing_font</span>(filename=<span class="org-constant">None</span>, font=<span class="org-constant">None</span>, bearings=<span class="org-constant">None</span>, kerning_matrix=<span class="org-constant">None</span>, **kwargs):</code>
 <code>  <span class="org-keyword">if</span> font <span class="org-keyword">is</span> <span class="org-constant">None</span>:</code>
 <code>    <span class="org-variable-name">font</span> = load_font(filename)</code>
 <code>  <span class="org-variable-name">font</span> = set_bearings(font, bearings)</code>
@@ -1086,7 +1102,7 @@ This code helps me update my hand-edited fonts.
 </div>
 
 <div class="org-src-container">
-<pre class="src src-python" id="orgd523cbb"><code>&lt;&lt;params&gt;&gt;</code>
+<pre class="src src-python" id="org3226539"><code>&lt;&lt;params&gt;&gt;</code>
 <code>&lt;&lt;def_cut_glyphs&gt;&gt;</code>
 <code>&lt;&lt;def_import_glyphs&gt;&gt;</code>
 <code>&lt;&lt;def_set_bearings&gt;&gt;</code>
@@ -1098,10 +1114,10 @@ This code helps me update my hand-edited fonts.
 </div>
 </div>
 
-<div id="outline-container-orgbbe7803" class="outline-3">
-<h3 id="orgbbe7803">Generate sachacHand Light</h3>
-<div class="outline-text-3" id="text-orgbbe7803">
-<table id="org712de9a" border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<div id="outline-container-orgda27c7c" class="outline-3">
+<h3 id="orgda27c7c">Generate sachacHand Light</h3>
+<div class="outline-text-3" id="text-orgda27c7c">
+<table id="orgd299f96" border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
 
 <colgroup>
@@ -1437,7 +1453,7 @@ This code helps me update my hand-edited fonts.
 Rows are first characters, columns are second characters.
 </p>
 
-<table id="org5b00172" border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<table id="org1c46dc6" border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
 
 <colgroup>
@@ -2030,21 +2046,14 @@ Rows are first characters, columns are second characters.
 <code>kern_existing_font(font=font, bearings=bearings, kerning_matrix=kerning_matrix)</code>
 </pre>
 </div>
-
-<pre class="example">
-<code>Old table removed.</code>
-<code>[None, ['f'], ['t'], ['i'], ['r'], ['k'], ['l'], ['v'], ['b', 'o', 'p'], ['n', 'm'], ['a'], ['W'], ['T'], ['F'], ['P'], ['g'], ['q', 'd', 'h', 'y', 'j'], ['c', 'e', 's', 'u', 'w', 'x', 'z'], ['V'], ['A'], ['Y'], ['M', 'N', 'H', 'I'], ['O', 'Q', 'D', 'U'], ['J'], ['C'], ['E'], ['L'], ['P'], ['K', 'R'], ['G'], ['B', 'S', 'X', 'Z']]</code>
-<code>[None, ['o', 'a', 'c', 'e', 'd', 'g', 'q', 'w'], ['f', 't'], ['x', 'v', 'z'], ['h', 'b', 'l', 'i'], ['j'], ['m', 'n', 'p', 'r', 'u'], ['k'], ['y'], ['s'], ['T'], ['F'], ['zero']]</code>
-<code>[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -30, -61, -20, 0, 0, 0, 0, 0, 0, -150, 0, -70, 0, -50, -41, -20, 0, 0, 0, 0, 0, 0, -150, 0, -10, 0, 0, -40, 0, 0, 0, 0, 0, 0, 0, -150, 0, 0, 0, -32, -40, 0, 0, 0, 0, 0, 0, 0, -170, 0, 29, 0, -10, -50, 0, 0, 0, 0, 0, 0, -48, -150, 0, -79, 0, -10, -20, 0, 0, 0, 0, 0, 0, 0, -110, 0, -20, 0, -40, -35, -15, 0, 0, 0, 0, 0, 0, -170, 0, 30, 0, 0, -40, 0, 0, 0, 0, 0, 0, 0, -170, 0, 43, 0, 0, -30, 0, 0, 0, 0, 0, 0, 0, -170, 0, 0, 0, -23, -30, 0, 0, 0, 0, 0, 0, 0, -170, 0, 7, 0, -40, -30, -10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -150, -120, -120, -30, -40, -130, 0, -100, -80, 0, 0, 0, 0, -90, -90, -70, -30, 0, -70, 0, -50, -80, -40, 0, 0, 0, -100, -70, -50, 0, 0, -70, 0, -30, -80, -20, 0, 0, 0, 0, 0, 0, 0, 40, 0, 0, 0, 0, -120, 0, 0, 0, 0, 0, 0, 30, 30, 30, 30, 30, 0, -100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -120, 0, 0, 0, -70, 30, 30, 0, -80, -20, 0, -40, -40, -10, 0, 0, 0, 30, 60, 30, 30, 0, 20, 40, 20, -80, -120, 20, 20, 0, 20, 60, 30, 30, 0, 20, 20, 40, 20, -10, 0, 0, 0, 20, 10, 40, 30, 0, 10, 20, 20, 0, 0, 0, 0, 0, 0, 50, 40, 30, -20, 30, 20, 30, 0, -70, 0, 0, 0, 0, 40, 20, 20, -20, 10, 10, 30, 0, -30, 0, 0, 0, 10, 40, 10, 30, 0, 30, 30, 20, 0, -30, 0, 0, 0, -10, 50, 0, 10, -20, 10, 0, 20, 0, 0, 0, 0, 0, -10, -10, 0, 0, -30, 0, 0, 20, 0, -90, 0, 0, 0, -50, 30, 20, 20, 0, 0, 20, 20, 0, -30, 0, 0, 0, 20, 20, 20, 10, 0, 20, 20, 20, 0, -60, 0, 0, 0, 20, 40, 30, 30, 0, 20, 20, 20, 0, -100, 10, 0, 0, 20, 40, 30, 30, 0, 20, 20, 20, 20, -20, 10, 0]</code>
-</pre>
 </div>
 </div>
 
 
-<div id="outline-container-org05af9ed" class="outline-3">
-<h3 id="org05af9ed">Generate sachacHand Regular</h3>
-<div class="outline-text-3" id="text-org05af9ed">
-<table id="orgc709804" border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<div id="outline-container-orgf6ab4bc" class="outline-3">
+<h3 id="orgf6ab4bc">Generate sachacHand Regular</h3>
+<div class="outline-text-3" id="text-orgf6ab4bc">
+<table id="org1f62b3b" border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
 
 <colgroup>
@@ -2340,7 +2349,7 @@ Rows are first characters, columns are second characters.
 </tbody>
 </table>
 
-<table id="org5da453e" border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<table id="orged23028" border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
 
 <colgroup>
@@ -3143,17 +3152,23 @@ Rows are first characters, columns are second characters.
 <pre class="example">
 <code>Bad name when parsing aglfn for unicode 41</code>
 <code>Old table removed.</code>
-<code>[None, ['f'], ['t'], ['i'], ['r'], ['k'], ['l'], ['v'], ['b', 'o', 'p'], ['n', 'm'], ['a'], ['W'], ['T'], ['F'], ['g'], ['d'], ['h', 'q', 'y', 'j'], ['c', 'e', 's', 'u', 'w', 'x', 'z'], ['V'], ['A'], ['Y'], ['M', 'N', 'H', 'I'], ['O', 'Q', 'D', 'U'], ['J'], ['C'], ['E'], ['L'], ['P'], ['K', 'R'], ['G'], ['B', 'S', 'X', 'Z']]</code>
-<code>[None, ['m', 'n', 'p', 'r'], ['h', 'b', 'l', 'i', 'k'], ['o', 'a', 'c', 'e', 'd', 'g', 'q', 'w', 'u'], ['f', 't'], ['x', 'v', 'z'], ['j'], ['y'], ['s'], ['T'], ['J'], ['F', 'B', 'D', 'E', 'H', 'I', 'K', 'L', 'M', 'N', 'P', 'R'], ['V'], ['A', 'C', 'G', 'K', 'O', 'Q', 'S', 'W'], ['U'], ['X'], ['Y'], ['Z'], ['zero']]</code>
-<code>[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 110, 0, 0, 0, 0, 0, 0, 0, 0, 0, -10, 20, -60, 0, 0, -90, 0, -40, -190, -80, 20, 0, 0, 0, 0, 0, 0, 0, 0, 20, 0, -20, 10, 0, -70, 0, 0, -100, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -30, 10, 0, -90, 0, 0, -160, -20, 0, 0, 0, -20, 0, 0, 0, 0, 0, 0, -10, -70, 0, 0, -90, 0, -40, -190, -100, 0, -10, 0, -50, -50, -10, -50, 0, 0, -10, -10, -20, -10, 0, -90, 0, 0, -100, 10, 0, 0, 0, -30, 0, -30, 0, -10, 0, -20, 0, 0, 10, 0, -50, -20, 0, -100, 10, 0, -20, 0, -30, 0, -30, 0, 0, 0, 0, 0, -30, 10, 0, -50, 0, 0, -100, 10, 0, 0, 0, -30, -30, -20, 0, 0, 0, 0, 0, -20, 10, 0, -90, 0, 0, -100, 10, 0, -10, 0, -30, -30, -30, -10, 0, 0, 0, 0, 0, 10, 0, -90, 0, 0, -100, 10, 0, -10, 0, -20, 0, -30, -10, 0, 0, 0, 0, -30, 0, -20, -90, 0, -10, -140, -30, 0, -60, 0, -40, -20, -40, 0, 0, 0, 0, 0, 0, 20, 0, 0, 0, 0, -100, 10, 0, 0, 0, -20, 0, 0, 0, 0, 0, -70, -30, -100, -70, -90, -120, -30, -80, -100, -50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -50, 0, 0, -70, 0, 0, -100, -50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -10, 10, 0, -50, 0, 0, -140, 10, 0, 0, 0, -20, 0, 0, 0, 0, 0, 10, 10, 0, 20, 10, -50, 10, 0, -100, 10, 0, 0, 0, 0, 0, 0, 0, 10, 0, 10, 0, 0, 20, 10, -50, 10, 0, -130, 10, 0, 0, 0, -20, 0, 0, 0, 10, 0, 0, 0, -20, 10, 10, -50, 0, 0, -130, 10, 0, 0, 0, -40, -40, -20, 0, 0, 0, -20, 0, -70, 30, 30, -80, -40, -40, -30, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 20, 30, 30, 60, 50, 0, 20, 20, -10, 60, 20, 20, 20, 0, 0, 0, 0, 20, 0, 20, 30, 20, 60, 30, -50, 40, 20, -10, 40, 0, 30, 0, 0, 0, 0, 0, 0, 0, 20, 20, 0, 50, 30, -50, 20, 0, 0, 40, 0, 30, 0, 0, 0, 0, 0, 0, 0, 30, 40, 0, 50, 40, -20, 30, 0, -70, 40, 0, 20, 0, 0, 0, 0, 0, 0, 0, 10, 20, 0, 40, 20, -20, 30, 0, -30, 80, 0, 20, 0, 0, 0, 0, 0, 0, 0, 30, 30, 10, 40, 10, 0, 20, 0, -30, 80, 0, 20, 0, 0, 0, 0, 0, 0, 0, 10, 10, -10, 50, 0, -20, 20, 0, 0, 110, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -10, -10, 0, -30, 20, 0, -90, 20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 20, -50, 30, 20, 0, 20, 0, -30, 80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 20, 10, 20, 20, 20, 0, 20, 0, -60, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 20, 30, 20, 40, 30, 0, 20, 0, -100, 10, 10, 0, 0, 0, 0, 0, 0, 0, 0, 20, 30, 20, 40, 30, 0, 20, 20, -20, 90, 10, 0, 0, 0, 0, 0, 0, 0]</code>
+<code>Traceback (most recent call last):</code>
+<code>  File "&lt;stdin&gt;", line 1, in &lt;module&gt;</code>
+<code>  File "/tmp/babel-RQDYFr/python-8wNyrc", line 383, in &lt;module&gt;</code>
+<code>    kern_existing_font(filename="sachacHandRegularEdited.sfd",bearings=bearings, kerning_matrix=kerning_matrix)</code>
+<code>  File "/tmp/babel-RQDYFr/python-8wNyrc", line 240, in kern_existing_font</code>
+<code>    f.write(test_font_html(font.fontname + '.woff'))</code>
+<code>  File "/tmp/babel-RQDYFr/python-8wNyrc", line 314, in test_font_html</code>
+<code>    for v in variants:</code>
+<code>TypeError: 'NoneType' object is not iterable</code>
 </pre>
 </div>
 </div>
 
 
-<div id="outline-container-org6c69b09" class="outline-3">
-<h3 id="org6c69b09">Generate sachacHand Bold</h3>
-<div class="outline-text-3" id="text-org6c69b09">
+<div id="outline-container-org1d4c18b" class="outline-3">
+<h3 id="org1d4c18b">Generate sachacHand Bold</h3>
+<div class="outline-text-3" id="text-org1d4c18b">
 <p>
 For cutting the glyphs:
 </p>
@@ -3186,7 +3201,7 @@ For cutting the glyphs:
 Kerning:
 </p>
 
-<table id="org27af0fa" border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<table id="org4392164" border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
 
 <colgroup>
@@ -3488,7 +3503,7 @@ Kerning:
 </tbody>
 </table>
 
-<table id="orge70932a" border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<table id="org38d2d73" border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
 
 <colgroup>
@@ -4099,21 +4114,14 @@ Kerning:
 <code>kern_existing_font(font=font, bearings=bearings, kerning_matrix=kerning_matrix)</code>
 </pre>
 </div>
-
-<pre class="example">
-<code>Starting from scratch</code>
-<code>[None, ['n', 'm'], ['f'], ['t'], ['i'], ['r'], ['k'], ['l'], ['v'], ['b', 'o', 'p'], ['a'], ['W'], ['T'], ['F'], ['g'], ['q', 'd', 'h', 'y', 'j'], ['c', 'e', 's', 'u', 'w', 'x', 'z'], ['V'], ['A'], ['Y'], ['M', 'N', 'H', 'I'], ['O', 'Q', 'D', 'U'], ['J'], ['C'], ['E'], ['L'], ['P'], ['K', 'R'], ['G'], ['B', 'S', 'X', 'Z']]</code>
-<code>[None, ['o', 'a', 'c', 'e', 'd', 'g', 'q', 'w'], ['f', 't'], ['x', 'v', 'z'], ['h', 'b', 'l', 'i'], ['j'], ['m', 'n', 'p', 'r', 'u'], ['k'], ['y'], ['s'], ['T'], ['F'], ['V'], ['zero']]</code>
-<code>[0, 0, 0, 0, 0, 0, 0, 20, 0, 0, 0, 0, 0, 0, 0, 0, 20, 0, 0, -90, 0, 0, 0, 0, -100, 0, -100, 0, 0, -10, 0, 0, 20, -90, 10, 20, 0, -40, -190, 20, 0, 0, 0, -20, 10, 0, 0, -70, 20, 20, 0, 0, -100, 0, 0, 0, 0, -30, 10, 0, 0, -90, 0, 0, 0, 0, -160, 0, 0, 0, 0, -70, 0, 0, -10, -90, 0, 0, 0, -40, -190, 0, 0, 0, 0, -20, -10, 0, -10, -90, -10, 0, 0, 0, -100, 0, 0, -10, 0, 0, 10, 0, 0, 0, 0, 20, 0, 0, -100, 0, 0, 0, 0, -30, 10, 0, 0, -50, 0, 0, 0, 0, -100, 0, 0, 0, 0, -20, 10, 0, 0, -90, 0, 0, 0, 0, -100, 0, 0, 0, 0, 0, 0, 0, 0, -90, 0, 0, 0, -10, -100, 0, 0, 0, 0, 0, 20, 0, 0, 0, 0, 0, 0, 0, -100, 0, 0, 0, 0, -120, -70, -90, -30, -120, -70, -30, -30, -80, -100, 0, 0, 0, 0, -90, 0, 0, 0, -70, 0, 0, 0, 0, -100, 0, 0, 0, 0, 0, 10, 0, 0, -50, 0, 0, 0, 0, -100, 0, 0, 0, 0, 0, 20, 10, 10, -50, 10, 10, 10, 0, -100, 0, 0, 10, 0, -20, 10, 10, 0, -50, 0, 0, 0, 0, -100, 0, 0, 0, 0, -70, 30, 30, 0, -80, -20, 0, -40, -40, -10, 0, 0, 0, 0, 30, 60, 30, 30, 0, 20, 40, 20, 20, -10, 20, 0, 20, 0, 20, 60, 30, 30, 0, 20, 20, 40, 20, -10, 0, 0, 0, 0, 20, 50, 40, 30, 0, 10, 20, 20, 0, 0, 0, 0, 0, 0, 0, 50, 40, 30, -20, 30, 20, 30, 0, -70, 0, 0, 0, 0, 0, 40, 20, 20, -20, 10, 10, 30, 0, -30, 0, 0, 0, 0, 10, 40, 10, 30, 0, 30, 30, 20, 0, -30, 0, 0, 0, 0, -10, 50, 0, 10, -20, 10, 0, 20, 0, 0, 0, 0, 0, 0, -10, -10, 0, 0, -30, 0, 0, 20, 0, -90, 0, 0, 0, 0, -50, 30, 20, 20, 0, 0, 20, 20, 0, -30, 0, 0, 0, 0, 20, 20, 20, 10, 0, 20, 20, 20, 0, -60, 0, 0, 0, 0, 20, 40, 30, 30, 0, 20, 20, 20, 0, -100, 10, 0, 0, 0, 20, 40, 30, 30, 0, 20, 20, 20, 20, -20, 10, 0, 0]</code>
-</pre>
 </div>
 </div>
 </div>
 
 
-<div id="outline-container-org18d27f2" class="outline-2">
-<h2 id="org18d27f2">Variants</h2>
-<div class="outline-text-2" id="text-org18d27f2">
+<div id="outline-container-org0a25f47" class="outline-2">
+<h2 id="org0a25f47">Variants</h2>
+<div class="outline-text-2" id="text-org0a25f47">
 <p>
 <a href="https://www.youtube.com/watch?v=WqSQU7nuTsc">https://www.youtube.com/watch?v=WqSQU7nuTsc</a>
 <a href="https://www.tug.org/TUGboat/tb24-3/williams.pdf">https://www.tug.org/TUGboat/tb24-3/williams.pdf</a>
@@ -4122,11 +4130,51 @@ Kerning:
 </p>
 </div>
 
-<div id="outline-container-org04bf330" class="outline-3">
-<h3 id="org04bf330">Import the glyphs for variant1 and variant2</h3>
-<div class="outline-text-3" id="text-org04bf330">
+<div id="outline-container-org4a74eee" class="outline-3">
+<h3 id="org4a74eee">Import the glyphs for variant1 and variant2</h3>
+<div class="outline-text-3" id="text-org4a74eee">
+<p>
+Expanding the kerning matrix:
+</p>
+
+<ul class="org-ul">
+<li>Specify list of variant glyphs to add to existing classes if not specified</li>
+<li>Specify suffixes, try each glyph to see if it exists</li>
+<li>Check the font to see what other glyphs are specified, add to those classes</li>
+</ul>
+
 <div class="org-src-container">
 <pre class="src src-python"><code>&lt;&lt;def_all&gt;&gt;</code>
+<code><span class="org-keyword">def</span> <span class="org-function-name">get_stylistic_set</span>(font, suffix):</code>
+<code>  <span class="org-keyword">return</span> [g <span class="org-keyword">for</span> g <span class="org-keyword">in</span> font <span class="org-keyword">if</span> suffix <span class="org-keyword">in</span> g]</code>
+<code><span class="org-keyword">def</span> <span class="org-function-name">add_character_variants</span>(font, sets):</code>
+<code>  <span class="org-keyword">if</span> <span class="org-keyword">not</span> <span class="org-string">'calt'</span> <span class="org-keyword">in</span> font.gsub_lookups:</code>
+<code>    font.addLookup(<span class="org-string">'calt'</span>, <span class="org-string">'gsub_contextchain'</span>, 0, [[<span class="org-string">'calt'</span>, [[<span class="org-string">'latn'</span>, [<span class="org-string">'dflt'</span>]]]]])</code>
+<code>  <span class="org-variable-name">prev_tag</span> = <span class="org-string">''</span></code>
+<code>  <span class="org-keyword">for</span> i, sub <span class="org-keyword">in</span> <span class="org-builtin">enumerate</span>(sets):</code>
+<code>    <span class="org-keyword">if</span> <span class="org-keyword">not</span> sub <span class="org-keyword">in</span> font.gsub_lookups: </code>
+<code>      font.addLookup(sub, <span class="org-string">'gsub_single'</span>, 0, [])</code>
+<code>      font.addLookupSubtable(sub, sub + <span class="org-string">'-1'</span>)</code>
+<code>    <span class="org-variable-name">alt_set</span> = get_stylistic_set(font, sub)</code>
+<code>    <span class="org-keyword">for</span> g <span class="org-keyword">in</span> alt_set:</code>
+<code>      get_glyph(font, glyph_base_name(g)).addPosSub(sub + <span class="org-string">'-1'</span>, g)</code>
+<code>    <span class="org-variable-name">default</span> = [glyph_base_name(g) <span class="org-keyword">for</span> g <span class="org-keyword">in</span> alt_set]</code>
+<code>    <span class="org-variable-name">prev_set</span> = [glyph_base_name(g) + prev_tag <span class="org-keyword">for</span> g <span class="org-keyword">in</span> alt_set]</code>
+<code>    <span class="org-keyword">print</span>(<span class="org-string">'%d | %d @&lt;ss%02d&gt;'</span> % (i + 1, 1, i + 1))</code>
+<code>    <span class="org-keyword">print</span>(default)</code>
+<code>    <span class="org-variable-name">default</span> = default + [<span class="org-string">'0'</span>]</code>
+<code>    <span class="org-keyword">try</span>: font.removeLookupSubtable(<span class="org-string">'calt-%d'</span> % (i + 1))</code>
+<code>    <span class="org-keyword">except</span> <span class="org-type">Exception</span>: <span class="org-keyword">pass</span></code>
+<code>    <span class="org-keyword">print</span>(prev_set)</code>
+<code>    <span class="org-keyword">if</span> i == 0:</code>
+<code>      font.addContextualSubtable(<span class="org-string">'calt'</span>, <span class="org-string">'calt-%d'</span> % (i + 1), <span class="org-string">'class'</span>, <span class="org-string">'%d | %d @&lt;ss%02d&gt;'</span> % (i + 1, 1, i + 1),</code>
+<code>                                 bclasses=(<span class="org-constant">None</span>, default), mclasses=(<span class="org-constant">None</span>, default))</code>
+<code>    <span class="org-keyword">else</span>:</code>
+<code>      font.addContextualSubtable(<span class="org-string">'calt'</span>, <span class="org-string">'calt-%d'</span> % (i + 1), <span class="org-string">'class'</span>, <span class="org-string">'%d | %d @&lt;ss%02d&gt;'</span> % (i + 1, 1, i + 1),</code>
+<code>                                 bclasses=(<span class="org-constant">None</span>, default, prev_set), mclasses=(<span class="org-constant">None</span>, default, prev_set))</code>
+<code>    <span class="org-variable-name">prev_tag</span> = <span class="org-string">'.'</span> + sub    </code>
+<code>  <span class="org-keyword">return</span> font</code>
+<code></code>
 <code><span class="org-variable-name">font</span> = fontforge.<span class="org-builtin">open</span>(<span class="org-string">'sachacHandRegularEdited.sfd'</span>)</code>
 <code><span class="org-variable-name">params</span> = {**params, </code>
 <code>          <span class="org-string">'row_padding'</span>: 50,</code>
@@ -4137,23 +4185,23 @@ Kerning:
 <code>          <span class="org-string">'matrix'</span>:</code>
 <code>            [<span class="org-string">'H.ss01,e.ss01,q.ss01,A.ss01,M.ss01,Y.ss01,eight.ss01,quotesingle.ss01,numbersign.ss01,less.ss01'</span>,</code>
 <code>             <span class="org-string">'O.ss01,b.ss01,r.ss01,B.ss01,N.ss01,Z.ss01,nine.ss01,quoteright.ss01,dollar.ss01,greater.ss01'</span>,</code>
-<code>             <span class="org-string">'n.ss01,h.ss01,u.ss01,R.ss01,P.ss01,zero.ss01,?.ss01,quotedbl.ss01,bracketleft.ss01'</span>,</code>
+<code>             <span class="org-string">'n.ss01,h.ss01,u.ss01,R.ss01,P.ss01,zero.crossed,question.ss01,quotedbl.ss01,bracketleft.ss01'</span>,</code>
 <code>             <span class="org-string">'o.ss01,k.ss01,w.ss01,D.ss01,Q.ss01,one.ss01,colon.ss01,quotedblleft.ss01,ampersand,bracketright.ss01'</span>,</code>
 <code>             <span class="org-string">'d.ss01,l.ss01,v.ss01,L.ss01,S.ss01,two.ss01,semicolon.ss01,quotedblright.ss01,parenleft.ss01,asciicircum.ss01'</span>,</code>
 <code>             <span class="org-string">'p.ss01,f.ss01,x.ss01,E.ss01,T.ss01,three.ss01,hyphen.ss01,at.ss01,parenright.ss01,grave.ss01'</span>,</code>
 <code>             <span class="org-string">'a.ss01,t.ss01,y.ss01,F.ss01,U.ss01,four.ss01,endash.ss01,slash.ss01,asterisk.ss01,braceleft.ss01'</span>,</code>
 <code>             <span class="org-string">'g.ss01,i.ss01,z.ss01,I.ss01,V.ss01,five.ss01,emdash.ss01,backslash.ss01,plus.ss01,bar.ss01'</span>,</code>
 <code>             <span class="org-string">'s.ss01,j.ss01,C.ss01,J.ss01,W.ss01,six.ss01,equal.ss01,asciitilde.ss01,comma.ss01,braceright.ss01'</span>,</code>
-<code>             <span class="org-string">'c.ss01,m.ss01,G.ss01,K.ss01,X.ss01,seven.ss01,exclam.ss01,underscore.ss01,period.ss01,None'</span>]}</code>
+<code>             <span class="org-string">'c.ss01,m.ss01,G.ss01,K.ss01,X.ss01,seven.ss01,exclam.ss01,underscore.ss01,period.ss01,zero.ss01'</span>]}</code>
 <code>cut_glyphs(**params)</code>
 <code><span class="org-variable-name">matrix</span> = glyph_matrix(font=font, matrix=params[<span class="org-string">'matrix'</span>])</code>
 <code>import_glyphs(font, **params)</code>
 <code><span class="org-variable-name">params</span> = {**params, </code>
-<code>          <span class="org-string">'sample_file'</span>: <span class="org-string">'sample-sachacHand-regular-variant2.png'</span>,</code>
+<code>          <span class="org-string">'sample_file'</span>: <span class="org-string">'sample-sachacHand-bold.png'</span>,</code>
 <code>          <span class="org-string">'matrix'</span>:</code>
 <code>            [<span class="org-string">'H.ss02,e.ss02,q.ss02,A.ss02,M.ss02,Y.ss02,eight.ss02,quotesingle.ss02,numbersign.ss02,less.ss02'</span>,</code>
 <code>             <span class="org-string">'O.ss02,b.ss02,r.ss02,B.ss02,N.ss02,Z.ss02,nine.ss02,quoteright.ss02,dollar.ss02,greater.ss02'</span>,</code>
-<code>             <span class="org-string">'n.ss02,h.ss02,u.ss02,R.ss02,P.ss02,zero.ss02,?.ss02,quotedbl.ss02,bracketleft.ss02'</span>,</code>
+<code>             <span class="org-string">'n.ss02,h.ss02,u.ss02,R.ss02,P.ss02,zero.ss02,question.ss02,quotedbl.ss02,bracketleft.ss02'</span>,</code>
 <code>             <span class="org-string">'o.ss02,k.ss02,w.ss02,D.ss02,Q.ss02,one.ss02,colon.ss02,quotedblleft.ss02,ampersand,bracketright.ss02'</span>,</code>
 <code>             <span class="org-string">'d.ss02,l.ss02,v.ss02,L.ss02,S.ss02,two.ss02,semicolon.ss02,quotedblright.ss02,parenleft.ss02,asciicircum.ss02'</span>,</code>
 <code>             <span class="org-string">'p.ss02,f.ss02,x.ss02,E.ss02,T.ss02,three.ss02,hyphen.ss02,at.ss02,parenright.ss02,grave.ss02'</span>,</code>
@@ -4164,49 +4212,106 @@ Kerning:
 <code>cut_glyphs(**params)</code>
 <code>import_glyphs(font, **params)</code>
 <code>set_bearings(font, bearings)</code>
-<code><span class="org-keyword">for</span> sub <span class="org-keyword">in</span> [<span class="org-string">'calt'</span>, <span class="org-string">'ss01'</span>, <span class="org-string">'ss02'</span>]:</code>
-<code>  <span class="org-keyword">if</span> sub <span class="org-keyword">in</span> font.gsub_lookups: font.removeLookup(sub)</code>
+<code><span class="org-variable-name">variants</span> = [<span class="org-string">'ss01'</span>, <span class="org-string">'ss02'</span>]</code>
 <code></code>
-<code><span class="org-keyword">def</span> <span class="org-function-name">get_stylistic_set</span>(font, suffix):</code>
-<code>  <span class="org-keyword">return</span> [g <span class="org-keyword">for</span> g <span class="org-keyword">in</span> font <span class="org-keyword">if</span> suffix <span class="org-keyword">in</span> g]</code>
-<code><span class="org-variable-name">ss01</span> = get_stylistic_set(font, <span class="org-string">'ss01'</span>)</code>
-<code><span class="org-variable-name">ss02</span> = get_stylistic_set(font, <span class="org-string">'ss02'</span>)</code>
-<code><span class="org-variable-name">default</span> = [glyph_base_name(g) <span class="org-keyword">for</span> g <span class="org-keyword">in</span> ss01]</code>
-<code>font.addLookup(<span class="org-string">'calt'</span>, <span class="org-string">'gsub_contextchain'</span>, 0, [[<span class="org-string">'calt'</span>, [[<span class="org-string">'latn'</span>, [<span class="org-string">'dflt'</span>]]]]])</code>
-<code><span class="org-keyword">for</span> sub <span class="org-keyword">in</span> [<span class="org-string">'ss01'</span>, <span class="org-string">'ss02'</span>]:</code>
-<code>  font.addLookup(sub, <span class="org-string">'gsub_single'</span>, 0, [])</code>
-<code>  font.addLookupSubtable(sub, sub + <span class="org-string">'-1'</span>)</code>
-<code><span class="org-keyword">for</span> g <span class="org-keyword">in</span> ss01: get_glyph(font, glyph_base_name(g)).addPosSub(<span class="org-string">'ss01-1'</span>, g)</code>
-<code><span class="org-keyword">for</span> g <span class="org-keyword">in</span> ss02: get_glyph(font, glyph_base_name(g)).addPosSub(<span class="org-string">'ss02-1'</span>, g)</code>
-<code><span class="org-comment-delimiter"># </span><span class="org-comment">font.addContextualSubtable('calt', 'calt-1', 'glyph', '''</span></code>
-<code><span class="org-comment-delimiter"># </span><span class="org-comment">a | a @&lt;gsub&gt;</span></code>
-<code><span class="org-comment-delimiter"># </span><span class="org-comment">b | b @&lt;gsub&gt;</span></code>
-<code><span class="org-comment-delimiter"># </span><span class="org-comment">''')</span></code>
-<code>font.addContextualSubtable(<span class="org-string">'calt'</span>, <span class="org-string">'calt-1'</span>, <span class="org-string">'class'</span>, <span class="org-string">'1 | 1 @&lt;ss01&gt;'</span>, bclasses=(<span class="org-constant">None</span>, default), mclasses=(<span class="org-constant">None</span>, default))</code>
-<code>font.addContextualSubtable(<span class="org-string">'calt'</span>, <span class="org-string">'calt-2'</span>, <span class="org-string">'class'</span>, <span class="org-string">'2 | 1 @&lt;ss02&gt;'</span>, bclasses=(<span class="org-constant">None</span>, default, ss01), mclasses=(<span class="org-constant">None</span>, default, ss01))</code>
+<code><span class="org-keyword">def</span> <span class="org-function-name">expand_classes</span>(array, new_glyphs):</code>
+<code>  <span class="org-variable-name">not_found</span> = []</code>
+<code>  <span class="org-keyword">for</span> g <span class="org-keyword">in</span> new_glyphs:</code>
+<code>    <span class="org-variable-name">found_exact</span> = <span class="org-constant">None</span></code>
+<code>    <span class="org-variable-name">found_base</span> = <span class="org-constant">None</span></code>
+<code>    <span class="org-variable-name">base</span> = glyph_base_name(g)</code>
+<code>    <span class="org-keyword">for</span> i, class_glyphs <span class="org-keyword">in</span> <span class="org-builtin">enumerate</span>(array):</code>
+<code>      <span class="org-keyword">if</span> class_glyphs <span class="org-keyword">is</span> <span class="org-constant">None</span>: <span class="org-keyword">continue</span></code>
+<code>      <span class="org-keyword">if</span> <span class="org-builtin">isinstance</span>(class_glyphs, <span class="org-builtin">str</span>):</code>
+<code>        <span class="org-variable-name">class_glyphs</span> = class_glyphs.split(<span class="org-string">','</span>)</code>
+<code>        <span class="org-variable-name">array</span>[i] = class_glyphs</code>
+<code>      <span class="org-keyword">for</span> glyph <span class="org-keyword">in</span> class_glyphs:</code>
+<code>        <span class="org-keyword">if</span> glyph == g:</code>
+<code>          <span class="org-variable-name">found_exact</span> = i</code>
+<code>          <span class="org-keyword">break</span></code>
+<code>        <span class="org-keyword">if</span> glyph == base:</code>
+<code>          <span class="org-variable-name">found_base</span> = i</code>
+<code>          <span class="org-keyword">break</span></code>
+<code>    <span class="org-keyword">if</span> found_exact: <span class="org-keyword">continue</span></code>
+<code>    <span class="org-keyword">elif</span> found_base: array[found_base].append(g)</code>
+<code>    <span class="org-keyword">else</span>: not_found.append(g)</code>
+<code>  <span class="org-keyword">return</span> ([<span class="org-string">','</span>.join(x) <span class="org-keyword">for</span> x <span class="org-keyword">in</span> array], not_found)</code>
+<code></code>
+<code><span class="org-comment-delimiter"># </span><span class="org-comment">def expand_kerning_matrix(font=font, kerning_matrix=kerning_matrix, new_glyphs=[]):</span></code>
+<code><span class="org-comment-delimiter">#   </span><span class="org-comment">classes_right = [None if (x == "" or x == "None") else x.split(",") for x in offsets[0,1:]]</span></code>
+<code><span class="org-comment-delimiter">#   </span><span class="org-comment">classes_left = [None if (x == "" or x == "None") else x.split(',') for x in offsets[1:,0]]</span></code>
+<code><span class="org-comment-delimiter">#   </span><span class="org-comment">right_glyphs = np.asarray(offsets[0,1:]).reshape(-1)</span></code>
+<code><span class="org-comment-delimiter">#   </span><span class="org-comment"># Expand all the right glyphs</span></code>
+<code><span class="org-comment-delimiter">#   </span><span class="org-comment">for i, c in enumerate(kerning_matrix[0]):</span></code>
+<code><span class="org-comment-delimiter">#     </span><span class="org-comment">if c is None: continue</span></code>
+<code><span class="org-comment-delimiter">#     </span><span class="org-comment">glyphs = c.split(',')</span></code>
+<code><span class="org-comment-delimiter">#     </span><span class="org-comment">for g in glyphs:</span></code>
+<code></code>
+<code><span class="org-variable-name">alt_set</span> = get_stylistic_set(font, <span class="org-string">'ss02'</span>)</code>
+<code>(classes_right, not_found) = expand_classes(<span class="org-builtin">list</span>(kerning_matrix[0]), alt_set)</code>
+<code>(classes_left, not_found) = expand_classes([x[0] <span class="org-keyword">for</span> x <span class="org-keyword">in</span> kerning_matrix], alt_set)</code>
+<code><span class="org-variable-name">kerning_matrix</span>[0] = classes_right</code>
+<code><span class="org-keyword">for</span> i, c <span class="org-keyword">in</span> <span class="org-builtin">enumerate</span>(classes_left):</code>
+<code>  kerning_matrix[i][0] = c</code>
+<code><span class="org-variable-name">font</span> = kern_classes(font, kerning_matrix)</code>
+<code><span class="org-variable-name">font</span> = kern_by_char(font, kerning_matrix)</code>
+<code>add_character_variants(font, variants)</code>
+<code><span class="org-comment-delimiter">#</span><span class="org-comment">font.mergeFeature('sachacHand-Regular-V.fea')</span></code>
 <code><span class="org-variable-name">font.familyname</span> = <span class="org-string">'sachacHand'</span></code>
 <code><span class="org-variable-name">font.fullname</span> = <span class="org-string">'sachacHand Regular Variants'</span></code>
 <code><span class="org-variable-name">font.os2_weight</span> = 400</code>
 <code><span class="org-variable-name">font.os2_family_class</span> = 10 * 256 + 8</code>
 <code><span class="org-variable-name">font.os2_vendor</span> = <span class="org-string">'SC83'</span></code>
 <code><span class="org-variable-name">font.fontname</span> = <span class="org-string">'sachacHand-Regular-V'</span></code>
+<code><span class="org-comment-delimiter"># </span><span class="org-comment">TODO Just plop them into different fonts, darn it.</span></code>
 <code>save_font(font)</code>
 <code><span class="org-keyword">with</span> <span class="org-builtin">open</span>(<span class="org-string">"test-%s.html"</span> % font.fontname, <span class="org-string">'w'</span>) <span class="org-keyword">as</span> f:</code>
-<code>  f.write(test_font_html(font.fontname + <span class="org-string">'.woff'</span>))</code>
+<code>  f.write(test_font_html(font.fontname + <span class="org-string">'.woff'</span>, variants=variants))</code>
+<code></code>
 </pre>
 </div>
 
 <pre class="example">
 <code>Bad name when parsing aglfn for unicode 41</code>
+<code>Old table removed.</code>
+<code>1 | 1 @&lt;ss01&gt;</code>
+<code>['H', 'e', 'q', 'A', 'M', 'Y', 'eight', 'quotesingle', 'numbersign', 'less', 'O', 'b', 'r', 'B', 'N', 'Z', 'nine', 'quoteright', 'dollar', 'greater', 'n', 'h', 'u', 'R', 'P', 'question', 'quotedbl', 'bracketleft', 'o', 'k', 'w', 'D', 'Q', 'one', 'colon', 'quotedblleft', 'bracketright', 'd', 'l', 'v', 'L', 'S', 'two', 'semicolon', 'quotedblright', 'parenleft', 'asciicircum', 'p', 'f', 'x', 'E', 'T', 'three', 'hyphen', 'at', 'parenright', 'grave', 'a', 't', 'y', 'F', 'U', 'four', 'endash', 'slash', 'asterisk', 'braceleft', 'g', 'i', 'z', 'I', 'V', 'five', 'emdash', 'backslash', 'plus', 'bar', 's', 'j', 'C', 'J', 'W', 'six', 'equal', 'asciitilde', 'comma', 'braceright', 'c', 'm', 'G', 'K', 'X', 'seven', 'exclam', 'underscore', 'period', 'zero']</code>
+<code>['H', 'e', 'q', 'A', 'M', 'Y', 'eight', 'quotesingle', 'numbersign', 'less', 'O', 'b', 'r', 'B', 'N', 'Z', 'nine', 'quoteright', 'dollar', 'greater', 'n', 'h', 'u', 'R', 'P', 'question', 'quotedbl', 'bracketleft', 'o', 'k', 'w', 'D', 'Q', 'one', 'colon', 'quotedblleft', 'bracketright', 'd', 'l', 'v', 'L', 'S', 'two', 'semicolon', 'quotedblright', 'parenleft', 'asciicircum', 'p', 'f', 'x', 'E', 'T', 'three', 'hyphen', 'at', 'parenright', 'grave', 'a', 't', 'y', 'F', 'U', 'four', 'endash', 'slash', 'asterisk', 'braceleft', 'g', 'i', 'z', 'I', 'V', 'five', 'emdash', 'backslash', 'plus', 'bar', 's', 'j', 'C', 'J', 'W', 'six', 'equal', 'asciitilde', 'comma', 'braceright', 'c', 'm', 'G', 'K', 'X', 'seven', 'exclam', 'underscore', 'period', 'zero']</code>
+<code>2 | 1 @&lt;ss02&gt;</code>
+<code>['H', 'e', 'q', 'A', 'M', 'Y', 'eight', 'quotesingle', 'numbersign', 'less', 'O', 'b', 'r', 'B', 'N', 'Z', 'nine', 'quoteright', 'dollar', 'greater', 'n', 'h', 'u', 'R', 'P', 'zero', 'question', 'quotedbl', 'bracketleft', 'o', 'k', 'w', 'D', 'Q', 'one', 'colon', 'quotedblleft', 'bracketright', 'd', 'l', 'v', 'L', 'S', 'two', 'semicolon', 'quotedblright', 'parenleft', 'asciicircum', 'p', 'f', 'x', 'E', 'T', 'three', 'hyphen', 'at', 'parenright', 'grave', 'a', 't', 'y', 'F', 'U', 'four', 'endash', 'slash', 'asterisk', 'braceleft', 'g', 'i', 'z', 'I', 'V', 'five', 'emdash', 'backslash', 'plus', 'bar', 's', 'j', 'C', 'J', 'W', 'six', 'equal', 'asciitilde', 'comma', 'braceright', 'c', 'm', 'G', 'K', 'X', 'seven', 'exclam', 'underscore', 'period']</code>
+<code>['H.ss01', 'e.ss01', 'q.ss01', 'A.ss01', 'M.ss01', 'Y.ss01', 'eight.ss01', 'quotesingle.ss01', 'numbersign.ss01', 'less.ss01', 'O.ss01', 'b.ss01', 'r.ss01', 'B.ss01', 'N.ss01', 'Z.ss01', 'nine.ss01', 'quoteright.ss01', 'dollar.ss01', 'greater.ss01', 'n.ss01', 'h.ss01', 'u.ss01', 'R.ss01', 'P.ss01', 'zero.ss01', 'question.ss01', 'quotedbl.ss01', 'bracketleft.ss01', 'o.ss01', 'k.ss01', 'w.ss01', 'D.ss01', 'Q.ss01', 'one.ss01', 'colon.ss01', 'quotedblleft.ss01', 'bracketright.ss01', 'd.ss01', 'l.ss01', 'v.ss01', 'L.ss01', 'S.ss01', 'two.ss01', 'semicolon.ss01', 'quotedblright.ss01', 'parenleft.ss01', 'asciicircum.ss01', 'p.ss01', 'f.ss01', 'x.ss01', 'E.ss01', 'T.ss01', 'three.ss01', 'hyphen.ss01', 'at.ss01', 'parenright.ss01', 'grave.ss01', 'a.ss01', 't.ss01', 'y.ss01', 'F.ss01', 'U.ss01', 'four.ss01', 'endash.ss01', 'slash.ss01', 'asterisk.ss01', 'braceleft.ss01', 'g.ss01', 'i.ss01', 'z.ss01', 'I.ss01', 'V.ss01', 'five.ss01', 'emdash.ss01', 'backslash.ss01', 'plus.ss01', 'bar.ss01', 's.ss01', 'j.ss01', 'C.ss01', 'J.ss01', 'W.ss01', 'six.ss01', 'equal.ss01', 'asciitilde.ss01', 'comma.ss01', 'braceright.ss01', 'c.ss01', 'm.ss01', 'G.ss01', 'K.ss01', 'X.ss01', 'seven.ss01', 'exclam.ss01', 'underscore.ss01', 'period.ss01']</code>
+</pre>
+
+
+<p>
+Okay, why isn't it triggering when we start off with 0?
+</p>
+
+<pre class="example">
+<code>Bad name when parsing aglfn for unicode 41</code>
+<code>1 | 1 @&lt;ss01&gt;</code>
+<code>['H', 'e', 'q', 'A', 'M', 'Y', 'eight', 'quotesingle', 'numbersign', 'less', 'O', 'b', 'r', 'B', 'N', 'Z', 'nine', 'quoteright', 'dollar', 'greater', 'n', 'h', 'u', 'R', 'P', 'question', 'quotedbl', 'bracketleft', 'o', 'k', 'w', 'D', 'Q', 'one', 'colon', 'quotedblleft', 'bracketright', 'd', 'l', 'v', 'L', 'S', 'two', 'semicolon', 'quotedblright', 'parenleft', 'asciicircum', 'p', 'f', 'x', 'E', 'T', 'three', 'hyphen', 'at', 'parenright', 'grave', 'a', 't', 'y', 'F', 'U', 'four', 'endash', 'slash', 'asterisk', 'braceleft', 'g', 'i', 'z', 'I', 'V', 'five', 'emdash', 'backslash', 'plus', 'bar', 's', 'j', 'C', 'J', 'W', 'six', 'equal', 'asciitilde', 'comma', 'braceright', 'c', 'm', 'G', 'K', 'X', 'seven', 'exclam', 'underscore', 'period', 'zero']</code>
+<code>['H', 'e', 'q', 'A', 'M', 'Y', 'eight', 'quotesingle', 'numbersign', 'less', 'O', 'b', 'r', 'B', 'N', 'Z', 'nine', 'quoteright', 'dollar', 'greater', 'n', 'h', 'u', 'R', 'P', 'question', 'quotedbl', 'bracketleft', 'o', 'k', 'w', 'D', 'Q', 'one', 'colon', 'quotedblleft', 'bracketright', 'd', 'l', 'v', 'L', 'S', 'two', 'semicolon', 'quotedblright', 'parenleft', 'asciicircum', 'p', 'f', 'x', 'E', 'T', 'three', 'hyphen', 'at', 'parenright', 'grave', 'a', 't', 'y', 'F', 'U', 'four', 'endash', 'slash', 'asterisk', 'braceleft', 'g', 'i', 'z', 'I', 'V', 'five', 'emdash', 'backslash', 'plus', 'bar', 's', 'j', 'C', 'J', 'W', 'six', 'equal', 'asciitilde', 'comma', 'braceright', 'c', 'm', 'G', 'K', 'X', 'seven', 'exclam', 'underscore', 'period', 'zero']</code>
+<code>2 | 1 @&lt;ss02&gt;</code>
+<code>['H', 'e', 'q', 'A', 'M', 'Y', 'eight', 'quotesingle', 'numbersign', 'less', 'O', 'b', 'r', 'B', 'N', 'Z', 'nine', 'quoteright', 'dollar', 'greater', 'n', 'h', 'u', 'R', 'P', 'zero', 'question', 'quotedbl', 'bracketleft', 'o', 'k', 'w', 'D', 'Q', 'one', 'colon', 'quotedblleft', 'bracketright', 'd', 'l', 'v', 'L', 'S', 'two', 'semicolon', 'quotedblright', 'parenleft', 'asciicircum', 'p', 'f', 'x', 'E', 'T', 'three', 'hyphen', 'at', 'parenright', 'grave', 'a', 't', 'y', 'F', 'U', 'four', 'endash', 'slash', 'asterisk', 'braceleft', 'g', 'i', 'z', 'I', 'V', 'five', 'emdash', 'backslash', 'plus', 'bar', 's', 'j', 'C', 'J', 'W', 'six', 'equal', 'asciitilde', 'comma', 'braceright', 'c', 'm', 'G', 'K', 'X', 'seven', 'exclam', 'underscore', 'period']</code>
+<code>['H.ss01', 'e.ss01', 'q.ss01', 'A.ss01', 'M.ss01', 'Y.ss01', 'eight.ss01', 'quotesingle.ss01', 'numbersign.ss01', 'less.ss01', 'O.ss01', 'b.ss01', 'r.ss01', 'B.ss01', 'N.ss01', 'Z.ss01', 'nine.ss01', 'quoteright.ss01', 'dollar.ss01', 'greater.ss01', 'n.ss01', 'h.ss01', 'u.ss01', 'R.ss01', 'P.ss01', 'zero.ss01', 'question.ss01', 'quotedbl.ss01', 'bracketleft.ss01', 'o.ss01', 'k.ss01', 'w.ss01', 'D.ss01', 'Q.ss01', 'one.ss01', 'colon.ss01', 'quotedblleft.ss01', 'bracketright.ss01', 'd.ss01', 'l.ss01', 'v.ss01', 'L.ss01', 'S.ss01', 'two.ss01', 'semicolon.ss01', 'quotedblright.ss01', 'parenleft.ss01', 'asciicircum.ss01', 'p.ss01', 'f.ss01', 'x.ss01', 'E.ss01', 'T.ss01', 'three.ss01', 'hyphen.ss01', 'at.ss01', 'parenright.ss01', 'grave.ss01', 'a.ss01', 't.ss01', 'y.ss01', 'F.ss01', 'U.ss01', 'four.ss01', 'endash.ss01', 'slash.ss01', 'asterisk.ss01', 'braceleft.ss01', 'g.ss01', 'i.ss01', 'z.ss01', 'I.ss01', 'V.ss01', 'five.ss01', 'emdash.ss01', 'backslash.ss01', 'plus.ss01', 'bar.ss01', 's.ss01', 'j.ss01', 'C.ss01', 'J.ss01', 'W.ss01', 'six.ss01', 'equal.ss01', 'asciitilde.ss01', 'comma.ss01', 'braceright.ss01', 'c.ss01', 'm.ss01', 'G.ss01', 'K.ss01', 'X.ss01', 'seven.ss01', 'exclam.ss01', 'underscore.ss01', 'period.ss01']</code>
 </pre>
 </div>
 </div>
+
+<div id="outline-container-org98dd64b" class="outline-3">
+<h3 id="org98dd64b">Okay, how do I space and kern the variants more efficiently?</h3>
+<div class="outline-text-3" id="text-org98dd64b">
+<p>
+font-feature-settings: "calt" 0; turns off variants. Works in Chrome, too.
+</p>
+</div>
+</div>
 </div>
 
-
-<div id="outline-container-orgf7e8748" class="outline-2">
-<h2 id="orgf7e8748">Test the fonts</h2>
-<div class="outline-text-2" id="text-orgf7e8748">
+<div id="outline-container-org842eb3a" class="outline-2">
+<h2 id="org842eb3a">Test the fonts</h2>
+<div class="outline-text-2" id="text-org842eb3a">
 <p>
 This lets me quickly try text with different versions of my font. I
 can also look at lots of kerning pairs at the same time.
@@ -4220,7 +4325,7 @@ Resources:
 <li><a href="http://ninastoessinger.com/stringmaker/index.php">http://ninastoessinger.com/stringmaker/index.php</a></li>
 </ul>
 
-<table id="org8fb1ffe" border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<table id="org95eac34" border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
 
 <colgroup>
@@ -4265,7 +4370,7 @@ Resources:
 
 
 <div class="org-src-container">
-<pre class="src src-python" id="org6c2eba8"><code><span class="org-variable-name">strings</span> = [<span class="org-string">"hhhhnnnnnnhhhhhnnnnnn"</span>, </code>
+<pre class="src src-python" id="org0319960"><code><span class="org-variable-name">strings</span> = [<span class="org-string">"hhhhnnnnnnhhhhhnnnnnn"</span>, </code>
 <code>           <span class="org-string">"ooonoonnonnn"</span>,</code>
 <code>           <span class="org-string">"nnannnnbnnnncnnnndnnnnennnnfnnnngnnnnhnnnninnnnjnn"</span>,</code>
 <code>           <span class="org-string">"nnknnnnlnnnnmnnnnnnnnnonnnnpnnnnqnnnnrnnnnsnnnntnn"</span>,</code>
@@ -4301,16 +4406,20 @@ Resources:
 <code>          <span class="org-keyword">for</span> j, first_letter <span class="org-keyword">in</span> <span class="org-builtin">enumerate</span>(row):</code>
 <code>            <span class="org-keyword">if</span> first_letter == <span class="org-constant">None</span>: <span class="org-keyword">continue</span></code>
 <code>            <span class="org-variable-name">style</span> = <span class="org-string">"border-top: 1px solid gray"</span> <span class="org-keyword">if</span> j == 0 <span class="org-keyword">else</span> <span class="org-string">""</span></code>
+<code>            <span class="org-variable-name">g1</span> = aglfn.to_glyph(glyph_base_name(first_letter))</code>
+<code>            <span class="org-variable-name">c1</span> = glyph_suffix(first_letter)</code>
 <code>            <span class="org-keyword">with</span> tag(<span class="org-string">'tr'</span>, style=style):</code>
 <code>              line(<span class="org-string">'td'</span>, first_letter)</code>
 <code>              <span class="org-keyword">for</span> c, column <span class="org-keyword">in</span> <span class="org-builtin">enumerate</span>(classes_right):</code>
 <code>                <span class="org-keyword">if</span> column <span class="org-keyword">is</span> <span class="org-constant">None</span>: <span class="org-keyword">continue</span></code>
 <code>                <span class="org-keyword">for</span> i, second_letter <span class="org-keyword">in</span> <span class="org-builtin">enumerate</span>(column):</code>
 <code>                  <span class="org-keyword">if</span> second_letter <span class="org-keyword">is</span> <span class="org-constant">None</span>: <span class="org-keyword">continue</span></code>
+<code>                  <span class="org-variable-name">g2</span> = aglfn.to_glyph(glyph_base_name(second_letter))</code>
+<code>                  <span class="org-variable-name">c2</span> = glyph_suffix(second_letter)</code>
 <code>                  <span class="org-variable-name">klass</span> = <span class="org-string">"kerned"</span> <span class="org-keyword">if</span> kerning[r][c] <span class="org-keyword">else</span> <span class="org-string">"default"</span></code>
 <code>                  <span class="org-variable-name">style</span> = <span class="org-string">"border-left: 1px solid gray"</span> <span class="org-keyword">if</span> i == 0 <span class="org-keyword">else</span> <span class="org-string">""</span></code>
 <code>                  <span class="org-keyword">with</span> tag(<span class="org-string">'td'</span>, klass=klass, style=style):</code>
-<code>                    text(<span class="org-string">'n%s%sn'</span> % (aglfn.to_glyph(first_letter), aglfn.to_glyph(second_letter)))</code>
+<code>                    doc.asis(<span class="org-string">'&lt;span class="base"&gt;n&lt;/span&gt;&lt;span class="%s" title="%s"&gt;%s&lt;/span&gt;&lt;span class="%s" title="%s"&gt;%s&lt;/span&gt;&lt;span class="base"&gt;n&lt;/span&gt;'</span> % (c1, first_letter, g1, c2, second_letter, g2))</code>
 <code>  <span class="org-keyword">return</span> doc.getvalue()</code>
 <code><span class="org-keyword">from</span> yattag <span class="org-keyword">import</span> Doc</code>
 <code><span class="org-keyword">import</span> numpy <span class="org-keyword">as</span> np</code>
@@ -4318,20 +4427,23 @@ Resources:
 <code><span class="org-keyword">import</span> aglfn</code>
 <code></code>
 <code><span class="org-keyword">def</span> <span class="org-function-name">test_glyphs</span>(font, count=1):</code>
-<code>  <span class="org-keyword">return</span> <span class="org-string">''</span>.join([(aglfn.to_glyph(g) <span class="org-keyword">or</span> <span class="org-string">""</span>) * count <span class="org-keyword">for</span> g <span class="org-keyword">in</span> font <span class="org-keyword">if</span> font[g].isWorthOutputting()])</code>
+<code>  <span class="org-keyword">return</span> <span class="org-string">''</span>.join([(aglfn.to_glyph(g) <span class="org-keyword">or</span> <span class="org-string">""</span>) * count <span class="org-keyword">for</span> g <span class="org-keyword">in</span> font <span class="org-keyword">if</span> (font[g].isWorthOutputting() <span class="org-keyword">and</span> font[g].<span class="org-builtin">unicode</span> &gt; -1)])</code>
 <code></code>
-<code><span class="org-keyword">def</span> <span class="org-function-name">test_font_html</span>(font_filename=<span class="org-constant">None</span>):</code>
+<code><span class="org-keyword">def</span> <span class="org-function-name">test_font_html</span>(font_filename=<span class="org-constant">None</span>, variants=<span class="org-constant">None</span>):</code>
 <code>  <span class="org-variable-name">doc</span>, <span class="org-variable-name">tag</span>, <span class="org-variable-name">text</span>, <span class="org-variable-name">line</span> = Doc().ttl()</code>
 <code>  <span class="org-variable-name">font</span> = fontforge.<span class="org-builtin">open</span>(font_filename)</code>
 <code>  <span class="org-variable-name">name</span> = font.fontname</code>
 <code>  <span class="org-keyword">with</span> tag(<span class="org-string">'html'</span>):</code>
 <code>    <span class="org-keyword">with</span> tag(<span class="org-string">'head'</span>): </code>
 <code>      doc.asis(<span class="org-string">'&lt;link rel="stylesheet" type="text/css" href="style.css" /&gt;'</span>)</code>
+<code>      doc.asis(<span class="org-string">'&lt;meta charset="UTF-8"&gt;'</span>)</code>
 <code>      <span class="org-keyword">with</span> tag(<span class="org-string">'style'</span>):</code>
 <code>        doc.asis(<span class="org-string">"@font-face { font-family: '%s'; src: url('%s'); }\n"</span> % (name, font_filename))</code>
 <code>        doc.asis(<span class="org-string">"body { font-family: '%s'; }\n"</span> % name)</code>
 <code>        doc.asis(<span class="org-string">".bold { font-weight: bold } .italic { font-style: italic } .oblique { font-style: oblique }"</span>)</code>
 <code>        doc.asis(<span class="org-string">".small-caps { font-variant: small-caps }"</span>)</code>
+<code>        <span class="org-keyword">for</span> v <span class="org-keyword">in</span> variants:</code>
+<code>          doc.asis(<span class="org-string">'.%s { font-feature-settings: "calt" off, "%s" on; }'</span> % (v, v))</code>
 <code>    <span class="org-keyword">with</span> tag(<span class="org-string">'body'</span>):</code>
 <code>      <span class="org-keyword">with</span> tag(<span class="org-string">'a'</span>, href=<span class="org-string">'index.html'</span>):</code>
 <code>        text(<span class="org-string">'Back to index'</span>)</code>
@@ -4349,7 +4461,13 @@ Resources:
 <code>            line(<span class="org-string">'td'</span>, size)</code>
 <code>            line(<span class="org-string">'td'</span>, test_glyphs(font))</code>
 <code>      line(<span class="org-string">'h2'</span>, <span class="org-string">'Variants'</span>)</code>
-<code>      line(<span class="org-string">'td'</span>, test_glyphs(font, 4))</code>
+<code>      line(<span class="org-string">'div'</span>, test_glyphs(font, 4))</code>
+<code>      <span class="org-keyword">with</span> tag(<span class="org-string">'table'</span>, klass=<span class="org-string">'nocalt'</span>):</code>
+<code>        <span class="org-keyword">for</span> v <span class="org-keyword">in</span> variants:</code>
+<code>          <span class="org-keyword">with</span> tag(<span class="org-string">'tr'</span>):</code>
+<code>            line(<span class="org-string">'td'</span>, v)</code>
+<code>            <span class="org-keyword">with</span> tag(<span class="org-string">'td'</span>, klass=v):</code>
+<code>              text(test_glyphs(font))</code>
 <code></code>
 <code><span class="org-comment-delimiter">#       </span><span class="org-comment">line('h2', 'Accents')</span></code>
 <code><span class="org-comment-delimiter">#       </span><span class="org-comment">line('div', '''</span></code>
@@ -4369,9 +4487,15 @@ Resources:
 <code>            line(<span class="org-string">'td'</span>, test_glyphs(font))</code>
 <code>      line(<span class="org-string">'h2'</span>, <span class="org-string">'Test strings'</span>)</code>
 <code>      <span class="org-keyword">for</span> s <span class="org-keyword">in</span> strings:</code>
-<code>        line(<span class="org-string">'div'</span>, s)</code>
+<code>        <span class="org-keyword">with</span> tag(<span class="org-string">'table'</span>):</code>
+<code>          <span class="org-keyword">for</span> v <span class="org-keyword">in</span> variants:</code>
+<code>            <span class="org-keyword">with</span> tag(<span class="org-string">'tr'</span>):</code>
+<code>              line(<span class="org-string">'td'</span>, v)</code>
+<code>              <span class="org-keyword">with</span> tag(<span class="org-string">'td'</span>, klass=v + <span class="org-string">' nocalt'</span>):</code>
+<code>                text(s)</code>
 <code>      line(<span class="org-string">'h2'</span>, <span class="org-string">'Kerning matrix'</span>)</code>
-<code>      doc.asis(test_kerning_matrix(font))</code>
+<code>      <span class="org-keyword">with</span> tag(<span class="org-string">'div'</span>, klass=<span class="org-string">'nocalt'</span>):</code>
+<code>        doc.asis(test_kerning_matrix(font))</code>
 <code>      line(<span class="org-string">'h2'</span>, <span class="org-string">'License'</span>)</code>
 <code>      <span class="org-keyword">with</span> tag(<span class="org-string">'pre'</span>, klass=<span class="org-string">'license'</span>):</code>
 <code>        text(font.<span class="org-constant">copyright</span>)</code>
@@ -4382,7 +4506,7 @@ Resources:
 </div>
 
 <div class="org-src-container">
-<pre class="src src-python" id="orgd8e9e95"><code>&lt;&lt;def_test_html&gt;&gt;</code>
+<pre class="src src-python" id="org36697fd"><code>&lt;&lt;def_test_html&gt;&gt;</code>
 <code><span class="org-variable-name">font_files</span> = [<span class="org-string">'sachacHand-Light.woff'</span>, <span class="org-string">'sachacHand-Regular.woff'</span>, <span class="org-string">'sachacHand-Bold.woff'</span>]</code>
 <code><span class="org-variable-name">fonts</span> = {}</code>
 <code></code>
@@ -4429,31 +4553,31 @@ Oh, can I get livereload working? There's a <code>python3-livereload</code>&#x20
 </div>
 </div>
 
-<div id="outline-container-orgb4ae19a" class="outline-2">
-<h2 id="orgb4ae19a">Ideas</h2>
-<div class="outline-text-2" id="text-orgb4ae19a">
+<div id="outline-container-orgf144230" class="outline-2">
+<h2 id="orgf144230">Ideas</h2>
+<div class="outline-text-2" id="text-orgf144230">
 </div>
-<div id="outline-container-org598d2af" class="outline-3">
-<h3 id="org598d2af"><span class="done DONE">DONE</span> Copy glyphs from hand-edited font</h3>
-<div class="outline-text-3" id="text-org598d2af">
+<div id="outline-container-orgd23f781" class="outline-3">
+<h3 id="orgd23f781"><span class="done DONE">DONE</span> Copy glyphs from hand-edited font</h3>
+<div class="outline-text-3" id="text-orgd23f781">
 </div>
 </div>
-<div id="outline-container-org4063c92" class="outline-3">
-<h3 id="org4063c92"><span class="todo TODO">TODO</span> Alternate glyphs</h3>
+<div id="outline-container-org0fc5067" class="outline-3">
+<h3 id="org0fc5067"><span class="todo TODO">TODO</span> Alternate glyphs</h3>
 </div>
-<div id="outline-container-org7741a40" class="outline-3">
-<h3 id="org7741a40"><span class="todo TODO">TODO</span> Ligatures</h3>
+<div id="outline-container-org1700929" class="outline-3">
+<h3 id="org1700929"><span class="todo TODO">TODO</span> Ligatures</h3>
 </div>
-<div id="outline-container-org48e9289" class="outline-3">
-<h3 id="org48e9289"><span class="todo TODO">TODO</span> Accents</h3>
+<div id="outline-container-org498ae82" class="outline-3">
+<h3 id="org498ae82"><span class="todo TODO">TODO</span> Accents</h3>
 </div>
-<div id="outline-container-orgd26899b" class="outline-3">
-<h3 id="orgd26899b">Generating a zero-width version?</h3>
-<div class="outline-text-3" id="text-orgd26899b">
+<div id="outline-container-org1b0e294" class="outline-3">
+<h3 id="org1b0e294">Generating a zero-width version?</h3>
+<div class="outline-text-3" id="text-org1b0e294">
 </div>
-<div id="outline-container-orgdf51052" class="outline-4">
-<h4 id="orgdf51052">Export glyphs, autotrace them, and load them into a different font</h4>
-<div class="outline-text-4" id="text-orgdf51052">
+<div id="outline-container-orgca28b67" class="outline-4">
+<h4 id="orgca28b67">Export glyphs, autotrace them, and load them into a different font</h4>
+<div class="outline-text-4" id="text-orgca28b67">
 <div class="org-src-container">
 <pre class="src src-python"><code><span class="org-keyword">import</span> os</code>
 <code>&lt;&lt;params&gt;&gt;</code>
@@ -4497,12 +4621,12 @@ ninja install
 </p>
 </div>
 </div>
-<div id="outline-container-org113e560" class="outline-4">
-<h4 id="org113e560"><span class="todo TODO">TODO</span> Manually edit the glyphs to make them look okay</h4>
+<div id="outline-container-org73cdb9d" class="outline-4">
+<h4 id="org73cdb9d"><span class="todo TODO">TODO</span> Manually edit the glyphs to make them look okay</h4>
 </div>
-<div id="outline-container-org4902529" class="outline-4">
-<h4 id="org4902529"><span class="todo TODO">TODO</span> Double up the paths and close them</h4>
-<div class="outline-text-4" id="text-org4902529">
+<div id="outline-container-org52e04fd" class="outline-4">
+<h4 id="org52e04fd"><span class="todo TODO">TODO</span> Double up the paths and close them</h4>
+<div class="outline-text-4" id="text-org52e04fd">
 <p>
 <a href="https://wiki.inkscape.org/wiki/index.php/CalligraphedOutlineFill">https://wiki.inkscape.org/wiki/index.php/CalligraphedOutlineFill</a> ?
 </p>
@@ -4513,9 +4637,9 @@ ninja install
 </div>
 </div>
 </div>
-<div id="outline-container-org4131f7b" class="outline-3">
-<h3 id="org4131f7b"><span class="todo TODO">TODO</span> Make a font for A-</h3>
-<div class="outline-text-3" id="text-org4131f7b">
+<div id="outline-container-org6e90cc6" class="outline-3">
+<h3 id="org6e90cc6"><span class="todo TODO">TODO</span> Make a font for A-</h3>
+<div class="outline-text-3" id="text-org6e90cc6">
 <div class="org-src-container">
 <pre class="src src-python"><code>&lt;&lt;params&gt;&gt;</code>
 <code><span class="org-variable-name">params</span> = {**params, </code>
@@ -4531,12 +4655,12 @@ ninja install
 </div>
 </div>
 
-<div id="outline-container-org7ca5d9c" class="outline-2">
-<h2 id="org7ca5d9c">Extra stuff</h2>
+<div id="outline-container-org3dee60b" class="outline-2">
+<h2 id="org3dee60b">Extra stuff</h2>
 </div>
-<div id="outline-container-orgec33c8b" class="outline-2">
-<h2 id="orgec33c8b">Get information from my blog database</h2>
-<div class="outline-text-2" id="text-orgec33c8b">
+<div id="outline-container-orgf8f5f3c" class="outline-2">
+<h2 id="orgf8f5f3c">Get information from my blog database</h2>
+<div class="outline-text-2" id="text-orgf8f5f3c">
 <div class="org-src-container">
 <pre class="src src-sh"><code><span class="org-builtin">cd</span> ~/code/docker/blog</code>
 <code>docker-compose up mysql</code>
@@ -4544,11 +4668,11 @@ ninja install
 </div>
 </div>
 
-<div id="outline-container-org6e5a729" class="outline-3">
-<h3 id="org6e5a729">Figure out what glyphs I want based on my blog headings</h3>
-<div class="outline-text-3" id="text-org6e5a729">
+<div id="outline-container-orgdeb02c8" class="outline-3">
+<h3 id="orgdeb02c8">Figure out what glyphs I want based on my blog headings</h3>
+<div class="outline-text-3" id="text-orgdeb02c8">
 <div class="org-src-container">
-<pre class="src src-python" id="org3b27916"><code><span class="org-keyword">from</span> dotenv <span class="org-keyword">import</span> load_dotenv</code>
+<pre class="src src-python" id="org249418e"><code><span class="org-keyword">from</span> dotenv <span class="org-keyword">import</span> load_dotenv</code>
 <code><span class="org-keyword">from</span> sqlalchemy <span class="org-keyword">import</span> create_engine</code>
 <code><span class="org-keyword">import</span> os</code>
 <code><span class="org-keyword">import</span> pandas <span class="org-keyword">as</span> pd</code>
@@ -4562,9 +4686,9 @@ ninja install
 </div>
 </div>
 
-<div id="outline-container-org61075b3" class="outline-3">
-<h3 id="org61075b3">Make test page with blog headings</h3>
-<div class="outline-text-3" id="text-org61075b3">
+<div id="outline-container-org99c4320" class="outline-3">
+<h3 id="org99c4320">Make test page with blog headings</h3>
+<div class="outline-text-3" id="text-org99c4320">
 <div class="org-src-container">
 <pre class="src src-python"><code>&lt;&lt;connect-to-db&gt;&gt;</code>
 <code><span class="org-keyword">from</span> yattag <span class="org-keyword">import</span> Doc, indent</code>
@@ -4586,9 +4710,9 @@ ninja install
 </div>
 </div>
 
-<div id="outline-container-org8c99dc7" class="outline-3">
-<h3 id="org8c99dc7">Check glyphs</h3>
-<div class="outline-text-3" id="text-org8c99dc7">
+<div id="outline-container-orgb2da442" class="outline-3">
+<h3 id="orgb2da442">Check glyphs</h3>
+<div class="outline-text-3" id="text-orgb2da442">
 <div class="org-src-container">
 <pre class="src src-python"><code>&lt;&lt;connect-to-db&gt;&gt;</code>
 <code><span class="org-variable-name">df</span>           = pd.read_sql(<span class="org-string">"select post_title from wp_posts WHERE post_type='post' AND post_status='publish'"</span>, dbConnection);</code>
@@ -4826,11 +4950,11 @@ ninja install
 </div>
 </div>
 
-<div id="outline-container-orgc0e88b6" class="outline-3">
-<h3 id="orgc0e88b6">Look up posts with weird glyphs</h3>
-<div class="outline-text-3" id="text-orgc0e88b6">
+<div id="outline-container-org828e444" class="outline-3">
+<h3 id="org828e444">Look up posts with weird glyphs</h3>
+<div class="outline-text-3" id="text-org828e444">
 <div class="org-src-container">
-<pre class="src src-python" id="org7bd7957"><code>&lt;&lt;connect-to-db&gt;&gt;</code>
+<pre class="src src-python" id="orgfa9188f"><code>&lt;&lt;connect-to-db&gt;&gt;</code>
 <code><span class="org-variable-name">df</span>           = pd.read_sql(<span class="org-string">"select id, post_title from wp_posts WHERE post_type='post' AND post_status='publish' AND post_title LIKE %(char)s limit 10;"</span>, dbConnection, params={<span class="org-string">"char"</span>: <span class="org-string">'%'</span> + char + <span class="org-string">'%'</span>});</code>
 <code><span class="org-keyword">print</span>(df)</code>
 </pre>
@@ -4845,11 +4969,11 @@ ninja install
 </div>
 </div>
 
-<div id="outline-container-org003223c" class="outline-3">
-<h3 id="org003223c">Get frequency of pairs of characters</h3>
-<div class="outline-text-3" id="text-org003223c">
+<div id="outline-container-org1776af3" class="outline-3">
+<h3 id="org1776af3">Get frequency of pairs of characters</h3>
+<div class="outline-text-3" id="text-org1776af3">
 <div class="org-src-container">
-<pre class="src src-python" id="org002105c"><code>&lt;&lt;connect-to-db&gt;&gt;</code>
+<pre class="src src-python" id="orge291855"><code>&lt;&lt;connect-to-db&gt;&gt;</code>
 <code><span class="org-variable-name">df</span> = pd.read_sql(<span class="org-string">"select post_title from wp_posts WHERE post_type='post' AND post_status='publish'"</span>, dbConnection);</code>
 <code><span class="org-keyword">from</span> collections <span class="org-keyword">import</span> Counter</code>
 <code><span class="org-variable-name">s</span> = df.post_title.<span class="org-builtin">apply</span>(<span class="org-builtin">list</span>).<span class="org-builtin">sum</span>()</code>
@@ -4865,13 +4989,13 @@ ninja install
 </div>
 </div>
 
-<div id="outline-container-org798164f" class="outline-3">
-<h3 id="org798164f">Copy metrics from my edited font</h3>
-<div class="outline-text-3" id="text-org798164f">
+<div id="outline-container-orgadab5a0" class="outline-3">
+<h3 id="orgadab5a0">Copy metrics from my edited font</h3>
+<div class="outline-text-3" id="text-orgadab5a0">
 </div>
-<div id="outline-container-orgfc3349e" class="outline-4">
-<h4 id="orgfc3349e">Get the glyph bearings</h4>
-<div class="outline-text-4" id="text-orgfc3349e">
+<div id="outline-container-org6e19527" class="outline-4">
+<h4 id="org6e19527">Get the glyph bearings</h4>
+<div class="outline-text-4" id="text-org6e19527">
 <div class="org-src-container">
 <pre class="src src-python"><code><span class="org-keyword">import</span> fontforge</code>
 <code><span class="org-keyword">import</span> numpy <span class="org-keyword">as</span> np</code>
@@ -5466,11 +5590,11 @@ ninja install
 </div>
 </div>
 
-<div id="outline-container-org98920c1" class="outline-4">
-<h4 id="org98920c1">Get the kerning information</h4>
-<div class="outline-text-4" id="text-org98920c1">
+<div id="outline-container-orga88802b" class="outline-4">
+<h4 id="orga88802b">Get the kerning information</h4>
+<div class="outline-text-4" id="text-orga88802b">
 <div class="org-src-container">
-<pre class="src src-python" id="org8e70a87"><code>&lt;&lt;params&gt;&gt;</code>
+<pre class="src src-python" id="org7310fa9"><code>&lt;&lt;params&gt;&gt;</code>
 <code><span class="org-keyword">def</span> <span class="org-function-name">show_kerning_classes</span>(f):</code>
 <code>  <span class="org-variable-name">kern_name</span> = f.gpos_lookups[0]</code>
 <code>  <span class="org-variable-name">lookup_info</span> = f.getLookupInfo(kern_name)</code>
@@ -5495,9 +5619,9 @@ ninja install
 </div>
 </div>
 
-<div id="outline-container-orgbd0bd5e" class="outline-3">
-<h3 id="orgbd0bd5e">Copy it to my website</h3>
-<div class="outline-text-3" id="text-orgbd0bd5e">
+<div id="outline-container-org4fe0a4e" class="outline-3">
+<h3 id="org4fe0a4e">Copy it to my website</h3>
+<div class="outline-text-3" id="text-org4fe0a4e">
 <div class="org-src-container">
 <pre class="src src-sh"><code>scp sachacHand-Regular.woff web:~/sacha-v3/</code>
 </pre>
@@ -5506,9 +5630,9 @@ ninja install
 </div>
 </div>
 
-<div id="outline-container-org524a14b" class="outline-2">
-<h2 id="org524a14b">Other resources</h2>
-<div class="outline-text-2" id="text-org524a14b">
+<div id="outline-container-org0e74ef5" class="outline-2">
+<h2 id="org0e74ef5">Other resources</h2>
+<div class="outline-text-2" id="text-org0e74ef5">
 <p>
 <a href="http://ctan.localhost.net.ar/fonts/amiri/tools/build.py">http://ctan.localhost.net.ar/fonts/amiri/tools/build.py</a>
 </p>

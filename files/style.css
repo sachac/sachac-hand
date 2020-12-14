@@ -4,9 +4,10 @@ table { font-size: inherit; font-weight: inherit }td { text-align: left }
 .blog-heading { font-weight: bold; font-size: 32px; font-family: 'sachacHand-Regular-V' }
 .blog-heading h2 a { text-decoration: none; font-size: 32px; font-weight: normal; color: rgb(153, 0, 0) }
 .blog-heading h2 { margin-block-start: 0; margin-block-end: 0 }
-
+span { overflow: visible; display: inline }
 
 .default { color: gray }
 body { font-family: Arial, sans-serif; font-size: 32px; padding: 10px }
 h1, h2, h3, h4, h5, h6 { font-weight: normal }
 .license { font-size: normal }
+.nocalt { font-feature-settings: "calt" off }
