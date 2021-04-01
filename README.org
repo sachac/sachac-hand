@@ -1,5 +1,5 @@
 #+OPTIONS: toc:2
-#+PROPERTY: header-args python  :noweb eval :dir "./files" :exports both :results output :colnames no
+#+PROPERTY: header-args python  :noweb eval :dir "./files" :exports both :results output :colnames no :session "font" :eval never-export
 
 * Summary
 
@@ -101,157 +101,157 @@ I also needed =(setenv "LD_LIBRARY_PATH" "/usr/local/lib")=. There are probably 
 * General font code
 ** Parameters and common functions
 
- #+NAME: params
- #+begin_src python :results none :eval no :tangle "files/params.py"
- import numpy as np
- import pandas as pd
- import aglfn
- import fontforge
- import subprocess
+#+NAME: params
+#+begin_src python :results none :eval no :tangle "files/params.py"
+import numpy as np
+import pandas as pd
+import aglfn
+import fontforge
+import subprocess
 
- params = {'template': 'template-256.png',
-   'sample_file': 'sample.png',
-   'name_list': 'aglfn.txt',
-   'new_font_file': 'sachacHand.sfd',
-   'new_otf': 'sachacHand.otf',
-   'new_font_name': 'sachacHand',
-   'new_family_name': 'sachacHand',
-   'new_full_name': 'sachacHand',
-   'text_color': 'lightgray',
-   'glyph_dir': 'glyphs/',
-   'letters': 'HOnodpagscebhklftijmnruwvxyzCGABRDLEFIJKMNPQSTUVWXYZ0123456789?:;-–—=!\'’"“”@/\\~_#$%&()*+,.<>[]^`{|}q',
-   'direction': 'vertical',
-   'rows': 10, 
-   'columns': 10, 
-   'x_height': 368,
-   'em': 1000, 
-   'em_width': 1000, 
-   'row_padding': 0,
-   'ascent': 800, 
-   'descent': 200, 
-   'height': 500, 
-   'width': 500, 
-   'caps': 650,
-   'line_width': 3,
-   'text': "Python+FontForge+Org: I made a font based on my handwriting!"
-   }
- fontforge.loadNamelist(params['name_list'])
- params['font_size'] = int(params['em'])
- params['baseline'] = params['em'] - params['descent']
+params = {'template': 'template-256.png',
+  'sample_file': 'sample.png',
+  'name_list': 'aglfn.txt',
+  'new_font_file': 'sachacHand.sfd',
+  'new_otf': 'sachacHand.otf',
+  'new_font_name': 'sachacHand',
+  'new_family_name': 'sachacHand',
+  'new_full_name': 'sachacHand',
+  'text_color': 'lightgray',
+  'glyph_dir': 'glyphs/',
+  'letters': 'HOnodpagscebhklftijmnruwvxyzCGABRDLEFIJKMNPQSTUVWXYZ0123456789?:;-–—=!\'’"“”@/\\~_#$%&()*+,.<>[]^`{|}q',
+  'direction': 'vertical',
+  'rows': 10, 
+  'columns': 10, 
+  'x_height': 368,
+  'em': 1000, 
+  'em_width': 1000, 
+  'row_padding': 0,
+  'ascent': 800, 
+  'descent': 200, 
+  'height': 500, 
+  'width': 500, 
+  'caps': 650,
+  'line_width': 3,
+  'text': "Python+FontForge+Org: I made a font based on my handwriting!"
+  }
+fontforge.loadNamelist(params['name_list'])
+params['font_size'] = int(params['em'])
+params['baseline'] = params['em'] - params['descent']
 
- def transpose_letters(letters, width, height):
-   return ''.join(np.reshape(list(letters.ljust(width * height)), (height, width)).transpose().reshape(-1))
+def transpose_letters(letters, width, height):
+  return ''.join(np.reshape(list(letters.ljust(width * height)), (height, width)).transpose().reshape(-1))
 
- # Return glyph name of s, or s if none (possibly variant)
- def glyph_name(s):
-   return aglfn.name(s) or s
+# Return glyph name of s, or s if none (possibly variant)
+def glyph_name(s):
+  return aglfn.name(s) or s
 
- def get_glyph(font, g):
-   pos = font.findEncodingSlot(g)
-   if pos == -1:
-     return font.createChar(pos, g)
-   else:
-     return font[pos]
+def get_glyph(font, g):
+  pos = font.findEncodingSlot(g)
+  if pos == -1:
+    return font.createChar(pos, g)
+  else:
+    return font[pos]
+    
+def glyph_matrix(font=None, matrix=None, letters=None, rows=0, columns=0, direction='horizontal', **kwargs):
+  if matrix:
+    if isinstance(matrix[0], str):
+      # Split each
+      matrix = [x.split(',') for x in matrix]
+    else:
+      matrix = matrix[:]  # copy the list
+  else:
+    matrix = np.reshape(list(letters.ljust(rows * columns))[0:rows * columns], (rows, columns))
+    if direction == 'vertical':
+      matrix = matrix.transpose()
+  if hasattr(font, 'findEncodingSlot'):
+    matrix = [[glyph_name(x) if x != 'None' else None for x in row] for row in matrix]
+    if font:
+      for r, row in enumerate(matrix):
+        for c, col in enumerate(row):
+          if col is None: continue
+          matrix[r][c] = get_glyph(font, col)
+  return matrix
 
- def glyph_matrix(font=None, matrix=None, letters=None, rows=0, columns=0, direction='horizontal', **kwargs):
-   if matrix:
-     if isinstance(matrix[0], str):
-       # Split each
-       matrix = [x.split(',') for x in matrix]
-     else:
-       matrix = matrix[:]  # copy the list
-   else:
-     matrix = np.reshape(list(letters.ljust(rows * columns))[0:rows * columns], (rows, columns))
-     if direction == 'vertical':
-       matrix = matrix.transpose()
-   matrix = [[glyph_name(x) if x != 'None' else None for x in row] for row in matrix]
-   if font:
-     for r, row in enumerate(matrix):
-       for c, col in enumerate(row):
-         if col is None: continue
-         matrix[r][c] = get_glyph(font, col)
-   return matrix
+def glyph_filename_base(glyph_name):
+  try:
+    return 'uni%s-%s' % (hex(ord(aglfn.to_glyph(glyph_name))).replace('0x', '').zfill(4), glyph_name)
+  except:
+    return glyph_name
 
- def glyph_filename_base(glyph_name):
-   try:
-     return 'uni%s-%s' % (hex(ord(aglfn.to_glyph(glyph_name))).replace('0x', '').zfill(4), glyph_name)
-   except:
-     return glyph_name
+def load_font(params):
+  if type(params) == str:
+    return fontforge.open(params)
+  else:
+    return fontforge.open(params['new_font_file'])
 
- def load_font(params):
-   if type(params) == str:
-     return fontforge.open(params)
-   else:
-     return fontforge.open(params['new_font_file'])
+def save_font(font, font_filename=None, **kwargs):
+  if font_filename is None:
+    font_filename = font.fontname + '.sfd'
+  font.save(font_filename)
+  font.generate(font_filename.replace('.sfd', '.otf'))
+  subprocess.call(['sfnt2woff', font_filename.replace('.sfd', '.otf')])
 
- def save_font(font, font_filename=None, **kwargs):
-   if font_filename is None:
-     font_filename = font.fontname + '.sfd'
-   font.save(font_filename)
-   font.generate(font_filename.replace('.sfd', '.otf'))
-   subprocess.call(['sfnt2woff', font_filename.replace('.sfd', '.otf')])
-
- import orgbabelhelper as ob
- def out(df, **kwargs):
-   print(ob.dataframe_to_orgtable(df, **kwargs))
+import orgbabelhelper as ob
+def out(df, **kwargs):
+  print(ob.dataframe_to_orgtable(df, **kwargs))
 
  #+end_src
 
 ** Generate guidelines
 *** Code to make the template
 
- #+NAME: def_make_template
- #+begin_src python :results none :eval no
- from PIL import Image, ImageFont, ImageDraw
+#+NAME: def_make_template
+#+begin_src python :results none 
+from PIL import Image, ImageFont, ImageDraw
 
- #LETTERS = 'abcd'
- # Baseline is red
- # Top of glyph is light blue
- # Bottom of glyph is blue
- def draw_letter(column, row, letter, params):
-   draw = params['draw']
-   sized_padding = int(params['row_padding'] * params['em'] / params['height'])
-   origin = (column * params['em_width'], row * (params['em'] + sized_padding))
-   draw.line((origin[0], origin[1], origin[0] + params['em_width'], origin[1]), fill='lightblue', width=params['line_width'])
-   draw.line((origin[0], origin[1], origin[0], origin[1] + params['em']), fill='lightgray', width=params['line_width'])
-   draw.line((origin[0], origin[1] + params['ascent'] - params['x_height'], origin[0] + params['em_width'], origin[1] + params['ascent'] - params['x_height']), fill='lightgray', width=params['line_width'])
-   draw.line((origin[0], origin[1] + params['ascent'], origin[0] + params['em_width'], origin[1] + params['ascent']), fill='red', width=params['line_width'])
-   draw.line((origin[0], origin[1] + params['ascent'] - params['caps'], origin[0] + params['em_width'], origin[1] + params['ascent'] - params['caps']), fill='lightgreen', width=params['line_width'])
-   draw.line((origin[0], origin[1] + params['em'], origin[0] + params['em_width'], origin[1] + params['em']), fill='blue', width=params['line_width'])
-   width, height = draw.textsize(letter, font=params['font'])
-   draw.text((origin[0] + (params['em_width'] - width) / 2, origin[1]), letter, font=params['font'], fill=params['text_color'])
+#LETTERS = 'abcd'
+# Baseline is red
+# Top of glyph is light blue
+# Bottom of glyph is blue
+def draw_letter(column, row, letter, params):
+  draw = params['draw']
+  sized_padding = int(params['row_padding'] * params['em'] / params['height'])
+  origin = (column * params['em_width'], row * (params['em'] + sized_padding))
+  draw.line((origin[0], origin[1], origin[0] + params['em_width'], origin[1]), fill='lightblue', width=params['line_width'])
+  draw.line((origin[0], origin[1], origin[0], origin[1] + params['em']), fill='lightgray', width=params['line_width'])
+  draw.line((origin[0], origin[1] + params['ascent'] - params['x_height'], origin[0] + params['em_width'], origin[1] + params['ascent'] - params['x_height']), fill='lightgray', width=params['line_width'])
+  draw.line((origin[0], origin[1] + params['ascent'], origin[0] + params['em_width'], origin[1] + params['ascent']), fill='red', width=params['line_width'])
+  draw.line((origin[0], origin[1] + params['ascent'] - params['caps'], origin[0] + params['em_width'], origin[1] + params['ascent'] - params['caps']), fill='lightgreen', width=params['line_width'])
+  draw.line((origin[0], origin[1] + params['em'], origin[0] + params['em_width'], origin[1] + params['em']), fill='blue', width=params['line_width'])
+  width, height = draw.textsize(letter, font=params['font'])
+  draw.text((origin[0] + (params['em_width'] - width) / 2, origin[1]), letter, font=params['font'], fill=params['text_color'])
 
- def make_template(params):
-   sized_padding = int(params['row_padding'] * params['em'] / params['height'])
-   img = Image.new('RGB', (params['columns'] * params['em_width'], params['rows'] * (params['em'] + sized_padding)), 'white')
-   params['draw'] = ImageDraw.Draw(img)
-   params['font'] = ImageFont.truetype(params['font_name'], params['font_size'])
-   matrix = glyph_matrix(**params)
-   for r, row in enumerate(matrix):
-     for c, ch in enumerate(row):
-       draw_letter(c, r, ch, params)
-   img.thumbnail((params['columns'] * params['width'], params['rows'] * (params['height'] + params['row_padding'])))
-   img.save(params['template'])
-   return params['template']
+def make_template(params):
+  sized_padding = int(params['row_padding'] * params['em'] / params['height'])
+  img = Image.new('RGB', (params['columns'] * params['em_width'], params['rows'] * (params['em'] + sized_padding)), 'white')
+  params['draw'] = ImageDraw.Draw(img)
+  params['font'] = ImageFont.truetype(params['font_name'], params['font_size'])
+  matrix = glyph_matrix(**params)
+  for r, row in enumerate(matrix):
+    for c, ch in enumerate(row):
+      draw_letter(c, r, ch, params)
+  img.thumbnail((params['columns'] * params['width'], params['rows'] * (params['height'] + params['row_padding'])))
+  img.save(params['template'])
+  return params['template']
  #+end_src
 
 *** Actually make the templates
 
- #+begin_src python :results file :eval no
-   <<params>>
-   <<def_make_template>>
-   #make_template({**params, 'font_name': '/home/sacha/.fonts/Romochka.otf', 'template': 'template-romochka.png', 'row_padding': 15}) 
-   #make_template({**params, 'font_name': '/home/sacha/.fonts/Breip.ttf', 'template': 'template-breip.png', 'row_padding': 15}) 
-   make_template({**params, 'font_name': '/home/sacha/.fonts/KGPrimaryDots.ttf', 
-     'letters': 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890?:;-–—=!\'’"“”@/\\~_#$%&()*+,.<>[]^`{|}', 'direction': 'horizontal', 'text_color': 'black',
-     'template': 'template-kg.png', 'ascent': 800, 'descent': 200, 'caps': 600, 'x_height': 340, 'row_padding': 50}) 
-   make_template({**params, 'font_name': 'sachacHand.otf', 'template': 'template-sachacHand.png', 'row_padding': 50})
-   return make_template({**params, 'font_name': 'sachacHand.otf', 
-   'template': 'template-sample.png', 'direction': 'horizontal', 'rows': 4, 'columns': 4, 'height': 100, 'width': 100, 'row_padding': 100 }) 
- #+end_src
+#+begin_src python :results value :eval
+<<params>>
+<<def_make_template>>
+#make_template({**params, 'font_name': '/home/sacha/.fonts/Romochka.otf', 'template': 'template-romochka.png', 'row_padding': 15}) 
+#make_template({**params, 'font_name': '/home/sacha/.fonts/Breip.ttf', 'template': 'template-breip.png', 'row_padding': 15}) 
+# make_template({**params, 'font_name': 'sachacHand-Regular.otf', 'template': 'template-sachacHand.png', 'row_padding': 50})
+make_template({**params, 'font_name': 'sachacHand.otf', 'template': 'template-sample.png', 'direction': 'horizontal', 'height': 1000, 'width': 1000, 'row_padding': 100 }) 
+#return make_template({**params, 'font_name': 'sachacHand.otf', 'template': 'template-sample.png', 'direction': 'horizontal', 'rows': 4, 'columns': 4, 'height': 100, 'width': 100, 'row_padding': 100 }) 
+#+end_src
 
  #+RESULTS:
- [[file:files/template-sample.png]]
+ :results:
+ template-sample.png
+ :end:
 
 ** Cut into glyphs
 
