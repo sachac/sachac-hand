@@ -1,5 +1,5 @@
 #+OPTIONS: toc:2
-#+PROPERTY: header-args python  :noweb no-export :dir "./files" :exports both :results output :colnames no :session "font" :eval never-export
+#+PROPERTY: header-args python  :noweb no-export :dir "./files" :exports both :results output :colnames no :eval never-export
 
 * Summary
 
@@ -111,7 +111,7 @@ import subprocess
 
 params = {'template': 'template-256.png',
   'sample_file': 'sample.png',
-  'name_list': 'aglfn.txt',
+  'name_list': '/usr/share/aglfn/glyphlist.txt',
   'new_font_file': 'sachacHand.sfd',
   'new_otf': 'sachacHand.otf',
   'new_font_name': 'sachacHand',
@@ -799,7 +799,7 @@ Kerning:
 | F             |      |             -90 |     |       |         |  -70 |           |     |     |     | -100 |    |      |      |
 | g             |      |                 |  10 |       |         |  -50 |           |     |     |     | -100 |    |      |      |
 | q,d,h,y,j     |      |                 |  20 |    10 |         |  -50 |        10 |  10 |  10 |     | -100 |    |      |   10 |
-| c,e,s,u,w,x,z |      |             -20 |  10 |    10 |   -10   |  -50 |           |     |     |     | -100 |    |      |      |
+| c,e,s,u,w,x,z |      |             -20 |  10 |    10 |     -10 |  -50 |           |     |     |     | -100 |    |      |      |
 | V             |      |             -70 |  30 |    30 |         |  -80 |       -20 |     | -40 | -40 |  -10 |    |      |      |
 | A             |      |              30 |  60 |    30 |      30 |      |        20 |  40 |  20 |  20 |  -10 | 20 |      |   20 |
 | Y             |      |              20 |  60 |    30 |      30 |      |        20 |  20 |  40 |  20 |  -10 |    |      |      |
@@ -813,7 +813,7 @@ Kerning:
 | K,R           |      |              20 |  20 |    20 |      10 |      |        20 |  20 |  20 |     |  -60 |    |      |      |
 | G             |      |              20 |  40 |    30 |      30 |      |        20 |  20 |  20 |     | -100 | 10 |      |      |
 | B,S,X,Z       |      |              20 |  40 |    30 |      30 |      |        20 |  20 |  20 |  20 |  -20 | 10 |      |      |
-
+| W             |      |             -70 |     |       |         |      |           |     |     |     |      |    |      |      |
 #+NAME: make_new
 #+begin_src python :var bearings=new_bearings :var kerning_matrix=new_kerning_matrix :results output :tangle make_new.py
 <<params>>
@@ -824,14 +824,17 @@ params = {**params,
           'height': 1000, 'width': 1000, 'row_padding': 100,
           'new_font_file': 'sachacHand-New.sfd',
           'new_otf': 'sachacHand-New.otf'}
-font = fontforge.font()
-font = import_glyphs(font, **params)
-#font = fontforge.open('sachacHand-New.sfd')
+if os.path.exists('sachacHand-New.sfd'):
+  font = fontforge.open('sachacHand-New.sfd')
+else:
+  font = fontforge.font()
+  font = import_glyphs(font, **params)
 font.fontname = 'sachacHand-New'
 font.familyname = 'sachacHand'
 font.fullname = 'sachacHand New'
 font.os2_weight = 600
 font.os2_family_class = 10 * 256 + 8
+font.encoding = "UnicodeFull"
 font.os2_vendor = 'SC83'
 kern_existing_font(font=font, bearings=bearings, kerning_matrix=kerning_matrix)
 #save_font(font)
@@ -841,7 +844,6 @@ kern_existing_font(font=font, bearings=bearings, kerning_matrix=kerning_matrix)
 
   #+RESULTS: make_new
   :results:
-  Bad name when parsing aglfn for unicode 41
   glyphs/uni0048-H.svg
   glyphs/uni004f-O.svg
   glyphs/uni006e-n.svg
@@ -945,9 +947,7 @@ kern_existing_font(font=font, bearings=bearings, kerning_matrix=kerning_matrix)
   Starting from scratch
   :end:
 
-  #+RESULTS: make_bold
-  :results:
-  :end:
+
 
 https://www.youtube.com/watch?v=WqSQU7nuTsc
 https://www.tug.org/TUGboat/tb24-3/williams.pdf
