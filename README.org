@@ -191,8 +191,8 @@ def save_font(font, font_filename=None, **kwargs):
     font_filename = font.fontname + '.sfd'
   font.save(font_filename)
   #font = fontforge.open(font_filename)
-  #font.generate(font_filename.replace('.sfd', '.otf'))
-  #font.generate(font_filename.replace('.sfd', '.woff2'))
+  font.generate(font_filename.replace('.sfd', '.otf'))
+  font.generate(font_filename.replace('.sfd', '.woff'))
 
 import orgbabelhelper as ob
 def out(df, **kwargs):
@@ -297,7 +297,7 @@ def cut_glyphs(sample_file="", letters="", direction="", columns=0, rows=0, heig
 import fontforge
 import os
 import aglfn
-
+import psMat
 def set_up_font_info(font, new_family_name="", new_font_name="", new_full_name="", em=1000, descent=200, ascent=800, **kwargs):
   font.encoding = 'UnicodeFull'
   font.fontname = new_font_name
@@ -312,6 +312,8 @@ def import_glyphs(font, glyph_dir='glyphs', letters=None, columns=None, rows=Non
   old_em = font.em
   font.em = height
   matrix = glyph_matrix(font=font, matrix=matrix, letters=letters, columns=columns, rows=rows, direction=direction)
+  if params['scale']:
+    scale = psMat.scale(params['scale']) 
   for row in matrix:
     for g in row:
       if g is None: continue
@@ -322,6 +324,8 @@ def import_glyphs(font, glyph_dir='glyphs', letters=None, columns=None, rows=Non
         g.clear()
         #g.importOutlines(png_filename)
         g.importOutlines(svg_filename)
+        if params['scale']:
+          g.transform(scale) 
         print(svg_filename)
       except Exception as e:
         print("Error with ", g, e)
@@ -355,13 +359,13 @@ def set_bearings(font, bearings, **kwargs):
       else:
         key = 'Default'
     if bearing_dict[key][1] != '':
-      font[g].left_side_bearing = bearing_dict[key][1]
+      font[g].left_side_bearing = bearing_dict[key][1] * (params['scale'] or 1)
     else:
-      font[g].left_side_bearing = bearing_dict['Default'][1]
+      font[g].left_side_bearing = bearing_dict['Default'][1] * (params['scale'] or 1)
     if bearing_dict[key][2] != '':
-      font[g].right_side_bearing = bearing_dict[key][2]
+      font[g].right_side_bearing = bearing_dict[key][2] * (params['scale'] or 1)
     else:
-      font[g].right_side_bearing = bearing_dict['Default'][2]
+      font[g].right_side_bearing = bearing_dict['Default'][2] * (params['scale'] or 1)
   if 'space' not in bearing_dict:
     space = font.createMappedChar('space')
     space.width = int(font.em / 5)
@@ -397,7 +401,7 @@ def kern_classes(font, kerning_matrix):
   offsets = np.asarray(kerning_matrix)
   classes_right = [None if (x == "" or x == "None") else x.split(",") for x in offsets[0,1:]]
   classes_left = [None if (x == "" or x == "None") else x.split(',') for x in offsets[1:,0]]
-  offset_list = [0 if x == "" else int(x) for x in offsets[1:,1:].reshape(-1)]
+  offset_list = [0 if x == "" else (int(int(x) * (params['scale'] or 1))) for x in offsets[1:,1:].reshape(-1)]
   #print('left', len(classes_left), classes_left)
   #print('right', len(classes_right), classes_right)
   #print('offset', len(offset_list), offset_list)
@@ -430,7 +434,7 @@ def kern_by_char(font, kerning_matrix):
         if column is None: continue
         for second_letter in column:
           if kerning_matrix[r + 1][c + 1]:
-            g.addPosSub("kern-2", second_letter, 0, 0, kerning_matrix[r + 1][c + 1], 0, 0, 0, 0, 0)
+            g.addPosSub("kern-2", second_letter, 0, 0, int((params['scale'] or 1) * kerning_matrix[r + 1][c + 1]), 0, 0, 0, 0, 0)
   return font
  #+end_src
 
@@ -822,11 +826,13 @@ Kerning:
 <<def_all>>
 params = {**params, 
           'sample_file': 'ipad.png',
+          'scale': 1.2,
           'direction': 'horizontal',
           'name_list': 'glyphlist.txt',
           'height': 1000, 'width': 1000, 'row_padding': 100,
           'new_font_file': 'sachacHand-New.sfd',
           'new_otf': 'sachacHand-New.otf'}
+import psMat   
 if False and os.path.exists('sachacHand-New.sfd'):
   font = fontforge.open('sachacHand-New.sfd')
 else:
@@ -844,11 +850,312 @@ kern_existing_font(font=font, bearings=bearings, kerning_matrix=kerning_matrix, 
 #font.generate('sachacHand-New.woff2')
 #save_font(font)
 with open("test-%s.html" % font.fontname, 'w') as f:
-  f.write(test_font_html('sachacHand-New.woff2'))
+  f.write(test_font_html('sachacHand-New.woff'))
 #+end_src
 
   #+RESULTS: make_new
   :results:
+  POS? H 72 72
+  POS? O 79 79
+  POS? n 110 110
+  POS? o 111 111
+  POS? d 100 100
+  POS? p 112 112
+  POS? a 97 97
+  POS? g 103 103
+  POS? s 115 115
+  POS? c 99 99
+  POS? e 101 101
+  POS? b 98 98
+  POS? h 104 104
+  POS? k 107 107
+  POS? l 108 108
+  POS? f 102 102
+  POS? t 116 116
+  POS? i 105 105
+  POS? j 106 106
+  POS? m 109 109
+  POS? n 110 110
+  POS? r 114 114
+  POS? u 117 117
+  POS? w 119 119
+  POS? v 118 118
+  POS? x 120 120
+  POS? y 121 121
+  POS? z 122 122
+  POS? C 67 67
+  POS? G 71 71
+  POS? A 65 65
+  POS? B 66 66
+  POS? R 82 82
+  POS? D 68 68
+  POS? L 76 76
+  POS? E 69 69
+  POS? F 70 70
+  POS? I 73 73
+  POS? J 74 74
+  POS? K 75 75
+  POS? M 77 77
+  POS? N 78 78
+  POS? P 80 80
+  POS? Q 81 81
+  POS? S 83 83
+  POS? T 84 84
+  POS? U 85 85
+  POS? V 86 86
+  POS? W 87 87
+  POS? X 88 88
+  POS? Y 89 89
+  POS? Z 90 90
+  POS? zero 48 48
+  POS? one 49 49
+  POS? two 50 50
+  POS? three 51 51
+  POS? four 52 52
+  POS? five 53 53
+  POS? six 54 54
+  POS? seven 55 55
+  POS? eight 56 56
+  POS? nine 57 57
+  POS? question 63 63
+  POS? colon 58 58
+  POS? semicolon 59 59
+  POS? hyphen 45 45
+  POS? endash -1 8211
+  POS? emdash -1 8212
+  POS? equal 61 61
+  POS? exclam 33 33
+  POS? quotesingle 39 39
+  POS? quoteright -1 8217
+  POS? quotedbl 34 34
+  POS? quotedblleft -1 8220
+  POS? quotedblright -1 8221
+  POS? at 64 64
+  POS? slash 47 47
+  POS? backslash 92 92
+  POS? asciitilde 126 126
+  POS? underscore 95 95
+  POS? numbersign 35 35
+  POS? dollar 36 36
+  POS? percent 37 37
+  POS? ampersand 38 38
+  POS? parenleft 40 40
+  POS? parenright 41 41
+  POS? asterisk 42 42
+  POS? plus 43 43
+  POS? comma 44 44
+  POS? period 46 46
+  POS? less 60 60
+  POS? greater 62 62
+  POS? bracketleft 91 91
+  POS? bracketright 93 93
+  POS? asciicircum 94 94
+  POS? grave 96 96
+  POS? braceleft 123 123
+  POS? bar 124 124
+  POS? braceright 125 125
+  POS? q 113 113
+  H H
+  glyphs/uni0048-H.svg
+  O O
+  glyphs/uni004f-O.svg
+  n n
+  glyphs/uni006e-n.svg
+  o o
+  glyphs/uni006f-o.svg
+  d d
+  glyphs/uni0064-d.svg
+  p p
+  glyphs/uni0070-p.svg
+  a a
+  glyphs/uni0061-a.svg
+  g g
+  glyphs/uni0067-g.svg
+  s s
+  glyphs/uni0073-s.svg
+  c c
+  glyphs/uni0063-c.svg
+  e e
+  glyphs/uni0065-e.svg
+  b b
+  glyphs/uni0062-b.svg
+  h h
+  glyphs/uni0068-h.svg
+  k k
+  glyphs/uni006b-k.svg
+  l l
+  glyphs/uni006c-l.svg
+  f f
+  glyphs/uni0066-f.svg
+  t t
+  glyphs/uni0074-t.svg
+  i i
+  glyphs/uni0069-i.svg
+  j j
+  glyphs/uni006a-j.svg
+  m m
+  glyphs/uni006d-m.svg
+  n n
+  glyphs/uni006e-n.svg
+  r r
+  glyphs/uni0072-r.svg
+  u u
+  glyphs/uni0075-u.svg
+  w w
+  glyphs/uni0077-w.svg
+  v v
+  glyphs/uni0076-v.svg
+  x x
+  glyphs/uni0078-x.svg
+  y y
+  glyphs/uni0079-y.svg
+  z z
+  glyphs/uni007a-z.svg
+  C C
+  glyphs/uni0043-C.svg
+  G G
+  glyphs/uni0047-G.svg
+  A A
+  glyphs/uni0041-A.svg
+  B B
+  glyphs/uni0042-B.svg
+  R R
+  glyphs/uni0052-R.svg
+  D D
+  glyphs/uni0044-D.svg
+  L L
+  glyphs/uni004c-L.svg
+  E E
+  glyphs/uni0045-E.svg
+  F F
+  glyphs/uni0046-F.svg
+  I I
+  glyphs/uni0049-I.svg
+  J J
+  glyphs/uni004a-J.svg
+  K K
+  glyphs/uni004b-K.svg
+  M M
+  glyphs/uni004d-M.svg
+  N N
+  glyphs/uni004e-N.svg
+  P P
+  glyphs/uni0050-P.svg
+  Q Q
+  glyphs/uni0051-Q.svg
+  S S
+  glyphs/uni0053-S.svg
+  T T
+  glyphs/uni0054-T.svg
+  U U
+  glyphs/uni0055-U.svg
+  V V
+  glyphs/uni0056-V.svg
+  W W
+  glyphs/uni0057-W.svg
+  X X
+  glyphs/uni0058-X.svg
+  Y Y
+  glyphs/uni0059-Y.svg
+  Z Z
+  glyphs/uni005a-Z.svg
+  zero 0
+  glyphs/uni0030-zero.svg
+  one 1
+  glyphs/uni0031-one.svg
+  two 2
+  glyphs/uni0032-two.svg
+  three 3
+  glyphs/uni0033-three.svg
+  four 4
+  glyphs/uni0034-four.svg
+  five 5
+  glyphs/uni0035-five.svg
+  six 6
+  glyphs/uni0036-six.svg
+  seven 7
+  glyphs/uni0037-seven.svg
+  eight 8
+  glyphs/uni0038-eight.svg
+  nine 9
+  glyphs/uni0039-nine.svg
+  question ?
+  glyphs/uni003f-question.svg
+  colon :
+  glyphs/uni003a-colon.svg
+  semicolon ;
+  glyphs/uni003b-semicolon.svg
+  hyphen -
+  glyphs/uni002d-hyphen.svg
+  endash –
+  glyphs/uni2013-endash.svg
+  emdash —
+  glyphs/uni2014-emdash.svg
+  equal =
+  glyphs/uni003d-equal.svg
+  exclam !
+  glyphs/uni0021-exclam.svg
+  quotesingle '
+  glyphs/uni0027-quotesingle.svg
+  quoteright ’
+  glyphs/uni2019-quoteright.svg
+  quotedbl "
+  glyphs/uni0022-quotedbl.svg
+  quotedblleft “
+  glyphs/uni201c-quotedblleft.svg
+  quotedblright ”
+  glyphs/uni201d-quotedblright.svg
+  at @
+  glyphs/uni0040-at.svg
+  slash /
+  glyphs/uni002f-slash.svg
+  backslash \
+  glyphs/uni005c-backslash.svg
+  asciitilde ~
+  glyphs/uni007e-asciitilde.svg
+  underscore _
+  glyphs/uni005f-underscore.svg
+  numbersign #
+  glyphs/uni0023-numbersign.svg
+  dollar $
+  glyphs/uni0024-dollar.svg
+  percent %
+  glyphs/uni0025-percent.svg
+  ampersand &
+  glyphs/uni0026-ampersand.svg
+  parenleft (
+  glyphs/uni0028-parenleft.svg
+  parenright )
+  glyphs/uni0029-parenright.svg
+  asterisk *
+  glyphs/uni002a-asterisk.svg
+  plus +
+  glyphs/uni002b-plus.svg
+  comma ,
+  glyphs/uni002c-comma.svg
+  period .
+  glyphs/uni002e-period.svg
+  less <
+  glyphs/uni003c-less.svg
+  greater >
+  glyphs/uni003e-greater.svg
+  bracketleft [
+  glyphs/uni005b-bracketleft.svg
+  bracketright ]
+  glyphs/uni005d-bracketright.svg
+  asciicircum ^
+  glyphs/uni005e-asciicircum.svg
+  grave `
+  glyphs/uni0060-grave.svg
+  braceleft {
+  glyphs/uni007b-braceleft.svg
+  bar |
+  glyphs/uni007c-bar.svg
+  braceright }
+  glyphs/uni007d-braceright.svg
+  q q
+  glyphs/uni0071-q.svg
+  Starting from scratch
   :end:
 
 
@@ -1160,6 +1467,14 @@ def test_font_html(font_filename=None, variants=None):
           with tag('tr', klass=t):
             line('td', t)
             line('td', test_glyphs(font))
+      line('h2', 'Size')
+      with tag('div'):
+        line('span', "Hello world")
+        line('span', "Hello world", klass='normal')
+      with tag('table'):
+        with tag('tr'):
+          line('td', test_glyphs(font))
+          line('td.base', test_glyphs(font))
       doc.asis(test_strings(strings, font, variants))
       line('h2', 'Kerning matrix')
       with tag('div', klass='nocalt'):
