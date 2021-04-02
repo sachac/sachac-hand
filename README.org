@@ -135,7 +135,6 @@ params = {'template': 'template-256.png',
   'line_width': 3,
   'text': "Python+FontForge+Org: I made a font based on my handwriting!"
   }
-fontforge.loadNamelist(params['name_list'])
 params['font_size'] = int(params['em'])
 params['baseline'] = params['em'] - params['descent']
 
@@ -148,8 +147,9 @@ def glyph_name(s):
 
 def get_glyph(font, g):
   pos = font.findEncodingSlot(g)
+  print("POS?", g, pos, ord(aglfn.to_glyph(g)))
   if pos == -1 or not pos in font:
-    return font.createChar(pos, g)
+    return font.createChar(ord(aglfn.to_glyph(g)), g)
   else:
     return font[pos]
   
@@ -174,6 +174,7 @@ def glyph_matrix(font=None, matrix=None, letters=None, rows=0, columns=0, direct
   return matrix
 
 def glyph_filename_base(glyph_name):
+  print(glyph_name, aglfn.to_glyph(glyph_name))
   try:
     return 'uni%s-%s' % (hex(ord(aglfn.to_glyph(glyph_name))).replace('0x', '').zfill(4), glyph_name)
   except:
@@ -189,8 +190,9 @@ def save_font(font, font_filename=None, **kwargs):
   if font_filename is None:
     font_filename = font.fontname + '.sfd'
   font.save(font_filename)
+  #font = fontforge.open(font_filename)
   #font.generate(font_filename.replace('.sfd', '.otf'))
-  #subprocess.call(['sfnt2woff', font_filename.replace('.sfd', '.otf')])
+  #font.generate(font_filename.replace('.sfd', '.woff2'))
 
 import orgbabelhelper as ob
 def out(df, **kwargs):
@@ -345,7 +347,7 @@ def set_bearings(font, bearings, **kwargs):
   for row in bearings[1:]:
     bearing_dict[row[0]] = row
   for g in font:
-    key = font[g].glyphname
+    key = g
     m = glyph_base_name(key)
     if not key in bearing_dict:
       if m and m in bearing_dict:
@@ -468,7 +470,7 @@ def kern_existing_font(filename=None, font=None, bearings=None, kerning_matrix=N
   font = set_bearings(font, bearings)
   font = kern_classes(font, kerning_matrix)
   font = kern_by_char(font, kerning_matrix)
-  save_font(font)
+  save_font(font, font_filename=filename)
   #with open("test-%s.html" % font.fontname, 'w') as f:
   #  f.write(test_font_html(font.fontname + '.woff'))
   return font
@@ -815,136 +817,38 @@ Kerning:
 | B,S,X,Z       |      |              20 |  40 |    30 |      30 |      |        20 |  20 |  20 |  20 |  -20 | 10 |      |      |
 | W             |      |             -70 |     |       |         |      |           |     |     |     |      |    |      |      |
 #+NAME: make_new
-#+begin_src python :var bearings=new_bearings :var kerning_matrix=new_kerning_matrix :results output :tangle make_new.py
+#+begin_src python :var bearings=new_bearings :var kerning_matrix=new_kerning_matrix :results output :tangle make_new.py 
 <<params>>
 <<def_all>>
 params = {**params, 
           'sample_file': 'ipad.png',
           'direction': 'horizontal',
+          'name_list': 'glyphlist.txt',
           'height': 1000, 'width': 1000, 'row_padding': 100,
           'new_font_file': 'sachacHand-New.sfd',
           'new_otf': 'sachacHand-New.otf'}
-if os.path.exists('sachacHand-New.sfd'):
+if False and os.path.exists('sachacHand-New.sfd'):
   font = fontforge.open('sachacHand-New.sfd')
 else:
   font = fontforge.font()
+  fontforge.loadNamelist(params['name_list'])
   font = import_glyphs(font, **params)
 font.fontname = 'sachacHand-New'
 font.familyname = 'sachacHand'
 font.fullname = 'sachacHand New'
-font.os2_weight = 600
+font.os2_weight = 400
 font.os2_family_class = 10 * 256 + 8
 font.encoding = "UnicodeFull"
 font.os2_vendor = 'SC83'
-kern_existing_font(font=font, bearings=bearings, kerning_matrix=kerning_matrix)
+kern_existing_font(font=font, bearings=bearings, kerning_matrix=kerning_matrix, filename=params['new_font_file'])
+#font.generate('sachacHand-New.woff2')
 #save_font(font)
-#with open("test-%s.html" % font.fontname, 'w') as f:
-#  f.write(test_font_html(font.fontname + '.woff'))
-  #+end_src
+with open("test-%s.html" % font.fontname, 'w') as f:
+  f.write(test_font_html('sachacHand-New.woff2'))
+#+end_src
 
   #+RESULTS: make_new
   :results:
-  glyphs/uni0048-H.svg
-  glyphs/uni004f-O.svg
-  glyphs/uni006e-n.svg
-  glyphs/uni006f-o.svg
-  glyphs/uni0064-d.svg
-  glyphs/uni0070-p.svg
-  glyphs/uni0061-a.svg
-  glyphs/uni0067-g.svg
-  glyphs/uni0073-s.svg
-  glyphs/uni0063-c.svg
-  glyphs/uni0065-e.svg
-  glyphs/uni0062-b.svg
-  glyphs/uni0068-h.svg
-  glyphs/uni006b-k.svg
-  glyphs/uni006c-l.svg
-  glyphs/uni0066-f.svg
-  glyphs/uni0074-t.svg
-  glyphs/uni0069-i.svg
-  glyphs/uni006a-j.svg
-  glyphs/uni006d-m.svg
-  glyphs/uni006e-n.svg
-  glyphs/uni0072-r.svg
-  glyphs/uni0075-u.svg
-  glyphs/uni0077-w.svg
-  glyphs/uni0076-v.svg
-  glyphs/uni0078-x.svg
-  glyphs/uni0079-y.svg
-  glyphs/uni007a-z.svg
-  glyphs/uni0043-C.svg
-  glyphs/uni0047-G.svg
-  glyphs/uni0041-A.svg
-  glyphs/uni0042-B.svg
-  glyphs/uni0052-R.svg
-  glyphs/uni0044-D.svg
-  glyphs/uni004c-L.svg
-  glyphs/uni0045-E.svg
-  glyphs/uni0046-F.svg
-  glyphs/uni0049-I.svg
-  glyphs/uni004a-J.svg
-  glyphs/uni004b-K.svg
-  glyphs/uni004d-M.svg
-  glyphs/uni004e-N.svg
-  glyphs/uni0050-P.svg
-  glyphs/uni0051-Q.svg
-  glyphs/uni0053-S.svg
-  glyphs/uni0054-T.svg
-  glyphs/uni0055-U.svg
-  glyphs/uni0056-V.svg
-  glyphs/uni0057-W.svg
-  glyphs/uni0058-X.svg
-  glyphs/uni0059-Y.svg
-  glyphs/uni005a-Z.svg
-  glyphs/uni0030-zero.svg
-  glyphs/uni0031-one.svg
-  glyphs/uni0032-two.svg
-  glyphs/uni0033-three.svg
-  glyphs/uni0034-four.svg
-  glyphs/uni0035-five.svg
-  glyphs/uni0036-six.svg
-  glyphs/uni0037-seven.svg
-  glyphs/uni0038-eight.svg
-  glyphs/uni0039-nine.svg
-  glyphs/uni003f-question.svg
-  glyphs/uni003a-colon.svg
-  glyphs/uni003b-semicolon.svg
-  glyphs/uni002d-hyphen.svg
-  glyphs/uni2013-endash.svg
-  glyphs/uni2014-emdash.svg
-  glyphs/uni003d-equal.svg
-  glyphs/uni0021-exclam.svg
-  glyphs/uni0027-quotesingle.svg
-  glyphs/uni2019-quoteright.svg
-  glyphs/uni0022-quotedbl.svg
-  glyphs/uni201c-quotedblleft.svg
-  glyphs/uni201d-quotedblright.svg
-  glyphs/uni0040-at.svg
-  glyphs/uni002f-slash.svg
-  glyphs/uni005c-backslash.svg
-  glyphs/uni007e-asciitilde.svg
-  glyphs/uni005f-underscore.svg
-  glyphs/uni0023-numbersign.svg
-  glyphs/uni0024-dollar.svg
-  glyphs/uni0025-percent.svg
-  glyphs/uni0026-ampersand.svg
-  glyphs/uni0028-parenleft.svg
-  glyphs/uni0029-parenright.svg
-  glyphs/uni002a-asterisk.svg
-  glyphs/uni002b-plus.svg
-  glyphs/uni002c-comma.svg
-  glyphs/uni002e-period.svg
-  glyphs/uni003c-less.svg
-  glyphs/uni003e-greater.svg
-  glyphs/uni005b-bracketleft.svg
-  glyphs/uni005d-bracketright.svg
-  glyphs/uni005e-asciicircum.svg
-  glyphs/uni0060-grave.svg
-  glyphs/uni007b-braceleft.svg
-  glyphs/uni007c-bar.svg
-  glyphs/uni007d-braceright.svg
-  glyphs/uni0071-q.svg
-  Starting from scratch
   :end:
 
 
@@ -1127,13 +1031,14 @@ Resources:
 | test-regular.html | sachacHand.woff      | regular |
 | test-bold.html    | sachacHandBold.woff  | bold    |
 | test-black.html   | sachacHandBlack.woff | black   |
+| test-new.html     | sachacHand-New.woff2 | new     |
 
 #+RESULTS:
 : [['test-regular.html', 'sachacHand.woff', 'regular'], ['test-bold.html', 'sachacHandBold.woff', 'bold'], ['test-black.html', 'sachacHandBlack.woff', 'black']]
 : [{'output': 'test-regular.html', 'font_filename': 'sachacHand.woff', 'klass': 'regular'}, {'output': 'test-bold.html', 'font_filename': 'sachacHandBold.woff', 'klass': 'bold'}, {'output': 'test-black.html', 'font_filename': 'sachacHandBlack.woff', 'klass': 'black'}]
 
 #+NAME: def_test_font_html
-#+begin_src python :eval no
+#+begin_src python 
 strings = ["hhhhnnnnnnhhhhhnnnnnn", 
            "ooonoonnonnn",
            "nnannnnbnnnncnnnndnnnnennnnfnnnngnnnnhnnnninnnnjnn",
@@ -1267,6 +1172,10 @@ def test_font_html(font_filename=None, variants=None):
   return doc.getvalue()
 #+end_src
 
+#+RESULTS: def_test_font_html
+:results:
+:end:
+
 #+NAME: test_html
 #+begin_src python :results output :session "out" :eval yes
 <<def_test_html>>
@@ -1310,6 +1219,8 @@ with open('index.html', 'w') as f:
 #+end_src
 
 #+RESULTS: test_html
+:results:
+:end:
 
 Oh, can I get livereload working? There's a =python3-livereload=... Ah, it's as simple as running =livereload=.
 
